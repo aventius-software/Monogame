@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<!-- Updated to use .NET 8. -->
 		<TargetFramework>net8.0-android</TargetFramework>
@@ -18,11 +18,12 @@
 		<CheckEolWorkloads>false</CheckEolWorkloads>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
-		<PackageReference Include="MonoGame.Framework.Android" Version="3.8.1.303" />
-
-		<!-- We need this to use AdMob -->
-		<PackageReference Include="Xamarin.GooglePlayServices.Ads.Lite" Version="122.3.0.3" />
+		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.2.1105" />
+		<PackageReference Include="MonoGame.Framework.Android" Version="3.8.2.1105" />
+		<PackageReference Include="Xamarin.AndroidX.Lifecycle.LiveData" Version="2.8.6" />
+		<PackageReference Include="Xamarin.AndroidX.Lifecycle.Service" Version="2.8.6" />
+		<PackageReference Include="Xamarin.AndroidX.Lifecycle.ViewModelSavedState" Version="2.8.6" />
+		<PackageReference Include="Xamarin.GooglePlayServices.Ads.Lite" Version="123.3.0" />		
 	</ItemGroup>
 	<Target Name="RestoreDotnetTools" BeforeTargets="Restore">
 		<Message Text="Restoring dotnet tools" Importance="High" />
