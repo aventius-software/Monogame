@@ -24,10 +24,19 @@ internal class Player : Vehicle
     public void LoadContent()
     {
         // Load and initialise the vehicle
-        LoadContent("car", _initialPosition);
+        LoadContent("car");
 
         // Load a font
         _font = _contentManager.Load<SpriteFont>("font");
+
+        // Initialise the vehicle physics, we'll make the player vehicle lighter than
+        // the opponent vehicle. If the opponent is heavier, it doesn't deflect much in
+        // collisions with the player. However, if we make the opponent lighter (or the
+        // player heavier than the opponent) then the opponent car deflects much easier. Try
+        // some different values and see what happens ;-)
+        //
+        // Drift factor: closer to '1' means more 'slippy', start at '0.9' for decent grip
+        InitialisePhysics(_initialPosition, mass: 1f, turnSpeed: 15f, driftFactor: 0.92f, enableDrifting: true);
     }
 
     public override void Update(GameTime gameTime)

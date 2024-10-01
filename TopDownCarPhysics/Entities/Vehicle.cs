@@ -41,15 +41,15 @@ internal abstract class Vehicle
     private float _angularDrag = 4f;
     private float _angularDragRateOfChange = 0.5f;
     private float _driftFactor = 0.92f;
-    private float _enginePower = 75f;
+    private float _enginePower = 50f;
     private bool _isDriftingEnabled = true;
     private float _linearDrag = 0.5f;
     private float _linearDragRateOfChange = 3.5f;
     private float _maxReversingSpeed = 15f;
-    private float _maxForwardSpeed = 40f;
+    private float _maxForwardSpeed = 30f;
     private Body _physicsBody;
     private float _savedDriftFactor = 0f;
-    private float _turnSpeed = 10f;
+    private float _turnSpeed = 15f;
 
     #endregion
 
@@ -75,16 +75,46 @@ internal abstract class Vehicle
 
     #region Protected methods
 
-    protected void LoadContent(string texturePath, Vector2 initialPosition)
+    protected void InitialisePhysics(
+        Vector2 startingPosition, 
+        float mass = 1f, 
+        float turnSpeed = 15f, 
+        float driftFactor = 0.92f, 
+        bool enableDrifting = true)
+    {
+        // Create a physics body to simulate the vehicle
+        _physicsBody = _physicsWorld.CreateRectangle(
+            width: _physicsWorld.ToSimUnits(_texture.Width),
+            height: _physicsWorld.ToSimUnits(_texture.Height),
+            density: 1,
+            position: _physicsWorld.ToSimUnits(startingPosition),
+            rotation: MathHelper.ToRadians(0),
+            bodyType: BodyType.Dynamic);
+
+        // Set some default mass
+        _physicsBody.Mass = mass;
+
+        // Set some others if you like...
+        _angularDrag = 4f;
+        _angularDragRateOfChange = 0.5f;
+        _driftFactor = driftFactor;
+        _enginePower = 50f;
+        _isDriftingEnabled = enableDrifting;
+        _linearDrag = 0.5f;
+        _linearDragRateOfChange = 3.5f;
+        _maxReversingSpeed = 15f;
+        _maxForwardSpeed = 30f;        
+        _savedDriftFactor = 0f;
+        _turnSpeed = turnSpeed;
+    }
+
+    protected void LoadContent(string texturePath)
     {
         // Set up the texture for the sprite
         _texture = _contentManager.Load<Texture2D>(texturePath);
 
         // Set the origin to be the centre of the car
-        _origin = new Vector2(_texture.Width / 2, _texture.Height / 2);
-
-        // Initialise the physics for this vehicle
-        InitialisePhysics(initialPosition, _texture.Width, _texture.Height);
+        _origin = new Vector2(_texture.Width / 2, _texture.Height / 2);        
     }
 
     #endregion
@@ -164,22 +194,7 @@ internal abstract class Vehicle
         // Apply steering to angular velocity, note we turn less if we are moving forward/reverse slower
         _physicsBody.AngularVelocity += InputDirection.X * MathHelper.ToRadians(_turnSpeed) * (Math.Abs(_physicsBody.LinearVelocity.Length()) / _maxForwardSpeed);
     }
-
-    private void InitialisePhysics(Vector2 startingPosition, int vehicleWidth, int vehicleHeight)
-    {
-        // Create a physics body to simulate the vehicle
-        _physicsBody = _physicsWorld.CreateRectangle(
-            width: _physicsWorld.ToSimUnits(vehicleWidth),
-            height: _physicsWorld.ToSimUnits(vehicleHeight),
-            density: 1,
-            position: _physicsWorld.ToSimUnits(startingPosition),
-            rotation: MathHelper.ToRadians(0),
-            bodyType: BodyType.Dynamic);
-
-        // Set some default mass
-        _physicsBody.Mass = 1f;
-    }
-
+    
     private void KillOrthogonalVelocity()
     {
         // If drifting is enabled... otherwise set to 0 (no drift, basically driving on rails ;-)

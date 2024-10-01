@@ -35,7 +35,13 @@ namespace TopDownCarPhysics
             // We'll need a physics world to simulate some car stuff
             _physicsWorld = new PhysicsWorld();
             _physicsWorld.Gravity = Vector2.Zero;
-            _physicsWorld.SetDisplayUnitToSimUnitRatio(8);
+
+            // For the physics simulation to work correctly we need to indicate how many pixels
+            // on the screen correspond to how many simulation units. So 'X' number of pixels
+            // for 1 metre in the physics simulation. Our car is 64 pixels long, so if we say
+            // the car is about 4 metres then 64/4 = 16. So 16 pixels will be 1 metre in the
+            // physics simulation. The same thinking must also apply to other unit conversions!
+            _physicsWorld.SetDisplayUnitToSimUnitRatio(16);
 
             // Create a basic player
             _player = new Player(new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2), _spriteBatch, _physicsWorld, Content);
