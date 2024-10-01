@@ -38,18 +38,18 @@ internal abstract class Vehicle
 
     #region Vehicle physics
 
-    private float _angularDrag = 4f;
-    private float _angularDragRateOfChange = 0.5f;
-    private float _driftFactor = 0.92f;
-    private float _enginePower = 50f;
+    private float _angularDrag;
+    private float _angularDragRateOfChange;
+    private float _driftFactor;
+    private float _enginePower;
     private bool _isDriftingEnabled = true;
-    private float _linearDrag = 0.5f;
-    private float _linearDragRateOfChange = 3.5f;
-    private float _maxReversingSpeed = 15f;
-    private float _maxForwardSpeed = 30f;
+    private float _linearDrag;
+    private float _linearDragRateOfChange;
+    private float _maxReversingSpeed;
+    private float _maxForwardSpeed;
     private Body _physicsBody;
-    private float _savedDriftFactor = 0f;
-    private float _turnSpeed = 15f;
+    private float _savedDriftFactor;
+    private float _turnSpeed;
 
     #endregion
 
@@ -184,14 +184,18 @@ internal abstract class Vehicle
         // Steers left or right depending on the X direction
         if (InputDirection.X == 0)
         {
+            // We're not turning left or right, so slowly reduce the angular damping so that the vehicle doesn't keep turning forever
             _physicsBody.AngularDamping = MathHelper.Lerp(_physicsBody.AngularDamping, _angularDrag, _angularDragRateOfChange * (float)gameTime.ElapsedGameTime.TotalSeconds);
         }
         else
         {
+            // We're turning one way or the other, so apply some angular drag
             _physicsBody.AngularDamping = _angularDrag;
         }
 
-        // Apply steering to angular velocity, note we turn less if we are moving forward/reverse slower
+        // Apply steering to (increase) angular velocity, note we take into account the forward/linear velocity
+        // as we want to turn less if we are moving forward/reverse slower. A very slow moving car doesn't have
+        // a high turning speed
         _physicsBody.AngularVelocity += InputDirection.X * MathHelper.ToRadians(_turnSpeed) * (Math.Abs(_physicsBody.LinearVelocity.Length()) / _maxForwardSpeed);
     }
     

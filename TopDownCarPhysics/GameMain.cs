@@ -6,6 +6,11 @@ using TopDownCarPhysics.Physics;
 
 namespace TopDownCarPhysics
 {
+    /// <summary>
+    /// This is just a simple little arcade style 2D top down car physics demo using Aether Physics engine and Monogame. It's
+    /// not entirely accurate (and isn't aiming to be), its not simulating each wheel or something clever like that. Think of 
+    /// this more as just a quick/fun car simulation that can be played about with by tweaking the physics and vehicle settings.
+    /// </summary>
     public class GameMain : Game
     {
         private GraphicsDeviceManager _graphics;
@@ -51,7 +56,8 @@ namespace TopDownCarPhysics
             _opponent = new Opponent(new Vector2(150, 150), _spriteBatch, _physicsWorld, Content);
             _opponent.LoadContent();
 
-            // Create 'edges' for the physics engine so we don't go off screen - basically a 'box' around the screen ;-)
+            // Create 'edges' for the physics engine so we don't go off screen - basically a 'box' around the screen that the
+            // vehicles will 'realistically' bounce/bump off when they hit it... well, sort of ;-)
             var topLeft = new Vector2(0, 0);
             var topRight = new Vector2(_graphics.PreferredBackBufferWidth, 0);
             var bottomLeft = new Vector2(0, _graphics.PreferredBackBufferHeight);
@@ -72,7 +78,7 @@ namespace TopDownCarPhysics
             _player.Update(gameTime);
             _opponent.Update(gameTime);
 
-            // Update physics
+            // Update the physics 'world'
             _physicsWorld.Step((float)gameTime.ElapsedGameTime.TotalSeconds);
 
             base.Update(gameTime);
@@ -92,6 +98,7 @@ namespace TopDownCarPhysics
                 effect: null,
                 transformMatrix: null);
 
+            // Draw the player and the opponent
             _player.Draw();
             _opponent.Draw();
 

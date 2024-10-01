@@ -64,7 +64,7 @@ internal class Player : Vehicle
 
         // Change the traction/skid control level
         if (keyboardState.IsKeyDown(Keys.I)) ImproveTraction();
-        if (keyboardState.IsKeyDown(Keys.T)) ReduceTraction();
+        if (keyboardState.IsKeyDown(Keys.R)) ReduceTraction();
 
         // Process/update this vehicles physics
         base.Update(gameTime);
@@ -73,8 +73,10 @@ internal class Player : Vehicle
     public override void Draw()
     {
         // Draw some details about the car physics
-        _spriteBatch.DrawString(_font, "Press/hold space to perform handbrake skid/turn", new Vector2(0, 0), Color.Black);
-        _spriteBatch.DrawString(_font, $"Is drifting/skidding enabled: {IsDriftingEnabled} (press 'E' to enable, 'D' to disable)", new Vector2(0, 18), Color.Black);
+        _spriteBatch.DrawString(_font, "Press the arrow keys to turn, brake and accelerate", new Vector2(0, 0), Color.Black);
+        _spriteBatch.DrawString(_font, "Press 'I' to improve traction, 'R' to reduce traction", new Vector2(0, 18), Color.Black);
+        _spriteBatch.DrawString(_font, "Press/hold space to perform handbrake skid/turn", new Vector2(0, 36), Color.Black);
+        _spriteBatch.DrawString(_font, $"Drifting/skidding enabled -> {IsDriftingEnabled} (press 'E' to enable, 'D' to disable)", new Vector2(0, 54), Color.Black);        
 
         base.Draw();
     }
