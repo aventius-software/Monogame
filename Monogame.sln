@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AndroidAdMobExample", "Andr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TopDownCarPhysics", "TopDownCarPhysics\TopDownCarPhysics.csproj", "{7D0DF4C4-BF98-47D0-B834-F935E260B1C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MorpehECSTest", "MorpehECSTest\MorpehECSTest.csproj", "{B96E7501-7A3F-4101-ADD8-D1EE343A8C6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MorpehECSTest", "MorpehECSTest\MorpehECSTest.csproj", "{B96E7501-7A3F-4101-ADD8-D1EE343A8C6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyInjectionSample", "DependencyInjectionSample\DependencyInjectionSample.csproj", "{F4870320-9D21-4139-87CA-11B5E6D42A51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,6 +30,10 @@ Global
 		{B96E7501-7A3F-4101-ADD8-D1EE343A8C6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B96E7501-7A3F-4101-ADD8-D1EE343A8C6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B96E7501-7A3F-4101-ADD8-D1EE343A8C6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4870320-9D21-4139-87CA-11B5E6D42A51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4870320-9D21-4139-87CA-11B5E6D42A51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4870320-9D21-4139-87CA-11B5E6D42A51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4870320-9D21-4139-87CA-11B5E6D42A51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
