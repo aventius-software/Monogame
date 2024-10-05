@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MorpehECSTest", "MorpehECST
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependencyInjectionSample", "DependencyInjectionSample\DependencyInjectionSample.csproj", "{F4870320-9D21-4139-87CA-11B5E6D42A51}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotTiledTest", "DotTiledTest\DotTiledTest.csproj", "{BBB5F6B1-116C-4502-8091-6AF18C972521}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotTiledTest", "DotTiledTest\DotTiledTest.csproj", "{BBB5F6B1-116C-4502-8091-6AF18C972521}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiledCSTest", "TiledCSTest\TiledCSTest.csproj", "{217E85DB-1A38-4162-9ACD-83867A18A8AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,6 +42,10 @@ Global
 		{BBB5F6B1-116C-4502-8091-6AF18C972521}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBB5F6B1-116C-4502-8091-6AF18C972521}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBB5F6B1-116C-4502-8091-6AF18C972521}.Release|Any CPU.Build.0 = Release|Any CPU
+		{217E85DB-1A38-4162-9ACD-83867A18A8AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{217E85DB-1A38-4162-9ACD-83867A18A8AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{217E85DB-1A38-4162-9ACD-83867A18A8AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{217E85DB-1A38-4162-9ACD-83867A18A8AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
