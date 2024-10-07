@@ -7,4 +7,4 @@ A Visual Studio 2022 solution with various example projects for Monogame related
 - Example of using Morpeh ECS by translating the code from the top down 2D car physics project (https://github.com/scellecs/morpeh)
 - Using dependency injection with Monogame
 
-Other stuff coming soon!
+Plus various other little examples, samples and demos
