@@ -13,9 +13,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependencyInjectionSample",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotTiledTest", "DotTiledTest\DotTiledTest.csproj", "{BBB5F6B1-116C-4502-8091-6AF18C972521}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiledCSTest", "TiledCSTest\TiledCSTest.csproj", "{217E85DB-1A38-4162-9ACD-83867A18A8AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TiledCSTest", "TiledCSTest\TiledCSTest.csproj", "{217E85DB-1A38-4162-9ACD-83867A18A8AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AetherPhysicsTest", "AetherPhysicsTest\AetherPhysicsTest.csproj", "{ECAEFAAD-8558-40A9-A454-FFFE32461E6B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AetherPhysicsTest", "AetherPhysicsTest\AetherPhysicsTest.csproj", "{ECAEFAAD-8558-40A9-A454-FFFE32461E6B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrawingPrimitiveShapes", "DrawingPrimitiveShapes\DrawingPrimitiveShapes.csproj", "{D144A2D7-1062-4A32-B226-56E7CC683ED3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,6 +54,10 @@ Global
 		{ECAEFAAD-8558-40A9-A454-FFFE32461E6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECAEFAAD-8558-40A9-A454-FFFE32461E6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECAEFAAD-8558-40A9-A454-FFFE32461E6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D144A2D7-1062-4A32-B226-56E7CC683ED3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D144A2D7-1062-4A32-B226-56E7CC683ED3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D144A2D7-1062-4A32-B226-56E7CC683ED3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D144A2D7-1062-4A32-B226-56E7CC683ED3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
