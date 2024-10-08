@@ -19,7 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AetherPhysicsTest", "Aether
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrawingPrimitiveShapes", "DrawingPrimitiveShapes\DrawingPrimitiveShapes.csproj", "{D144A2D7-1062-4A32-B226-56E7CC683ED3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RenderTargetExample", "RenderTargetExample\RenderTargetExample.csproj", "{C1BEC437-F526-40A8-8370-52BE06585B1E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RenderTargetExample", "RenderTargetExample\RenderTargetExample.csproj", "{C1BEC437-F526-40A8-8370-52BE06585B1E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmoothMovementTest", "SmoothMovementTest\SmoothMovementTest.csproj", "{D512F08E-FE4E-4705-AE92-A3ED91C7C55A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +66,10 @@ Global
 		{C1BEC437-F526-40A8-8370-52BE06585B1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1BEC437-F526-40A8-8370-52BE06585B1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1BEC437-F526-40A8-8370-52BE06585B1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D512F08E-FE4E-4705-AE92-A3ED91C7C55A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D512F08E-FE4E-4705-AE92-A3ED91C7C55A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D512F08E-FE4E-4705-AE92-A3ED91C7C55A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D512F08E-FE4E-4705-AE92-A3ED91C7C55A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
