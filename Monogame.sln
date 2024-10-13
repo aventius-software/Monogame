@@ -23,7 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RenderTargetExample", "Rend
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmoothMovementTest", "SmoothMovementTest\SmoothMovementTest.csproj", "{D512F08E-FE4E-4705-AE92-A3ED91C7C55A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AetherPhysicsDebugViewTest", "AetherPhysicsDebugViewTest\AetherPhysicsDebugViewTest.csproj", "{0B1ABB82-BF88-44ED-891D-855BAAF1D2B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AetherPhysicsDebugViewTest", "AetherPhysicsDebugViewTest\AetherPhysicsDebugViewTest.csproj", "{0B1ABB82-BF88-44ED-891D-855BAAF1D2B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiledMapWithCamera", "TiledMapWithCamera\TiledMapWithCamera.csproj", "{B89BD187-E529-41EF-96DE-78980EFA29E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -76,6 +78,10 @@ Global
 		{0B1ABB82-BF88-44ED-891D-855BAAF1D2B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B1ABB82-BF88-44ED-891D-855BAAF1D2B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B1ABB82-BF88-44ED-891D-855BAAF1D2B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B89BD187-E529-41EF-96DE-78980EFA29E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B89BD187-E529-41EF-96DE-78980EFA29E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B89BD187-E529-41EF-96DE-78980EFA29E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B89BD187-E529-41EF-96DE-78980EFA29E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
