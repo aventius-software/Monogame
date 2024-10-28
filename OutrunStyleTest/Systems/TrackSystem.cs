@@ -59,12 +59,15 @@ internal class TrackSystem : ISystem
 
     public void OnUpdate(float deltaTime)
     {
+        // We'll need some information about the track
         var track = _trackFilter.First();
         ref var trackComponent = ref track.GetComponent<TrackComponent>();
 
+        // We'll need to access the camera
         var camera = _cameraFilter.First();
-        ref var cameraComponent = ref track.GetComponent<CameraComponent>();
+        ref var cameraComponent = ref camera.GetComponent<CameraComponent>();
 
+        // Away we go...
         var clipBottomLine = _graphicsDevice.Viewport.Height;
         var baseSegment = GetTrackSegment(cameraComponent.Position.Z, trackComponent.Length, trackComponent.IndividualSegmentLength, trackComponent.TotalTrackSegments);
         var baseIndex = baseSegment.Index;
@@ -85,6 +88,7 @@ internal class TrackSystem : ISystem
                 _graphicsDevice.Viewport.Height, 
                 trackComponent.Width);
 
+            // Update current segment with projected coordinates
             _trackSegments[currIndex] = currSegment;
 
             var currBottomLine = currSegment.ZMap.ScreenCoordinates.Y;
@@ -105,7 +109,7 @@ internal class TrackSystem : ISystem
                     currSegment.RoadColour,
                     currSegment.GrassColour,
                     currSegment.RumbleColour,
-                    Color.DarkGray
+                    currSegment.LaneColour
                 );
 
                 clipBottomLine = currBottomLine;
@@ -213,6 +217,8 @@ internal class TrackSystem : ISystem
 
         //await GraphicsService.DrawQuadrilateralAsync(ColorTranslator.ToHtml(rumbleColour), x1 - w1 - rumble_w1, y1, x1 - w1, y1, x2 - w2, y2, x2 - w2 - rumble_w2, y2);
         //await GraphicsService.DrawQuadrilateralAsync(ColorTranslator.ToHtml(rumbleColour), x1 + w1 + rumble_w1, y1, x1 + w1, y1, x2 + w2, y2, x2 + w2 + rumble_w2, y2);
+        _shapeDrawingService.DrawFilledQuadrilateral(rumbleColour, x1 - w1 - rumble_w1, y1, x1 - w1, y1, x2 - w2, y2, x2 - w2 - rumble_w2, y2);
+        _shapeDrawingService.DrawFilledQuadrilateral(rumbleColour, x1 + w1 + rumble_w1, y1, x1 + w1, y1, x2 + w2, y2, x2 + w2 + rumble_w2, y2);
 
         //if (true)//roadColour == RoadColourDark)
         //{

@@ -51,7 +51,7 @@ internal class PlayerControlSystem : ISystem
         var track = _trackFilter.First();
         ref var trackComponent = ref track.GetComponent<TrackComponent>();        
 
-        if (playerComponent.Position.Z >= trackComponent.Length) playerComponent.Position.Z -= trackComponent.Length;
+        //if (playerComponent.Position.Z >= trackComponent.Length) playerComponent.Position.Z -= trackComponent.Length;
 
         // Get the movement component
         //ref var transformComponent = ref entity.GetComponent<TransformComponent>();
