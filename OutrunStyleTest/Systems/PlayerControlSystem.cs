@@ -1,7 +1,6 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-using OutrunStyleTest.Components;
+﻿using OutrunStyleTest.Components;
 using Scellecs.Morpeh;
+using System.Numerics;
 
 namespace OutrunStyleTest.Systems;
 
@@ -12,7 +11,9 @@ namespace OutrunStyleTest.Systems;
 internal class PlayerControlSystem : ISystem
 {
     public World World { get; set; }
-    private Filter filter;
+
+    private Filter _playerFilter;
+    private Filter _trackFilter;
 
     public PlayerControlSystem(World world)
     {
@@ -25,34 +26,50 @@ internal class PlayerControlSystem : ISystem
 
     public void OnAwake()
     {
-        filter = World.Filter.With<PlayerComponent>().Build();
+        // Setup filters
+        _playerFilter = World.Filter.With<PlayerComponent>().Build();
+        _trackFilter = World.Filter.With<TrackComponent>().Build();
+
+        // Initialise the player
+        var player = _playerFilter.First();
+
+        ref var playerComponent = ref player.GetComponent<PlayerComponent>();
+        playerComponent.Position = Vector3.Zero;
+        playerComponent.MaxSpeed = 100f / (1f / 60f);
+        playerComponent.Speed = 0;
     }
 
     public void OnUpdate(float deltaTime)
     {
         // Get keyboard state
-        var keyboardState = Keyboard.GetState();
+        //var keyboardState = Keyboard.GetState();
 
-        foreach (var entity in filter)
-        {
-            // Get the movement component
-            //ref var transformComponent = ref entity.GetComponent<TransformComponent>();
-            //ref var driftComponent = ref entity.GetComponent<DriftComponent>();
+        var player = _playerFilter.First();
+        ref var playerComponent = ref player.GetComponent<PlayerComponent>();
+        playerComponent.Position.Z = playerComponent.Speed * deltaTime;
 
-            //// Remember to reset the input direction on each update!
-            //transformComponent.Direction = Vector2.Zero;
+        var track = _trackFilter.First();
+        ref var trackComponent = ref track.GetComponent<TrackComponent>();        
 
-            //// Acceleration and braking
-            //if (keyboardState.IsKeyDown(Keys.Up)) transformComponent.Direction.Y = 1;
-            //else if (keyboardState.IsKeyDown(Keys.Down)) transformComponent.Direction.Y = -1;
+        if (playerComponent.Position.Z >= trackComponent.Length) playerComponent.Position.Z -= trackComponent.Length;
 
-            //// Turning
-            //if (keyboardState.IsKeyDown(Keys.Left)) transformComponent.Direction.X = -1;
-            //else if (keyboardState.IsKeyDown(Keys.Right)) transformComponent.Direction.X = 1;
+        // Get the movement component
+        //ref var transformComponent = ref entity.GetComponent<TransformComponent>();
+        //ref var driftComponent = ref entity.GetComponent<DriftComponent>();
 
-            //// Press space to skid/drift ;-)
-            //if (keyboardState.IsKeyDown(Keys.Space)) driftComponent.IsSkidding = true;
-            //else driftComponent.IsSkidding = false;
-        }
+        //// Remember to reset the input direction on each update!
+        //transformComponent.Direction = Vector2.Zero;
+
+        //// Acceleration and braking
+        //if (keyboardState.IsKeyDown(Keys.Up)) transformComponent.Direction.Y = 1;
+        //else if (keyboardState.IsKeyDown(Keys.Down)) transformComponent.Direction.Y = -1;
+
+        //// Turning
+        //if (keyboardState.IsKeyDown(Keys.Left)) transformComponent.Direction.X = -1;
+        //else if (keyboardState.IsKeyDown(Keys.Right)) transformComponent.Direction.X = 1;
+
+        //// Press space to skid/drift ;-)
+        //if (keyboardState.IsKeyDown(Keys.Space)) driftComponent.IsSkidding = true;
+        //else driftComponent.IsSkidding = false;        
     }
 }

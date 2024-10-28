@@ -72,4 +72,54 @@ internal class ShapeDrawingService
         // Draw...
         Draw(vertices, PrimitiveType.TriangleList, 2);
     }
+
+    public void DrawFilledQuadrilateral(Color colour, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+    {
+        // Coordinates
+        var vertices = new VertexPositionColor[6];
+
+        // First triangle
+        vertices[0].Position = new Vector3(x1, y1, 0f);
+        vertices[0].Color = colour;
+        vertices[1].Position = new Vector3(x2, y2, 0f);
+        vertices[1].Color = colour;
+        vertices[2].Position = new Vector3(x3, y3, 0f);
+        vertices[2].Color = colour;
+
+        // Second triangle
+        vertices[3].Position = new Vector3(x1, y1, 0f);
+        vertices[3].Color = colour;
+        vertices[4].Position = new Vector3(x3, y3, 0f);
+        vertices[4].Color = colour;
+        vertices[5].Position = new Vector3(x4, y4, 0f);
+        vertices[5].Color = colour;
+
+        // Draw...
+        Draw(vertices, PrimitiveType.TriangleList, 2);
+    }
+
+    public void DrawFilledRectangle(Color colour, int x, int y, int width, int height)
+    {
+        // Coordinates
+        var vertices = new VertexPositionColor[6];
+
+        // First triangle
+        vertices[0].Position = new Vector3(x, y, 0f);
+        vertices[0].Color = colour;
+        vertices[1].Position = new Vector3(x + width, y, 0f);
+        vertices[1].Color = colour;
+        vertices[2].Position = new Vector3(x + width, y + height, 0f);
+        vertices[2].Color = colour;
+
+        // Second triangle
+        vertices[3].Position = new Vector3(x, y, 0f);
+        vertices[3].Color = colour;
+        vertices[4].Position = new Vector3(x + width, y + height, 0f);
+        vertices[4].Color = colour;
+        vertices[5].Position = new Vector3(x, y + height, 0f);
+        vertices[5].Color = colour;
+
+        // Draw...
+        Draw(vertices, PrimitiveType.TriangleList, 2);
+    }
 }

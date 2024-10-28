@@ -7,11 +7,10 @@ namespace OutrunStyleTest.Systems;
 internal class CameraSystem : ISystem
 {
     public World World { get; set; }
-    
-    private float _distanceToPlayer;
-    private float _distanceToProjectionPlane;
-    private Filter _filter;
-    private Vector3 _position;
+
+    private Filter _cameraFilter;
+    private Filter _playerFilter;
+    private Filter _trackFilter;
 
     public CameraSystem(World world)
     {
@@ -24,29 +23,38 @@ internal class CameraSystem : ISystem
 
     public void OnAwake()
     {
-        // Set camera position
-        _position = new Vector3(0, 1000, 0);
+        // Set filters for each of our entities we need
+        _cameraFilter = World.Filter.With<CameraComponent>().Build();
+        _playerFilter = World.Filter.With<PlayerComponent>().Build();
+        _trackFilter = World.Filter.With<TrackComponent>().Build();
 
-        // And some other stuff
-        _distanceToPlayer = 500f;
-        //_distanceToProjectionPlane = 1 / (_position.Y / _distanceToPlayer);
+        // Setup the camera
+        var camera = _cameraFilter.First();
 
-        // We want the player entity
-        _filter = World.Filter.With<PlayerComponent>().Build();
+        // We want the camera component
+        ref var cameraComponent = ref camera.GetComponent<CameraComponent>();
+
+        cameraComponent.Position = new Vector3(0, 1000, 0);
+        cameraComponent.DistanceToPlayer = 500;
+        cameraComponent.DistanceToProjectionPlane = 1 / (cameraComponent.Position.Y / cameraComponent.DistanceToPlayer);
     }
 
     public void OnUpdate(float deltaTime)
     {
-        // Get the player
-        var entity = _filter.First();
+        var camera = _cameraFilter.First();
+        ref var cameraComponent = ref camera.GetComponent<CameraComponent>();
 
-        // We want the position component
-        ref var playerComponent = ref entity.GetComponent<PlayerComponent>();
+        var player = _playerFilter.First();
+        ref var playerComponent = ref player.GetComponent<PlayerComponent>();
 
-        // Adjust position
-        _position.X = playerComponent.Position.X * 1; // * roadWidth;
+        var track = _trackFilter.First();
+        ref var trackComponent = ref track.GetComponent<TrackComponent>();
+
+        // Adjust camera position
+        cameraComponent.Position.X = playerComponent.Position.X * trackComponent.Width;
+        cameraComponent.Position.Z = playerComponent.Position.Z - cameraComponent.DistanceToPlayer;
 
         // Don't let camera Z to go negative
-        _position.Z = playerComponent.Position.Z - _distanceToPlayer;        
+        if (cameraComponent.Position.Z < 0) cameraComponent.Position.Z += trackComponent.Length;
     }
 }

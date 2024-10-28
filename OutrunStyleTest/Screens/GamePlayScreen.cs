@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using OutrunStyleTest.Components;
 using OutrunStyleTest.Services;
 using OutrunStyleTest.Systems;
 using Scellecs.Morpeh;
@@ -6,20 +7,24 @@ using Scellecs.Morpeh;
 namespace OutrunStyleTest.Screens;
 
 internal class GamePlayScreen : IScreen
-{    
+{
+    private readonly CameraSystem _cameraSystem;
     private readonly World _ecsWorld;    
     private readonly PlayerControlSystem _playerControlSystem;
-    private readonly RoadDrawingSystem _roadDrawingSystem;
+    private readonly TrackSystem _roadDrawingSystem;
     
     private SystemsGroup _renderSystemsGroup;
     private SystemsGroup _updateSystemsGroup;
 
-    public GamePlayScreen(World ecsWorld, 
+    public GamePlayScreen(
+        World ecsWorld,
+        CameraSystem cameraSystem,
         PlayerControlSystem playerControlSystem, 
-        RoadDrawingSystem roadDrawingSystem)
+        TrackSystem roadDrawingSystem)
     {
         _ecsWorld = ecsWorld;        
 
+        _cameraSystem = cameraSystem;
         _playerControlSystem = playerControlSystem;
         _roadDrawingSystem = roadDrawingSystem;
     }
@@ -31,25 +36,28 @@ internal class GamePlayScreen : IScreen
     }
 
     public void Initialise()
-    {
-        // Add render systems
-        _renderSystemsGroup = _ecsWorld.CreateSystemsGroup();
-        _renderSystemsGroup.AddSystem(_roadDrawingSystem);
-        _renderSystemsGroup.Initialize();
-
+    {        
         // Add all our update systems - order matters!
         _updateSystemsGroup = _ecsWorld.CreateSystemsGroup();        
-        _updateSystemsGroup.AddSystem(_playerControlSystem);        
+        _updateSystemsGroup.AddSystem(_playerControlSystem);
+        _updateSystemsGroup.AddSystem(_cameraSystem);        
+
+        // Add render systems
+        _renderSystemsGroup = _ecsWorld.CreateSystemsGroup();
+        _renderSystemsGroup.AddSystem(_roadDrawingSystem);                       
+
+        // Create entities
+        var track = _ecsWorld.CreateEntity();
+        track.AddComponent<TrackComponent>();
+
+        var player = _ecsWorld.CreateEntity();
+        player.AddComponent<PlayerComponent>();
+
+        var camera = _ecsWorld.CreateEntity();
+        camera.AddComponent<CameraComponent>();
+
         _updateSystemsGroup.Initialize();
-
-        // Create player entity
-        //_vehicleFactory.Create(new Vector2(50, 50), 1.5f, true);
-
-        // Create some enemies
-        //_vehicleFactory.Create(new Vector2(150, 150), 1.5f);
-        //_vehicleFactory.Create(new Vector2(400, 200), 1.5f);
-        //_vehicleFactory.Create(new Vector2(50, 300), 1.5f);
-        //_vehicleFactory.Create(new Vector2(600, 400), 1.5f);
+        _renderSystemsGroup.Initialize();
     }
 
     public void LoadContent()

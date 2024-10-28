@@ -50,13 +50,9 @@ public class GameMain : Game
 
         // Our ECS systems        
         services.AddSingleton<PlayerControlSystem>();
-        services.AddSingleton<RoadDrawingSystem>();
-
-        // For ECS 'entities' We'll use a factory to create multiple vehicles (including the player vehicle). So
-        // in the game play screen for example, we'll ask the factory to create a player, but probably also some
-        // dumb opponents for the player to mess around with (well, bump into at least)
-        //services.AddSingleton<VehicleFactory>();
-
+        services.AddSingleton<TrackSystem>();
+        services.AddSingleton<CameraSystem>();
+        
         // Build the service provider
         var serviceProvider = services.BuildServiceProvider();
 
