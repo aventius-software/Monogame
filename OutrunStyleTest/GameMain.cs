@@ -9,11 +9,20 @@ using Scellecs.Morpeh;
 
 namespace OutrunStyleTest;
 
+/// <summary>
+/// A simple demo of an outrun style road system, code mostly translated from https://github.com/ssusnic/Pseudo-3d-Racer use
+/// the arrow keys up/down to accelerate and brake. No left/right though yet
+/// 
+/// Also, some useful links are:-
+/// 
+/// https://www.youtube.com/watch?v=N60lBZDEwJ8&list=PLB_ibvUSN7mzUffhiay5g5GUHyJRO4DYr&index=8
+/// http://www.extentofthejam.com/pseudo/
+/// https://codeincomplete.com/articles/javascript-racer-v1-straight/
+/// </summary>
 public class GameMain : Game
 {
     private GraphicsDeviceManager _graphics;
     private ScreenManagementService _screenManagementService;
-    private SpriteBatch _spriteBatch;
 
     public GameMain()
     {
@@ -52,7 +61,7 @@ public class GameMain : Game
         services.AddSingleton<PlayerControlSystem>();
         services.AddSingleton<TrackSystem>();
         services.AddSingleton<CameraSystem>();
-        
+
         // Build the service provider
         var serviceProvider = services.BuildServiceProvider();
 

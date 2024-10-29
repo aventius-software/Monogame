@@ -39,6 +39,7 @@ internal class PlayerControlSystem : ISystem
 
         // Initialise the player
         ref var playerComponent = ref _player.GetComponent<PlayerComponent>();
+        playerComponent.AccelerationRate = 10;
         playerComponent.Position = Vector3.Zero;
         playerComponent.MaxSpeed = 100f / (1f / 60f);
         playerComponent.Speed = 0;
@@ -46,6 +47,7 @@ internal class PlayerControlSystem : ISystem
 
     public void OnUpdate(float deltaTime)
     {
+        // Move the player forward (Z position) according to the players speed
         ref var playerComponent = ref _player.GetComponent<PlayerComponent>();
         playerComponent.Position.Z += playerComponent.Speed * deltaTime;
 
@@ -53,12 +55,19 @@ internal class PlayerControlSystem : ISystem
         var keyboardState = Keyboard.GetState();
 
         // Acceleration and braking
-        if (keyboardState.IsKeyDown(Keys.Up) && playerComponent.Speed < playerComponent.MaxSpeed - 10) playerComponent.Speed += 10;
-        else if (keyboardState.IsKeyDown(Keys.Down) && playerComponent.Speed > 10) playerComponent.Speed -= 10;
-        
+        if (keyboardState.IsKeyDown(Keys.Up) && playerComponent.Speed < playerComponent.MaxSpeed - playerComponent.AccelerationRate)
+        {
+            playerComponent.Speed += playerComponent.AccelerationRate;
+        }
+        else if (keyboardState.IsKeyDown(Keys.Down) && playerComponent.Speed > playerComponent.AccelerationRate)
+        {
+            playerComponent.Speed -= playerComponent.AccelerationRate;
+        }
+
         // Update the players position
         ref var trackComponent = ref _track.GetComponent<TrackComponent>();
 
+        // Back to start if finished
         if (playerComponent.Position.Z >= trackComponent.Length) playerComponent.Position.Z -= trackComponent.Length;
     }
 }

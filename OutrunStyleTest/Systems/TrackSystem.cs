@@ -4,7 +4,6 @@ using OutrunStyleTest.Components;
 using OutrunStyleTest.Services;
 using Scellecs.Morpeh;
 using System;
-using System.Collections.Generic;
 
 namespace OutrunStyleTest.Systems;
 
@@ -16,9 +15,9 @@ internal class TrackSystem : ISystem
     private Filter _cameraFilter;
     private readonly GraphicsDevice _graphicsDevice;
     private readonly ShapeDrawingService _shapeDrawingService;
-    private Entity _track;    
+    private Entity _track;
     private Filter _trackFilter;
-    private List<TrackSegment> _trackSegments;
+    private TrackSegment[] _trackSegments;
 
     public TrackSystem(World world, ShapeDrawingService shapeDrawingService, GraphicsDevice graphicsDevice)
     {
@@ -47,7 +46,7 @@ internal class TrackSystem : ISystem
         trackComponent.IndividualSegmentLength = 100;
         trackComponent.Lanes = 5;
         trackComponent.Width = 1000;
-        trackComponent.RumbleSegments = 5;
+        //trackComponent.RumbleSegments = 5;
         trackComponent.TotalTrackSegments = 300;
         trackComponent.Length = trackComponent.IndividualSegmentLength * trackComponent.TotalTrackSegments;
 
@@ -55,7 +54,7 @@ internal class TrackSystem : ISystem
         _trackSegments = CreateTrack(
             numberOfTrackSegments: trackComponent.TotalTrackSegments,
             individualSegmentLength: trackComponent.IndividualSegmentLength,
-            numberOfRumbleSegments: trackComponent.RumbleSegments);
+            numberOfRumbleSegments: 2);
     }
 
     public void OnUpdate(float deltaTime)
@@ -80,13 +79,13 @@ internal class TrackSystem : ISystem
 
             var offsetZ = (currIndex < baseIndex) ? trackComponent.Length : 0;
 
-            Project3D(ref currSegment.ZMap, 
-                cameraComponent.Position.X, 
-                cameraComponent.Position.Y, 
+            Project3D(ref currSegment.ZMap,
+                cameraComponent.Position.X,
+                cameraComponent.Position.Y,
                 cameraComponent.Position.Z - offsetZ,
-                cameraComponent.DistanceToProjectionPlane, 
-                _graphicsDevice.Viewport.Width, 
-                _graphicsDevice.Viewport.Height, 
+                cameraComponent.DistanceToProjectionPlane,
+                _graphicsDevice.Viewport.Width,
+                _graphicsDevice.Viewport.Height,
                 trackComponent.Width);
 
             // Update current segment with projected coordinates
@@ -105,82 +104,67 @@ internal class TrackSystem : ISystem
                 DrawTrackSegment(
                     _graphicsDevice.Viewport.Width,
                     trackComponent.Lanes,
-                    p1.X, p1.Y, p1.W,
-                    p2.X, p2.Y, p2.W,
+                    (int)p1.X, (int)p1.Y, (int)p1.Z,
+                    (int)p2.X, (int)p2.Y, (int)p2.Z,
                     currSegment.RoadColour,
                     currSegment.GrassColour,
                     currSegment.RumbleColour,
                     currSegment.LaneColour
                 );
 
-                clipBottomLine = currBottomLine;
+                clipBottomLine = (int)currBottomLine;
             }
         }
     }
 
-    private List<TrackSegment> CreateTrack(int numberOfTrackSegments, int individualSegmentLength, int numberOfRumbleSegments)
+    private TrackSegment[] CreateTrack(int numberOfTrackSegments, int individualSegmentLength, int numberOfRumbleSegments)
     {
         // Lets build a track
-        var track = new List<TrackSegment>();
+        var track = new TrackSegment[numberOfTrackSegments];
 
         // Create all the track segments
         for (var segmentNumber = 0; segmentNumber < numberOfTrackSegments; segmentNumber++)
         {
             // Add a segment to the track
-            track.Add(CreateTrackSegment(segmentNumber, individualSegmentLength, numberOfRumbleSegments));
+            track[segmentNumber] = CreateTrackSegment(segmentNumber, individualSegmentLength, numberOfRumbleSegments,
+                Color.Gray, Color.DarkGray,
+                Color.Green, Color.DarkGreen,
+                Color.White, Color.Red);
         }
 
-        // Colour the start/end of the track
-        //for (var i = 0; i < numberOfRumbleSegments; i++)
-        //{
-            // Start segment...
-            var startSegment = track[0];
-            startSegment.RoadColour = Color.White;// Color.FromArgb(255, 255, 255);
-            track[0] = startSegment;
+        // Colour the start of the track
+        track[0].RoadColour = Color.White;
+        track[1].RoadColour = Color.White;
+        track[2].RoadColour = Color.White;
 
-            // Last segment...
-            var finishSegment = track[^1];
-            finishSegment.RoadColour = Color.Silver;// Color.FromArgb(50, 50, 50);
-            track[^1] = finishSegment;
-        //}
+        // Last bit of the track
+        track[^1].RoadColour = Color.Black;
+        track[^2].RoadColour = Color.Black;
+        track[^3].RoadColour = Color.Black;
 
         return track;
-    }    
-    
-    private TrackSegment CreateTrackSegment(int index, int individualSegmentLength, int numberOfRumbleSegments)
-    {        
+    }
+
+    private TrackSegment CreateTrackSegment(int index, int individualSegmentLength, int numberOfRumbleSegments,
+        Color roadColourLight, Color roadColourDark,
+        Color grassColourLight, Color grassColourDark,
+        Color rumbleColourLight, Color rumbleColourDark)
+    {
         return new TrackSegment
         {
             Index = index,
             ZMap = new ZMap
             {
-                WorldCoordinates = new WorldCoordinate
-                {
-                    X = 0,
-                    Y = 0,
-                    Z = index * individualSegmentLength
-                },
-                ScreenCoordinates = new ScreenCoordinate
-                {
-                    X = 0,
-                    Y = 0,
-                    W = 0
-                },
+                WorldCoordinates = new Vector3(0, 0, index * individualSegmentLength),
+                ScreenCoordinates = new Vector3(0, 0, 0),
                 Scale = -1
             },
-            GrassColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? Color.LightGreen : Color.DarkGreen, // GrassColourLight : GrassColourDark,
-            RoadColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? Color.LightGray : Color.DarkGray, // RoadColourLight : RoadColourDark,
-            RumbleColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? Color.White : Color.Red, // RumbleColourLight : RumbleColourDark
+            GrassColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? grassColourLight : grassColourDark,
+            RoadColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? roadColourLight : roadColourDark,
+            RumbleColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? rumbleColourLight : rumbleColourDark,
             LaneColour = Color.White
         };
     }
-
-    //private void Project2D(ref ZMap zmap, int viewPortWidth, int viewPortHeight, int trackWidth)
-    //{
-    //    zmap.ScreenCoordinates.X = viewPortWidth / 2;
-    //    zmap.ScreenCoordinates.Y = (int)(viewPortHeight - zmap.WorldCoordinates.Z);
-    //    zmap.ScreenCoordinates.W = trackWidth;
-    //}
 
     private void Project3D(ref ZMap zmap, float cameraX, float cameraY, float cameraZ, float cameraDepth, int viewPortWidth, int viewPortHeight, int trackWidth)
     {
@@ -200,11 +184,11 @@ internal class TrackSystem : ISystem
         // scaling projected coordinates to the screen coordinates
         zmap.ScreenCoordinates.X = (int)Math.Round((1 + projectedX) * (viewPortWidth / 2));
         zmap.ScreenCoordinates.Y = (int)Math.Round((1 - projectedY) * (viewPortHeight / 2));
-        zmap.ScreenCoordinates.W = (int)Math.Round(projectedW * (viewPortWidth / 2));
+        zmap.ScreenCoordinates.Z = (int)Math.Round(projectedW * (viewPortWidth / 2));
     }
-    
+
     private void DrawTrackSegment(int viewPortWidth, int numberOfLanes, int x1, int y1, int w1, int x2, int y2, int w2, Color roadColour, Color grassColour, Color rumbleColour, Color laneColour)
-    {        
+    {
         // Draw grass first        
         _shapeDrawingService.DrawFilledRectangle(grassColour, 0, y2, viewPortWidth, y1 - y2);
 
@@ -235,10 +219,10 @@ internal class TrackSystem : ISystem
                 lane_x2 += lane_w2;
 
                 _shapeDrawingService.DrawFilledQuadrilateral(laneColour,
-                    new Vector2(lane_x1 - line_w1, y1),
-                    new Vector2(lane_x1 + line_w1, y1),
-                    new Vector2(lane_x2 + line_w2, y2),
-                    new Vector2(lane_x2 - line_w2, y2)
+                    lane_x1 - line_w1, y1,
+                    lane_x1 + line_w1, y1,
+                    lane_x2 + line_w2, y2,
+                    lane_x2 - line_w2, y2
                 );
             }
         }

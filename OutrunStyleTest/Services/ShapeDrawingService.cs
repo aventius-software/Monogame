@@ -3,10 +3,14 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace OutrunStyleTest.Services;
 
+/// <summary>
+/// A simple shape drawing service using BasicEffect (shader)
+/// </summary>
 internal class ShapeDrawingService
 {
-    private BasicEffect _basicEffect;
+    private readonly BasicEffect _basicEffect;
     private readonly GraphicsDevice _graphicsDevice;
+    private readonly RasterizerState _rasterizerState;
 
     public ShapeDrawingService(GraphicsDevice graphicsDevice)
     {
@@ -26,13 +30,15 @@ internal class ShapeDrawingService
 
         // The following MUST be enabled if you want to color your vertices
         _basicEffect.VertexColorEnabled = true;
+
+        // Build rasterizer state
+        _rasterizerState = new RasterizerState();
+        _rasterizerState.CullMode = CullMode.None;
     }
 
     private void Draw(VertexPositionColor[] vertices, PrimitiveType primitiveType, int primitiveCount)
     {
-        RasterizerState rasterizerState1 = new RasterizerState();
-        rasterizerState1.CullMode = CullMode.None;
-        _graphicsDevice.RasterizerState = rasterizerState1;
+        _graphicsDevice.RasterizerState = _rasterizerState;
 
         foreach (EffectPass pass in _basicEffect.CurrentTechnique.Passes)
         {
@@ -46,31 +52,6 @@ internal class ShapeDrawingService
                 vertexDeclaration: VertexPositionColor.VertexDeclaration
             );
         }
-    }
-
-    public void DrawFilledQuadrilateral(Color colour, Vector2 point1, Vector2 point2, Vector2 point3, Vector2 point4)
-    {
-        // Coordinates
-        var vertices = new VertexPositionColor[6];
-
-        // First triangle
-        vertices[0].Position = new Vector3(point1.X, point1.Y, 0f);
-        vertices[0].Color = colour;
-        vertices[1].Position = new Vector3(point2.X, point2.Y, 0f);
-        vertices[1].Color = colour;
-        vertices[2].Position = new Vector3(point3.X, point3.Y, 0f);
-        vertices[2].Color = colour;
-
-        // Second triangle
-        vertices[3].Position = new Vector3(point1.X, point1.Y, 0f);
-        vertices[3].Color = colour;
-        vertices[4].Position = new Vector3(point3.X, point3.Y, 0f);
-        vertices[4].Color = colour;
-        vertices[5].Position = new Vector3(point4.X, point4.Y, 0f);
-        vertices[5].Color = colour;
-
-        // Draw...
-        Draw(vertices, PrimitiveType.TriangleList, 2);
     }
 
     public void DrawFilledQuadrilateral(Color colour, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
