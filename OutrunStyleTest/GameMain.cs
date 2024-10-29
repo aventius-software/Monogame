@@ -18,6 +18,7 @@ namespace OutrunStyleTest;
 /// https://www.youtube.com/watch?v=N60lBZDEwJ8&list=PLB_ibvUSN7mzUffhiay5g5GUHyJRO4DYr&index=8
 /// http://www.extentofthejam.com/pseudo/
 /// https://codeincomplete.com/articles/javascript-racer-v1-straight/
+/// https://jakesgordon.com/writing/javascript-racer/
 /// </summary>
 public class GameMain : Game
 {

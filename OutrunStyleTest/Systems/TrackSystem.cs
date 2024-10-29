@@ -4,6 +4,9 @@ using OutrunStyleTest.Components;
 using OutrunStyleTest.Services;
 using Scellecs.Morpeh;
 using System;
+using System.Diagnostics.Metrics;
+using System.IO;
+using System.Reflection;
 
 namespace OutrunStyleTest.Systems;
 
@@ -45,8 +48,7 @@ internal class TrackSystem : ISystem
         trackComponent.DrawDistance = 200;
         trackComponent.IndividualSegmentLength = 100;
         trackComponent.Lanes = 5;
-        trackComponent.Width = 1000;
-        //trackComponent.RumbleSegments = 5;
+        trackComponent.Width = 1000;        
         trackComponent.TotalTrackSegments = 300;
         trackComponent.Length = trackComponent.IndividualSegmentLength * trackComponent.TotalTrackSegments;
 
@@ -69,18 +71,21 @@ internal class TrackSystem : ISystem
 
         // Away we go...
         var clipBottomLine = _graphicsDevice.Viewport.Height;
+
+        // Get the base track segment and its index
         var baseSegment = GetTrackSegment(cameraComponent.Position.Z, trackComponent.Length, trackComponent.IndividualSegmentLength, trackComponent.TotalTrackSegments);
         var baseIndex = baseSegment.Index;
 
+        // Draw 'n' number of track segments
         for (var n = 0; n < trackComponent.DrawDistance; n++)
         {
             var currIndex = (baseIndex + n) % trackComponent.TotalTrackSegments;
             var currSegment = _trackSegments[currIndex];
-
+            var curveX = -currSegment.Curve;
             var offsetZ = (currIndex < baseIndex) ? trackComponent.Length : 0;
 
             Project3D(ref currSegment.ZMap,
-                cameraComponent.Position.X,
+                cameraComponent.Position.X - curveX,
                 cameraComponent.Position.Y,
                 cameraComponent.Position.Z - offsetZ,
                 cameraComponent.DistanceToProjectionPlane,
@@ -126,26 +131,105 @@ internal class TrackSystem : ISystem
         for (var segmentNumber = 0; segmentNumber < numberOfTrackSegments; segmentNumber++)
         {
             // Add a segment to the track
-            track[segmentNumber] = CreateTrackSegment(segmentNumber, individualSegmentLength, numberOfRumbleSegments,
+            track[segmentNumber] = CreateTrackSegment(segmentNumber, individualSegmentLength, numberOfRumbleSegments, 0,
                 Color.Gray, Color.DarkGray,
                 Color.Green, Color.DarkGreen,
                 Color.White, Color.Red);
         }
 
         // Colour the start of the track
-        track[0].RoadColour = Color.White;
-        track[1].RoadColour = Color.White;
-        track[2].RoadColour = Color.White;
-
+        track[0].RoadColour = Color.White;        
+        track[1].RoadColour = Color.White;        
+        track[2].RoadColour = Color.White;        
+        
         // Last bit of the track
         track[^1].RoadColour = Color.Black;
         track[^2].RoadColour = Color.Black;
         track[^3].RoadColour = Color.Black;
 
+        // Do some curves
+        // https://jakesgordon.com/writing/javascript-racer-v2-curves/
+        var tightness = 5;
+        var index = 0;
+        var length = 25;
+        
+        //var leftCurve = CurveLeft(tightness, length, 0);
+        //for (var n = index; n < index + length; n++)
+        //{
+        //    track[n].Curve = leftCurve[n - index];
+        //}
+        //index += length;
+
+        var leftStraight = LeftStraight(tightness, length, 0);
+        for (var n = index; n < index + length; n++)
+        {
+            track[n].Curve = leftStraight[n - index];
+        }
+        index += length;
+
+        var rightStraight = RightStraight(tightness, length, (int)track[index - 1].Curve);
+        for (var n = index; n < index + length; n++)
+        {
+            track[n].Curve = rightStraight[n - index];
+        }
+        index += length;
+
         return track;
     }
 
-    private TrackSegment CreateTrackSegment(int index, int individualSegmentLength, int numberOfRumbleSegments,
+    private float[] CurveLeft(int tightness, int length, int offset)
+    {
+        var curves = new float[length];
+        
+        for (var n = 0; n < length; n++)
+        {
+            curves[n] = MathHelper.Lerp(offset, offset + (tightness * n), n);
+        }
+
+        return curves;
+    }
+
+    private float[] CurveRight(int tightness, int length, int offset)
+    {
+        var curves = new float[length];
+        
+        for (var n = 0; n < length; n++)
+        {
+            curves[n] = MathHelper.Lerp(offset + (tightness * n), offset, n);
+        }
+
+        return curves;
+    }
+
+    private float[] LeftStraight(int tightness, int length, int offset)
+    {
+        var curves = new float[length];
+
+        for (var n = 0; n < length; n++)
+        {            
+            curves[n] = MathHelper.Lerp(offset, offset + tightness, n * tightness * tightness);
+        }
+
+        return curves;
+    }
+
+    private float[] RightStraight(int tightness, int length, int offset)
+    {
+        var curves = new float[length];
+
+        for (var n = 0; n < length; n++)
+        {
+            curves[n] = MathHelper.Lerp(offset + tightness, offset, n * tightness * tightness);
+        }
+
+        return curves;
+    }    
+    
+    private TrackSegment CreateTrackSegment(
+        int index, 
+        int individualSegmentLength, 
+        int numberOfRumbleSegments, 
+        float curve,
         Color roadColourLight, Color roadColourDark,
         Color grassColourLight, Color grassColourDark,
         Color rumbleColourLight, Color rumbleColourDark)
@@ -153,35 +237,36 @@ internal class TrackSystem : ISystem
         return new TrackSegment
         {
             Index = index,
+            Curve = curve,
+            GrassColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? grassColourLight : grassColourDark,
+            RoadColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? roadColourLight : roadColourDark,
+            RumbleColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? rumbleColourLight : rumbleColourDark,
+            LaneColour = Color.White,
             ZMap = new ZMap
             {
                 WorldCoordinates = new Vector3(0, 0, index * individualSegmentLength),
                 ScreenCoordinates = new Vector3(0, 0, 0),
                 Scale = -1
             },
-            GrassColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? grassColourLight : grassColourDark,
-            RoadColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? roadColourLight : roadColourDark,
-            RumbleColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? rumbleColourLight : rumbleColourDark,
-            LaneColour = Color.White
         };
     }
 
     private void Project3D(ref ZMap zmap, float cameraX, float cameraY, float cameraZ, float cameraDepth, int viewPortWidth, int viewPortHeight, int trackWidth)
     {
-        // translating world coordinates to camera coordinates
+        // Translating world coordinates to camera coordinates
         var transX = zmap.WorldCoordinates.X - cameraX;
         var transY = zmap.WorldCoordinates.Y - cameraY;
         var transZ = zmap.WorldCoordinates.Z - cameraZ;
 
-        // scaling factor based on the law of similar triangles
+        // Scaling factor based on the law of similar triangles
         zmap.Scale = cameraDepth / transZ;
 
-        // projecting camera coordinates onto a normalized projection plane
+        // Projecting camera coordinates onto a normalized projection plane
         var projectedX = zmap.Scale * transX;
         var projectedY = zmap.Scale * transY;
         var projectedW = zmap.Scale * trackWidth;
 
-        // scaling projected coordinates to the screen coordinates
+        // Scaling projected coordinates to the screen coordinates
         zmap.ScreenCoordinates.X = (int)Math.Round((1 + projectedX) * (viewPortWidth / 2));
         zmap.ScreenCoordinates.Y = (int)Math.Round((1 - projectedY) * (viewPortHeight / 2));
         zmap.ScreenCoordinates.Z = (int)Math.Round(projectedW * (viewPortWidth / 2));
