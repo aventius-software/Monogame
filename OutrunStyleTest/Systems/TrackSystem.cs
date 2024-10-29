@@ -12,9 +12,11 @@ internal class TrackSystem : ISystem
 {
     public World World { get; set; }
 
+    private Entity _camera;
     private Filter _cameraFilter;
     private readonly GraphicsDevice _graphicsDevice;
     private readonly ShapeDrawingService _shapeDrawingService;
+    private Entity _track;    
     private Filter _trackFilter;
     private List<TrackSegment> _trackSegments;
 
@@ -34,17 +36,16 @@ internal class TrackSystem : ISystem
     {
         // To get the camera entity
         _cameraFilter = World.Filter.With<CameraComponent>().Build();
+        _camera = _cameraFilter.First();
 
         // To get the track entity
         _trackFilter = World.Filter.With<TrackComponent>().Build();
+        _track = _trackFilter.First();
 
-        // Initialise the track
-        var track = _trackFilter.First();
-
-        ref var trackComponent = ref track.GetComponent<TrackComponent>();
+        ref var trackComponent = ref _track.GetComponent<TrackComponent>();
         trackComponent.DrawDistance = 200;
         trackComponent.IndividualSegmentLength = 100;
-        trackComponent.Lanes = 3;
+        trackComponent.Lanes = 5;
         trackComponent.Width = 1000;
         trackComponent.RumbleSegments = 5;
         trackComponent.TotalTrackSegments = 300;
@@ -60,12 +61,12 @@ internal class TrackSystem : ISystem
     public void OnUpdate(float deltaTime)
     {
         // We'll need some information about the track
-        var track = _trackFilter.First();
-        ref var trackComponent = ref track.GetComponent<TrackComponent>();
+        //var track = _trackFilter.First();
+        ref var trackComponent = ref _track.GetComponent<TrackComponent>();
 
         // We'll need to access the camera
-        var camera = _cameraFilter.First();
-        ref var cameraComponent = ref camera.GetComponent<CameraComponent>();
+        //var camera = _cameraFilter.First();
+        ref var cameraComponent = ref _camera.GetComponent<CameraComponent>();
 
         // Away we go...
         var clipBottomLine = _graphicsDevice.Viewport.Height;
@@ -169,7 +170,8 @@ internal class TrackSystem : ISystem
             },
             GrassColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? Color.LightGreen : Color.DarkGreen, // GrassColourLight : GrassColourDark,
             RoadColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? Color.LightGray : Color.DarkGray, // RoadColourLight : RoadColourDark,
-            RumbleColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? Color.White : Color.Red // RumbleColourLight : RumbleColourDark
+            RumbleColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? Color.White : Color.Red, // RumbleColourLight : RumbleColourDark
+            LaneColour = Color.White
         };
     }
 
@@ -203,47 +205,43 @@ internal class TrackSystem : ISystem
     
     private void DrawTrackSegment(int viewPortWidth, int numberOfLanes, int x1, int y1, int w1, int x2, int y2, int w2, Color roadColour, Color grassColour, Color rumbleColour, Color laneColour)
     {        
-        // Draw grass first
-        //await GraphicsService.DrawFilledRectangleAsync(ColorTranslator.ToHtml(grassColour), 0, y2, GraphicsService.CanvasWidth, y1 - y2);
+        // Draw grass first        
         _shapeDrawingService.DrawFilledRectangle(grassColour, 0, y2, viewPortWidth, y1 - y2);
 
-        // Draw the road surface
-        //await GraphicsService.DrawQuadrilateralAsync(ColorTranslator.ToHtml(roadColour), x1 - w1, y1, x1 + w1, y1, x2 + w2, y2, x2 - w2, y2);
+        // Draw the road surface        
         _shapeDrawingService.DrawFilledQuadrilateral(roadColour, x1 - w1, y1, x1 + w1, y1, x2 + w2, y2, x2 - w2, y2);
 
         // Draw rumble strips
         var rumble_w1 = w1 / 5;
         var rumble_w2 = w2 / 5;
 
-        //await GraphicsService.DrawQuadrilateralAsync(ColorTranslator.ToHtml(rumbleColour), x1 - w1 - rumble_w1, y1, x1 - w1, y1, x2 - w2, y2, x2 - w2 - rumble_w2, y2);
-        //await GraphicsService.DrawQuadrilateralAsync(ColorTranslator.ToHtml(rumbleColour), x1 + w1 + rumble_w1, y1, x1 + w1, y1, x2 + w2, y2, x2 + w2 + rumble_w2, y2);
         _shapeDrawingService.DrawFilledQuadrilateral(rumbleColour, x1 - w1 - rumble_w1, y1, x1 - w1, y1, x2 - w2, y2, x2 - w2 - rumble_w2, y2);
         _shapeDrawingService.DrawFilledQuadrilateral(rumbleColour, x1 + w1 + rumble_w1, y1, x1 + w1, y1, x2 + w2, y2, x2 + w2 + rumble_w2, y2);
 
-        //if (true)//roadColour == RoadColourDark)
-        //{
-        //    var line_w1 = (w1 / 20) / 2;
-        //    var line_w2 = (w2 / 20) / 2;
+        if (roadColour == Color.DarkGray)
+        {
+            var line_w1 = (w1 / 20) / 2;
+            var line_w2 = (w2 / 20) / 2;
 
-        //    var lane_w1 = (w1 * 2) / numberOfLanes;
-        //    var lane_w2 = (w2 * 2) / numberOfLanes;
+            var lane_w1 = (w1 * 2) / numberOfLanes;
+            var lane_w2 = (w2 * 2) / numberOfLanes;
 
-        //    var lane_x1 = x1 - w1;
-        //    var lane_x2 = x2 - w2;
+            var lane_x1 = x1 - w1;
+            var lane_x2 = x2 - w2;
 
-        //    for (var i = 1; i < numberOfLanes; i++)
-        //    {
-        //        lane_x1 += lane_w1;
-        //        lane_x2 += lane_w2;
+            for (var i = 1; i < numberOfLanes; i++)
+            {
+                lane_x1 += lane_w1;
+                lane_x2 += lane_w2;
 
-        //        _shapeDrawingService.DrawFilledQuadrilateral(laneColour,
-        //            new Vector2(lane_x1 - line_w1, y1),
-        //            new Vector2(lane_x1 + line_w1, y1),
-        //            new Vector2(lane_x2 + line_w2, y2),
-        //            new Vector2(lane_x2 - line_w2, y2)
-        //        );
-        //    }
-        //}
+                _shapeDrawingService.DrawFilledQuadrilateral(laneColour,
+                    new Vector2(lane_x1 - line_w1, y1),
+                    new Vector2(lane_x1 + line_w1, y1),
+                    new Vector2(lane_x2 + line_w2, y2),
+                    new Vector2(lane_x2 - line_w2, y2)
+                );
+            }
+        }
     }
 
     private TrackSegment GetTrackSegment(float z, int trackLength, int individualSegmentLength, int totalTrackSegments)

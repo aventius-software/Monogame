@@ -24,9 +24,6 @@
 		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.2.1105" />
 		<PackageReference Include="Scellecs.Morpeh" Version="2023.1.0" />
 	</ItemGroup>
-	<ItemGroup>
-		<Folder Include="Entities\" />
-	</ItemGroup>
 	<Target Name="RestoreDotnetTools" BeforeTargets="Restore">
 		<Message Text="Restoring dotnet tools" Importance="High" />
 		<Exec Command="dotnet tool restore" />

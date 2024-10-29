@@ -1,4 +1,5 @@
-﻿using OutrunStyleTest.Components;
+﻿using Microsoft.Xna.Framework.Input;
+using OutrunStyleTest.Components;
 using Scellecs.Morpeh;
 using System.Numerics;
 
@@ -12,7 +13,9 @@ internal class PlayerControlSystem : ISystem
 {
     public World World { get; set; }
 
+    private Entity _player;
     private Filter _playerFilter;
+    private Entity _track;
     private Filter _trackFilter;
 
     public PlayerControlSystem(World world)
@@ -26,14 +29,16 @@ internal class PlayerControlSystem : ISystem
 
     public void OnAwake()
     {
-        // Setup filters
+        // Get player entity
         _playerFilter = World.Filter.With<PlayerComponent>().Build();
+        _player = _playerFilter.First();
+
+        // Get track entity
         _trackFilter = World.Filter.With<TrackComponent>().Build();
+        _track = _trackFilter.First();
 
         // Initialise the player
-        var player = _playerFilter.First();
-
-        ref var playerComponent = ref player.GetComponent<PlayerComponent>();
+        ref var playerComponent = ref _player.GetComponent<PlayerComponent>();
         playerComponent.Position = Vector3.Zero;
         playerComponent.MaxSpeed = 100f / (1f / 60f);
         playerComponent.Speed = 0;
@@ -41,35 +46,19 @@ internal class PlayerControlSystem : ISystem
 
     public void OnUpdate(float deltaTime)
     {
+        ref var playerComponent = ref _player.GetComponent<PlayerComponent>();
+        playerComponent.Position.Z += playerComponent.Speed * deltaTime;
+
         // Get keyboard state
-        //var keyboardState = Keyboard.GetState();
+        var keyboardState = Keyboard.GetState();
 
-        var player = _playerFilter.First();
-        ref var playerComponent = ref player.GetComponent<PlayerComponent>();
-        playerComponent.Position.Z = playerComponent.Speed * deltaTime;
+        // Acceleration and braking
+        if (keyboardState.IsKeyDown(Keys.Up) && playerComponent.Speed < playerComponent.MaxSpeed - 10) playerComponent.Speed += 10;
+        else if (keyboardState.IsKeyDown(Keys.Down) && playerComponent.Speed > 10) playerComponent.Speed -= 10;
+        
+        // Update the players position
+        ref var trackComponent = ref _track.GetComponent<TrackComponent>();
 
-        var track = _trackFilter.First();
-        ref var trackComponent = ref track.GetComponent<TrackComponent>();        
-
-        //if (playerComponent.Position.Z >= trackComponent.Length) playerComponent.Position.Z -= trackComponent.Length;
-
-        // Get the movement component
-        //ref var transformComponent = ref entity.GetComponent<TransformComponent>();
-        //ref var driftComponent = ref entity.GetComponent<DriftComponent>();
-
-        //// Remember to reset the input direction on each update!
-        //transformComponent.Direction = Vector2.Zero;
-
-        //// Acceleration and braking
-        //if (keyboardState.IsKeyDown(Keys.Up)) transformComponent.Direction.Y = 1;
-        //else if (keyboardState.IsKeyDown(Keys.Down)) transformComponent.Direction.Y = -1;
-
-        //// Turning
-        //if (keyboardState.IsKeyDown(Keys.Left)) transformComponent.Direction.X = -1;
-        //else if (keyboardState.IsKeyDown(Keys.Right)) transformComponent.Direction.X = 1;
-
-        //// Press space to skid/drift ;-)
-        //if (keyboardState.IsKeyDown(Keys.Space)) driftComponent.IsSkidding = true;
-        //else driftComponent.IsSkidding = false;        
+        if (playerComponent.Position.Z >= trackComponent.Length) playerComponent.Position.Z -= trackComponent.Length;
     }
 }
