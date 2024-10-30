@@ -19,15 +19,17 @@ internal class TrackSystem : ISystem
     private readonly GraphicsDevice _graphicsDevice;
     private readonly ShapeDrawingService _shapeDrawingService;
     private Entity _track;
+    private TrackBuilderService _trackBuilderService;
     private Filter _trackFilter;
     private TrackSegment[] _trackSegments;
 
-    public TrackSystem(World world, ShapeDrawingService shapeDrawingService, GraphicsDevice graphicsDevice)
+    public TrackSystem(World world, ShapeDrawingService shapeDrawingService, GraphicsDevice graphicsDevice, TrackBuilderService trackBuilderService)
     {
         World = world;
 
         _shapeDrawingService = shapeDrawingService;
         _graphicsDevice = graphicsDevice;
+        _trackBuilderService = trackBuilderService;
     }
 
     public void Dispose()
@@ -53,10 +55,16 @@ internal class TrackSystem : ISystem
         trackComponent.Length = trackComponent.IndividualSegmentLength * trackComponent.TotalTrackSegments;
 
         // Create (pre-populate) the track data        
-        _trackSegments = CreateTrack(
-            numberOfTrackSegments: trackComponent.TotalTrackSegments,
-            individualSegmentLength: trackComponent.IndividualSegmentLength,
-            numberOfRumbleSegments: 2);
+        //_trackSegments = CreateTrack(
+        //    numberOfTrackSegments: trackComponent.TotalTrackSegments,
+        //    individualSegmentLength: trackComponent.IndividualSegmentLength,
+        //    numberOfRumbleSegments: 2);
+
+        _trackBuilderService.AddCurve(false, 2, 25);
+        _trackBuilderService.AddStraight(50);
+        _trackBuilderService.AddCurve(true, 2, 25);
+        _trackBuilderService.AddStraight(trackComponent.TotalTrackSegments);
+        _trackSegments = _trackBuilderService.Build();
     }
 
     public void OnUpdate(float deltaTime)
@@ -80,12 +88,11 @@ internal class TrackSystem : ISystem
         for (var n = 0; n < trackComponent.DrawDistance; n++)
         {
             var currIndex = (baseIndex + n) % trackComponent.TotalTrackSegments;
-            var currSegment = _trackSegments[currIndex];
-            var curveX = -currSegment.Curve;
+            var currSegment = _trackSegments[currIndex];            
             var offsetZ = (currIndex < baseIndex) ? trackComponent.Length : 0;
 
             Project3D(ref currSegment.ZMap,
-                cameraComponent.Position.X - curveX,
+                cameraComponent.Position.X - currSegment.OffsetX,
                 cameraComponent.Position.Y,
                 cameraComponent.Position.Z - offsetZ,
                 cameraComponent.DistanceToProjectionPlane,
@@ -163,14 +170,14 @@ internal class TrackSystem : ISystem
         var leftStraight = LeftStraight(tightness, length, 0);
         for (var n = index; n < index + length; n++)
         {
-            track[n].Curve = leftStraight[n - index];
+            track[n].OffsetX = leftStraight[n - index];
         }
         index += length;
 
-        var rightStraight = RightStraight(tightness, length, (int)track[index - 1].Curve);
+        var rightStraight = RightStraight(tightness, length, (int)track[index - 1].OffsetX);
         for (var n = index; n < index + length; n++)
         {
-            track[n].Curve = rightStraight[n - index];
+            track[n].OffsetX = rightStraight[n - index];
         }
         index += length;
 
@@ -237,7 +244,7 @@ internal class TrackSystem : ISystem
         return new TrackSegment
         {
             Index = index,
-            Curve = curve,
+            OffsetX = curve,
             GrassColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? grassColourLight : grassColourDark,
             RoadColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? roadColourLight : roadColourDark,
             RumbleColour = Math.Floor(index / (float)numberOfRumbleSegments) % 2 == 1 ? rumbleColourLight : rumbleColourDark,

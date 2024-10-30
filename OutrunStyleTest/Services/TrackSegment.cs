@@ -4,7 +4,7 @@ namespace OutrunStyleTest.Services;
 
 public struct TrackSegment
 {
-    public float Curve;
+    public float OffsetX;
     public Color GrassColour;
     public int Index;
     public Color LaneColour;

@@ -47,6 +47,7 @@ public class GameMain : Game
         services.AddSingleton(Content);
 
         // Core services
+        services.AddSingleton<TrackBuilderService>();
         services.AddSingleton<ShapeDrawingService>();
         services.AddSingleton<ScreenManagementService>();
         services.AddSingleton<ScreenCollection, GameScreens>();
