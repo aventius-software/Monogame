@@ -43,27 +43,27 @@ internal class TrackSystem : ISystem
         // To get the track entity
         _trackFilter = World.Filter.With<TrackComponent>().Build();
         _track = _trackFilter.First();
-        
-        _trackBuilderService.NumberOfLanes = 6;
-        _trackBuilderService.SegmentWidth = 1000;
-        _trackBuilderService.AddStraight(25);
-
+                
         _trackBuilderService.NumberOfLanes = 4;
         _trackBuilderService.SegmentWidth = 1000;
         _trackBuilderService.AddStraight(25);
 
         _trackBuilderService.NumberOfLanes = 2;
-        _trackBuilderService.SegmentWidth = 500;
-        _trackBuilderService.AddCurve(false, 2, 25);
-                
+        _trackBuilderService.SegmentWidth = 800;
+        _trackBuilderService.AddLeftCurve(25, 2);
+
         _trackBuilderService.NumberOfLanes = 2;
-        _trackBuilderService.SegmentWidth = 500;
-        _trackBuilderService.AddCurve(true, 2, 25);
-        
-        //_trackBuilderService.NumberOfLanes = 8;
-        //_trackBuilderService.SegmentWidth = 1000;
-        //_trackBuilderService.AddStraight(100);
-        
+        _trackBuilderService.SegmentWidth = 800;
+        _trackBuilderService.AddLeftStraight(25, 2);
+
+        _trackBuilderService.NumberOfLanes = 2;
+        _trackBuilderService.SegmentWidth = 800;
+        _trackBuilderService.AddRightCurve(25, 2);
+
+        _trackBuilderService.NumberOfLanes = 2;
+        _trackBuilderService.SegmentWidth = 800;
+        _trackBuilderService.AddRightStraight(25, 2);
+
         _trackSegments = _trackBuilderService.Build();
 
         // Set track component values
