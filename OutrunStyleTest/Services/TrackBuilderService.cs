@@ -6,16 +6,18 @@ using System.Linq;
 namespace OutrunStyleTest.Services;
 
 internal class TrackBuilderService
-{
-    private Color grassColourDark = Color.DarkGreen;
-    private Color grassColourLight = Color.Green;
-    private Color laneColour = Color.White;
-    private Color roadColourDark = Color.DarkGray;
-    private Color roadColourLight = Color.Gray;
-    private Color rumbleStripColourDark = Color.Red;
-    private Color rumbleStripColourLight = Color.White;
-    private int _segmentLength = 100;
-    private int _segmentsPerStrip = 2;
+{    
+    public Color GrassColourDark = Color.DarkGreen;
+    public Color GrassColourLight = Color.Green;
+    public Color LaneColour = Color.White;
+    public int NumberOfLanes = 4;
+    public Color RoadColourDark = Color.DarkGray;
+    public Color RoadColourLight = Color.Gray;
+    public Color RumbleStripColourDark = Color.Red;
+    public Color RumbleStripColourLight = Color.White;
+    public int SegmentHeight = 150;
+    public int SegmentWidth = 1000;
+    public int SegmentsPerStrip = 2;
 
     private List<TrackSegment> _trackSegments = [];
 
@@ -38,7 +40,7 @@ internal class TrackBuilderService
             // which will give us some pattern of alternating 'true' or 'false' for each segment. This
             // way we can use it to either colour a segement (or strip of segments) a certain colour, which
             // in our case will just be alternating light/dark colours
-            var segmentStripIsAnEvenNumber = Math.Floor(segmentIndex / (float)_segmentsPerStrip) % 2 == 1;
+            var segmentStripIsAnEvenNumber = Math.Floor(segmentIndex / (float)SegmentsPerStrip) % 2 == 1;
 
             // For calculating curves
             var curve = direction * MathHelper.Lerp(lastOffset, lastOffset + (tightness * iterationIndex), iterationIndex);
@@ -48,13 +50,15 @@ internal class TrackBuilderService
             {
                 Index = segmentIndex,
                 OffsetX = curve,
-                GrassColour = segmentStripIsAnEvenNumber ? grassColourLight : grassColourDark,
-                RoadColour = segmentStripIsAnEvenNumber ? roadColourLight : roadColourDark,
-                RumbleColour = segmentStripIsAnEvenNumber ? rumbleStripColourLight : rumbleStripColourDark,
-                LaneColour = Color.White,
+                GrassColour = segmentStripIsAnEvenNumber ? GrassColourLight : GrassColourDark,
+                RoadColour = segmentStripIsAnEvenNumber ? RoadColourLight : RoadColourDark,
+                RumbleColour = segmentStripIsAnEvenNumber ? RumbleStripColourLight : RumbleStripColourDark,
+                Lanes = NumberOfLanes,
+                LaneColour = LaneColour,
+                Width = SegmentWidth,
                 ZMap = new ZMap
                 {
-                    WorldCoordinates = new Vector3(0, 0, segmentIndex * _segmentLength),
+                    WorldCoordinates = new Vector3(0, 0, segmentIndex * SegmentHeight),
                     ScreenCoordinates = new Vector3(0, 0, 0),
                     Scale = -1
                 },
@@ -75,19 +79,21 @@ internal class TrackBuilderService
             // which will give us some pattern of alternating 'true' or 'false' for each segment. This
             // way we can use it to either colour a segement (or strip of segments) a certain colour, which
             // in our case will just be alternating light/dark colours
-            var segmentStripIsAnEvenNumber = Math.Floor(segmentIndex / (float)_segmentsPerStrip) % 2 == 1;
+            var segmentStripIsAnEvenNumber = Math.Floor(segmentIndex / (float)SegmentsPerStrip) % 2 == 1;
 
             _trackSegments.Add(new TrackSegment
             {
                 Index = segmentIndex,
                 OffsetX = lastOffset,
-                GrassColour = segmentStripIsAnEvenNumber ? grassColourLight : grassColourDark,
-                RoadColour = segmentStripIsAnEvenNumber ? roadColourLight : roadColourDark,
-                RumbleColour = segmentStripIsAnEvenNumber ? rumbleStripColourLight : rumbleStripColourDark,
-                LaneColour = Color.White,
+                GrassColour = segmentStripIsAnEvenNumber ? GrassColourLight : GrassColourDark,
+                RoadColour = segmentStripIsAnEvenNumber ? RoadColourLight : RoadColourDark,
+                RumbleColour = segmentStripIsAnEvenNumber ? RumbleStripColourLight : RumbleStripColourDark,
+                Lanes = NumberOfLanes,
+                LaneColour = LaneColour,
+                Width = SegmentWidth,
                 ZMap = new ZMap
                 {
-                    WorldCoordinates = new Vector3(0, 0, segmentIndex * _segmentLength),
+                    WorldCoordinates = new Vector3(0, 0, segmentIndex * SegmentHeight),
                     ScreenCoordinates = new Vector3(0, 0, 0),
                     Scale = -1
                 },

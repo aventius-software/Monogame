@@ -3,13 +3,16 @@
 namespace OutrunStyleTest.Services;
 
 public struct TrackSegment
-{
-    public float OffsetX;
+{    
     public Color GrassColour;
+    public int Height;
     public int Index;
+    public int Lanes;
     public Color LaneColour;
+    public float OffsetX; 
     public Color RoadColour;
     public Color RumbleColour;
     public int Scale;
+    public int Width;
     public ZMap ZMap;
 }

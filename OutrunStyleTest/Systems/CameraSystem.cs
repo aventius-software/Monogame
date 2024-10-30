@@ -53,7 +53,7 @@ internal class CameraSystem : ISystem
         ref var trackComponent = ref _track.GetComponent<TrackComponent>();
 
         // Adjust the camera position so it follows the player position
-        cameraComponent.Position.X = playerComponent.Position.X * trackComponent.Width;
+        cameraComponent.Position.X = playerComponent.Position.X;// * trackComponent.Width;
         cameraComponent.Position.Z = playerComponent.Position.Z - cameraComponent.DistanceToPlayer;
 
         // Don't let camera Z to go negative
