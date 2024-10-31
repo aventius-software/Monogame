@@ -72,12 +72,12 @@ internal class TrackBuilderService
 
     public void AddUphillStraight(int numberOfTrackSegments, int steepness)
     {
-        AddSection(numberOfTrackSegments, TrackHillType.StraightUphill, steepness);
+        AddSection(numberOfTrackSegments, TrackHillType.EaseInAndOutUphill, steepness);
     }
 
     public void AddDownhillStraight(int numberOfTrackSegments, int steepness)
     {
-        AddSection(numberOfTrackSegments, TrackHillType.StraightDownhill, steepness);
+        AddSection(numberOfTrackSegments, TrackHillType.EaseInAndOutDownhill, steepness);
     }
 
     public TrackSegment[] Build() => [.. _trackSegments];
@@ -177,18 +177,7 @@ internal class TrackBuilderService
                     break;
 
                 case TrackTurnType.EaseInAndOutLeftTurn:
-                    {
-                        /*
-                        var start = 0f;
-                        var end = 1000f * tightness;                        
-                        var step = (end - start) / numberOfTrackSegmentsToAdd;
-                        var inc = 1 / step;
-                        var position = inc * iterationIndex;
-
-                        dx = -MathHelper.SmoothStep(start, end, position);
-                        //dx = -SmoothStep(start, end, position);
-                        */
-
+                    {                        
                         var start = 0f;
                         var end = tightness * 1000f;
                         var incrementPerIteration = (end - start) / numberOfTrackSegmentsToAdd;                        
@@ -257,13 +246,23 @@ internal class TrackBuilderService
 
                 case TrackHillType.EaseInAndOutUphill:
                     {
-                        dy = -MathHelper.SmoothStep(0, steepness * 2, 1);
+                        var start = 0f;
+                        var end = 1f;
+                        var incrementPerIteration = (end - start) / numberOfTrackSegmentsToAdd;
+                        var offset = iterationIndex * (1f * incrementPerIteration);
+
+                        dy = steepness * 1000 * MathHelper.SmoothStep(start, end, offset);
                     }
                     break;
 
                 case TrackHillType.EaseInAndOutDownhill:
                     {
-                        dy = MathHelper.SmoothStep(0, steepness * 2, 1);
+                        var start = 0f;
+                        var end = 1f;
+                        var incrementPerIteration = (end - start) / numberOfTrackSegmentsToAdd;
+                        var offset = iterationIndex * (1f * incrementPerIteration);
+
+                        dy = -steepness * 1000 * MathHelper.SmoothStep(start, end, offset);
                     }
                     break;
 
