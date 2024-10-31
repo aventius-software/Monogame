@@ -48,9 +48,12 @@ internal class TrackBuilderService
 
     public void AddLeftCurve(int numberOfTrackSegments, int tightness)
     {
-        //AddSection(numberOfTrackSegments / 2, TrackTurnType.EaseInLeftTurn, tightness);
-        //AddSection(numberOfTrackSegments / 2, TrackTurnType.EaseOutLeftTurn, tightness);
         AddSection(numberOfTrackSegments, TrackTurnType.EaseInAndOutLeftTurn, tightness);
+    }
+
+    public void AddLeftDownhillCurve(int numberOfTrackSegments, int tightness, int steepness)
+    {
+        AddSection(numberOfTrackSegments, TrackTurnType.EaseInAndOutLeftTurn, tightness, TrackHillType.EaseInAndOutDownhill, steepness);
     }
 
     public void AddLeftStraight(int numberOfTrackSegments, int tightness)
@@ -60,14 +63,17 @@ internal class TrackBuilderService
 
     public void AddRightCurve(int numberOfTrackSegments, int tightness)
     {
-        //AddSection(numberOfTrackSegments / 2, TrackTurnType.EaseInRightTurn, tightness);
-        //AddSection(numberOfTrackSegments / 2, TrackTurnType.EaseOutRightTurn, tightness);
         AddSection(numberOfTrackSegments, TrackTurnType.EaseInAndOutRightTurn, tightness);
     }
 
     public void AddRightStraight(int numberOfTrackSegments, int tightness)
     {
         AddSection(numberOfTrackSegments, TrackTurnType.RightStraight, tightness);
+    }
+
+    public void AddRightUphillCurve(int numberOfTrackSegments, int tightness, int steepness)
+    {
+        AddSection(numberOfTrackSegments, TrackTurnType.EaseInAndOutRightTurn, tightness, TrackHillType.EaseInAndOutUphill, steepness);
     }
 
     public void AddUphillStraight(int numberOfTrackSegments, int steepness)
@@ -177,24 +183,24 @@ internal class TrackBuilderService
                     break;
 
                 case TrackTurnType.EaseInAndOutLeftTurn:
-                    {                        
+                    {
                         var start = 0f;
-                        var end = tightness * 1000f;
-                        var incrementPerIteration = (end - start) / numberOfTrackSegmentsToAdd;                        
-                        var offset = iterationIndex * (1 / incrementPerIteration);
+                        var end = 1f;
+                        var incrementPerIteration = (end - start) / numberOfTrackSegmentsToAdd;
+                        var offset = iterationIndex * (1f * incrementPerIteration);
 
-                        dx = -MathHelper.SmoothStep(start, end, offset);
+                        dx = -tightness * 1000 * MathHelper.SmoothStep(start, end, offset);
                     }
                     break;
 
                 case TrackTurnType.EaseInAndOutRightTurn:
                     {
                         var start = 0f;
-                        var end = tightness * 1000f;
+                        var end = 1f;
                         var incrementPerIteration = (end - start) / numberOfTrackSegmentsToAdd;
-                        var offset = iterationIndex * (1 / incrementPerIteration);
+                        var offset = iterationIndex * (1f * incrementPerIteration);
 
-                        dx = MathHelper.SmoothStep(start, end, offset);
+                        dx = tightness * 1000 * MathHelper.SmoothStep(start, end, offset);
                     }
                     break;
 
@@ -207,7 +213,7 @@ internal class TrackBuilderService
             float dy = 0;
 
             switch (hillType)
-            {                
+            {
                 case TrackHillType.EaseInUphill:
                     {
                         dy = MathHelper.Lerp(0, steepness * iterationIndex, iterationIndex);
@@ -266,7 +272,7 @@ internal class TrackBuilderService
                     }
                     break;
 
-                default:                    
+                default:
                     dy = 0;
                     break;
             }
@@ -292,20 +298,5 @@ internal class TrackBuilderService
                 },
             });
         }
-    }
-
-    private float xInverseLerp(float a, float b, float v)
-    {
-        return (v - a) / (b - a);
-    }
-
-    private float xLerp(float a, float b, float t)
-    {
-        return (1f - t) * (a + b) * t;
-    }
-
-    private float SmoothStep(float a, float b, float percent)
-    {
-        return (float)(a + (b - a) * ((-Math.Cos(percent * Math.PI) / 2) + 0.5));
     }
 }

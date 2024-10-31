@@ -51,27 +51,27 @@ internal class TrackSystem : ISystem
         // position instead of being a smooth connection back to the start ;-)      
         _trackBuilderService.NumberOfLanes = 4;
         _trackBuilderService.SegmentWidth = 1000;
-        _trackBuilderService.AddDownhillStraight(50, 2);
+        _trackBuilderService.AddDownhillStraight(25, 2);
 
         _trackBuilderService.NumberOfLanes = 4;
         _trackBuilderService.SegmentWidth = 1000;
-        _trackBuilderService.AddUphillStraight(50, 2);
+        _trackBuilderService.AddUphillStraight(25, 2);
         
         _trackBuilderService.NumberOfLanes = 4;
         _trackBuilderService.SegmentWidth = 1000;
-        _trackBuilderService.AddLeftCurve(50, 3);
-
-        //_trackBuilderService.NumberOfLanes = 4;
-        //_trackBuilderService.SegmentWidth = 1000;
-        //_trackBuilderService.AddLeftStraight(50, 2);
+        _trackBuilderService.AddLeftCurve(25, 2);
+        
+        _trackBuilderService.NumberOfLanes = 4;
+        _trackBuilderService.SegmentWidth = 1000;
+        _trackBuilderService.AddRightCurve(25, 2);
 
         _trackBuilderService.NumberOfLanes = 4;
         _trackBuilderService.SegmentWidth = 1000;
-        _trackBuilderService.AddRightCurve(50, 3);
-        
-        //_trackBuilderService.NumberOfLanes = 4;
-        //_trackBuilderService.SegmentWidth = 1000;
-        //_trackBuilderService.AddRightStraight(50, 2);
+        _trackBuilderService.AddLeftDownhillCurve(25, 2, 2);
+
+        _trackBuilderService.NumberOfLanes = 4;
+        _trackBuilderService.SegmentWidth = 1000;
+        _trackBuilderService.AddRightUphillCurve(25, 2, 2);
 
         _trackSegments = _trackBuilderService.Build();
 
