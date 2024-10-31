@@ -10,11 +10,11 @@ using Scellecs.Morpeh;
 namespace OutrunStyleTest;
 
 /// <summary>
-/// A simple demo of an outrun style road system, code mostly translated from https://github.com/ssusnic/Pseudo-3d-Racer use
-/// the arrow keys up/down to accelerate and brake, and left/right arrow keys to move the camera left or right. Its a little 
+/// A simple demo of an outrun style road system, code based a lot on https://github.com/ssusnic/Pseudo-3d-Racer use the
+/// arrow keys up/down to accelerate and brake, and left/right arrow keys to move the camera left or right. Its a little 
 /// rough around the edges and some improvements could do with being made (to my code, not the original).
 /// 
-/// Also, some useful links are:-
+/// Some other useful links are:-
 /// 
 /// https://www.youtube.com/watch?v=N60lBZDEwJ8&list=PLB_ibvUSN7mzUffhiay5g5GUHyJRO4DYr&index=8
 /// http://www.extentofthejam.com/pseudo/

@@ -9,7 +9,8 @@ internal enum TrackSectionType
 {
     LeftCurve, RightCurve,
     LeftStraight, RightStraight,
-    Straight
+    Straight,
+    UphillStraight, DownhillStraight
 }
 
 internal class TrackBuilderService
@@ -53,15 +54,26 @@ internal class TrackBuilderService
         AddSection(TrackSectionType.RightStraight, numberOfTrackSegments, tightness);
     }
 
+    public void AddUphillStraight(int numberOfTrackSegments, int steepness)
+    {
+        AddSection(TrackSectionType.UphillStraight, numberOfTrackSegments, 0, steepness);
+    }
+
+    public void AddDownhillStraight(int numberOfTrackSegments, int steepness)
+    {
+        AddSection(TrackSectionType.DownhillStraight, numberOfTrackSegments, 0, steepness);
+    }
+
     public TrackSegment[] Build() => [.. _trackSegments];
 
-    private void AddSection(TrackSectionType trackSectionType, int numberOfTrackSegments, int tightness = 0)
+    private void AddSection(TrackSectionType trackSectionType, int numberOfTrackSegments, int tightness = 0, int steepness = 0)
     {
         // Get the current segment count before we start...
         var startingSegmentCount = _trackSegments.Count;
 
         // Get the last x offset of the previous segment (or 0 if this is the first segment)
         var previousSegmentOffsetX = startingSegmentCount == 0 ? 0 : _trackSegments.Last().OffsetX;
+        var previousSegmentOffsetY = startingSegmentCount == 0 ? 0 : _trackSegments.Last().OffsetY;
 
         // Add segments according to the length (number of segements specified)
         for (var segmentIndex = startingSegmentCount; segmentIndex < startingSegmentCount + numberOfTrackSegments; segmentIndex++)
@@ -76,8 +88,8 @@ internal class TrackBuilderService
             var segmentStripIndex = (int)Math.Floor(segmentIndex / (float)SegmentsPerStrip);
             var segmentStripIsAnEvenNumber = segmentStripIndex % 2 == 1;
 
-            // Workout direction - need to add a smoother transition section type!
-            float dx;
+            // Workout curves/hills - TODO: need to add smoother transitions between sections! 
+            float dx = 0, dy = 0;
 
             switch (trackSectionType)
             {
@@ -105,8 +117,21 @@ internal class TrackBuilderService
                     }
                     break;
 
+                case TrackSectionType.UphillStraight:
+                    {
+                        dy = MathHelper.Lerp(0, steepness * iterationIndex, iterationIndex);
+                    }
+                    break;
+
+                case TrackSectionType.DownhillStraight:
+                    {
+                        dy = -MathHelper.Lerp(0, steepness * iterationIndex, iterationIndex);
+                    }
+                    break;
+
                 default:
                     dx = 0;
+                    dy = 0;
                     break;
             }
 
@@ -115,6 +140,7 @@ internal class TrackBuilderService
             {
                 Index = segmentIndex,
                 OffsetX = previousSegmentOffsetX + dx,
+                OffsetY = previousSegmentOffsetY + dy,
                 SegmentStripIndex = segmentStripIndex,
                 GrassColour = segmentStripIsAnEvenNumber ? GrassColourLight : GrassColourDark,
                 RoadColour = segmentStripIsAnEvenNumber ? RoadColourLight : RoadColourDark,

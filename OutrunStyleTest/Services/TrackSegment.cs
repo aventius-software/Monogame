@@ -9,7 +9,8 @@ public struct TrackSegment
     public int Index;
     public int Lanes;
     public Color LaneColour;
-    public float OffsetX;    
+    public float OffsetX;
+    public float OffsetY;
     public Color RoadColour;
     public Color RumbleColour;
     public int Scale;

@@ -51,8 +51,16 @@ internal class TrackSystem : ISystem
         // position instead of being a smooth connection back to the start ;-)      
         _trackBuilderService.NumberOfLanes = 4;
         _trackBuilderService.SegmentWidth = 1000;
-        _trackBuilderService.AddStraight(25);
+        _trackBuilderService.AddDownhillStraight(25, 5);
 
+        _trackBuilderService.NumberOfLanes = 4;
+        _trackBuilderService.SegmentWidth = 1000;
+        _trackBuilderService.AddUphillStraight(25, 5);
+
+        _trackBuilderService.NumberOfLanes = 4;
+        _trackBuilderService.SegmentWidth = 1000;
+        _trackBuilderService.AddStraight(25);
+        
         _trackBuilderService.NumberOfLanes = 4;
         _trackBuilderService.SegmentWidth = 1000;
         _trackBuilderService.AddLeftCurve(25, 2);
@@ -101,7 +109,7 @@ internal class TrackSystem : ISystem
             // Transform coordinates
             Project3D(ref currentSegment.ZMap,
                 cameraComponent.Position.X - currentSegment.OffsetX,
-                cameraComponent.Position.Y,
+                cameraComponent.Position.Y - currentSegment.OffsetY,
                 cameraComponent.Position.Z - offsetZ,
                 cameraComponent.DistanceToProjectionPlane,
                 _graphicsDevice.Viewport.Width,
