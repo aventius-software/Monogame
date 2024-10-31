@@ -6,8 +6,9 @@ using System.Numerics;
 namespace OutrunStyleTest.Systems;
 
 /// <summary>
-/// This system reads input to allow control of the player. Basically the input device sets
-/// stuff in the transform component which is used to handle movement/position ;-)
+/// This system reads input to allow control of the player, there's nothing fancy
+/// going here. Some improvements would/could be steering resistance or friction
+/// on different surfaces etc...
 /// </summary>
 internal class PlayerControlSystem : ISystem
 {
@@ -41,8 +42,9 @@ internal class PlayerControlSystem : ISystem
         ref var playerComponent = ref _player.GetComponent<PlayerComponent>();
         playerComponent.AccelerationRate = 10;
         playerComponent.Position = Vector3.Zero;
-        playerComponent.MaxSpeed = 100f / (1f / 60f);
+        playerComponent.MaxSpeed = 10000f;
         playerComponent.Speed = 0;
+        playerComponent.SteeringRate = 30f;
     }
 
     public void OnUpdate(float deltaTime)
@@ -62,6 +64,16 @@ internal class PlayerControlSystem : ISystem
         else if (keyboardState.IsKeyDown(Keys.Down) && playerComponent.Speed > playerComponent.AccelerationRate)
         {
             playerComponent.Speed -= playerComponent.AccelerationRate;
+        }
+
+        // Steering
+        if (keyboardState.IsKeyDown(Keys.Left))
+        {
+            playerComponent.Position.X -= playerComponent.SteeringRate;
+        }
+        else if (keyboardState.IsKeyDown(Keys.Right))
+        {
+            playerComponent.Position.X += playerComponent.SteeringRate;
         }
 
         // Update the players position
