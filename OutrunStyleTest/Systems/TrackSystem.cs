@@ -43,25 +43,30 @@ internal class TrackSystem : ISystem
         // To get the track entity
         _trackFilter = World.Filter.With<TrackComponent>().Build();
         _track = _trackFilter.First();
-                
+
+        // Build a track... note that the track currently will loop when
+        // you get to the end. So you'll need to make sure that each
+        // section eventually 'adds' up to the 'x' position of the start
+        // otherwise your 'end' will abruptly 'snap' back to the start
+        // position instead of being a smooth connection back to the start ;-)      
         _trackBuilderService.NumberOfLanes = 4;
         _trackBuilderService.SegmentWidth = 1000;
         _trackBuilderService.AddStraight(25);
 
-        _trackBuilderService.NumberOfLanes = 2;
-        _trackBuilderService.SegmentWidth = 800;
+        _trackBuilderService.NumberOfLanes = 4;
+        _trackBuilderService.SegmentWidth = 1000;
         _trackBuilderService.AddLeftCurve(25, 2);
 
-        _trackBuilderService.NumberOfLanes = 2;
-        _trackBuilderService.SegmentWidth = 800;
+        _trackBuilderService.NumberOfLanes = 4;
+        _trackBuilderService.SegmentWidth = 1000;
         _trackBuilderService.AddLeftStraight(25, 2);
 
-        _trackBuilderService.NumberOfLanes = 2;
-        _trackBuilderService.SegmentWidth = 800;
+        _trackBuilderService.NumberOfLanes = 4;
+        _trackBuilderService.SegmentWidth = 1000;
         _trackBuilderService.AddRightCurve(25, 2);
 
-        _trackBuilderService.NumberOfLanes = 2;
-        _trackBuilderService.SegmentWidth = 800;
+        _trackBuilderService.NumberOfLanes = 4;
+        _trackBuilderService.SegmentWidth = 1000;
         _trackBuilderService.AddRightStraight(25, 2);
 
         _trackSegments = _trackBuilderService.Build();
@@ -69,7 +74,7 @@ internal class TrackSystem : ISystem
         // Set track component values
         ref var trackComponent = ref _track.GetComponent<TrackComponent>();
         trackComponent.DrawDistance = Math.Min(200, _trackSegments.Length);
-        trackComponent.SegmentHeight = _trackBuilderService.SegmentHeight;        
+        trackComponent.SegmentHeight = _trackBuilderService.SegmentHeight;
         trackComponent.Length = _trackBuilderService.SegmentHeight * _trackSegments.Length;
     }
 
@@ -116,7 +121,7 @@ internal class TrackSystem : ISystem
                 var p2 = currSegment.ZMap.ScreenCoordinates;
 
                 DrawTrackSegment(
-                    _graphicsDevice.Viewport.Width,                    
+                    _graphicsDevice.Viewport.Width,
                     currSegment.Lanes,
                     (int)p1.X, (int)p1.Y, (int)p1.Z,
                     (int)p2.X, (int)p2.Y, (int)p2.Z,
@@ -131,7 +136,7 @@ internal class TrackSystem : ISystem
         }
     }
 
-    private void Project3D(ref ZMap zmap, float cameraX, float cameraY, float cameraZ, float cameraDepth, int viewPortWidth, int viewPortHeight, int trackWidth)
+    private static void Project3D(ref ZMap zmap, float cameraX, float cameraY, float cameraZ, float cameraDepth, int viewPortWidth, int viewPortHeight, int trackWidth)
     {
         // Translating world coordinates to camera coordinates
         var transX = zmap.WorldCoordinates.X - cameraX;
@@ -167,6 +172,9 @@ internal class TrackSystem : ISystem
         _shapeDrawingService.DrawFilledQuadrilateral(rumbleColour, x1 - w1 - rumble_w1, y1, x1 - w1, y1, x2 - w2, y2, x2 - w2 - rumble_w2, y2);
         _shapeDrawingService.DrawFilledQuadrilateral(rumbleColour, x1 + w1 + rumble_w1, y1, x1 + w1, y1, x2 + w2, y2, x2 + w2 + rumble_w2, y2);
 
+        // We only need (or want) to draw lane markers on every other strip, so basically we
+        // check if the current segments road colour is say 'dark' (instead of light) and then
+        // we draw some lane markers
         if (roadColour == Color.DarkGray)
         {
             var line_w1 = (w1 / 20) / 2;

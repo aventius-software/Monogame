@@ -77,38 +77,72 @@ internal class TrackBuilderService
             var segmentStripIsAnEvenNumber = Math.Floor(segmentIndex / (float)SegmentsPerStrip) % 2 == 1;
 
             // Workout direction
-            float offsetX;
-            float lastOffsetX = startingSegmentCount == 0 ? 0 : _trackSegments.Last().OffsetX;
+            //float offsetX;
+            //float lastOffset = startingSegmentCount == 0 ? 0 : _trackSegments.Last().OffsetX;
 
             // For calculating curves
+            //switch (trackSectionType)
+            //{
+            //    case TrackSectionType.LeftCurve:
+            //        {
+            //            offsetX = -MathHelper.Lerp(lastOffset, lastOffset + (tightness * iterationIndex), iterationIndex);
+            //        }
+            //        break;
+
+            //    case TrackSectionType.RightCurve:
+            //        {
+            //            offsetX = MathHelper.Lerp(lastOffset, lastOffset + (tightness * iterationIndex), iterationIndex);
+            //        }
+            //        break;
+
+            //    case TrackSectionType.LeftStraight:
+            //        {
+            //            offsetX = -MathHelper.Lerp(lastOffset, lastOffset + tightness, (tightness * iterationIndex) * (float)Math.Pow(tightness, 4));
+            //        }
+            //        break;
+
+            //    case TrackSectionType.RightStraight:
+            //        {
+            //            offsetX = MathHelper.Lerp(lastOffset, lastOffset + tightness, (tightness * iterationIndex) * (float)Math.Pow(tightness, 4));
+            //        }
+            //        break;
+
+            //    default:
+            //        offsetX = lastOffset;
+            //        break;
+            //}
+
+            // Workout direction
+            float offsetX;
+
             switch (trackSectionType)
             {
                 case TrackSectionType.LeftCurve:
                     {
-                        offsetX = -MathHelper.Lerp(lastOffset, lastOffset + (tightness * iterationIndex), iterationIndex);
+                        offsetX = -MathHelper.Lerp(0, tightness * iterationIndex, iterationIndex);
                     }
                     break;
 
                 case TrackSectionType.RightCurve:
                     {
-                        offsetX = MathHelper.Lerp(lastOffset, lastOffset + (tightness * iterationIndex), iterationIndex);
+                        offsetX = MathHelper.Lerp(0, (tightness * iterationIndex), iterationIndex);
                     }
                     break;
 
                 case TrackSectionType.LeftStraight:
                     {
-                        offsetX = -MathHelper.Lerp(lastOffset, lastOffset + tightness, (tightness * iterationIndex) * (float)Math.Pow(tightness, 4));
+                        offsetX = -MathHelper.Lerp(0, tightness, (tightness * iterationIndex) * (float)Math.Pow(tightness, 4));
                     }
                     break;
 
                 case TrackSectionType.RightStraight:
                     {
-                        offsetX = MathHelper.Lerp(lastOffset, lastOffset + tightness, (tightness * iterationIndex) * (float)Math.Pow(tightness, 4));
+                        offsetX = MathHelper.Lerp(0, tightness, (tightness * iterationIndex) * (float)Math.Pow(tightness, 4));
                     }
                     break;
 
                 default:
-                    offsetX = lastOffsetX;
+                    offsetX = 0;
                     break;
             }
 
@@ -116,7 +150,7 @@ internal class TrackBuilderService
             _trackSegments.Add(new TrackSegment
             {
                 Index = segmentIndex,
-                OffsetX = offsetX,
+                OffsetX = lastOffset + offsetX,
                 GrassColour = segmentStripIsAnEvenNumber ? GrassColourLight : GrassColourDark,
                 RoadColour = segmentStripIsAnEvenNumber ? RoadColourLight : RoadColourDark,
                 RumbleColour = segmentStripIsAnEvenNumber ? RumbleStripColourLight : RumbleStripColourDark,
