@@ -56,14 +56,10 @@ internal class TrackSystem : ISystem
         _trackBuilderService.NumberOfLanes = 4;
         _trackBuilderService.SegmentWidth = 1000;
         _trackBuilderService.AddUphillStraight(25, 5);
-
-        _trackBuilderService.NumberOfLanes = 4;
-        _trackBuilderService.SegmentWidth = 1000;
-        _trackBuilderService.AddStraight(25);
         
         _trackBuilderService.NumberOfLanes = 4;
         _trackBuilderService.SegmentWidth = 1000;
-        _trackBuilderService.AddLeftCurve(25, 2);
+        _trackBuilderService.AddLeftCurve(50, 2);
 
         _trackBuilderService.NumberOfLanes = 4;
         _trackBuilderService.SegmentWidth = 1000;
@@ -71,8 +67,8 @@ internal class TrackSystem : ISystem
 
         _trackBuilderService.NumberOfLanes = 4;
         _trackBuilderService.SegmentWidth = 1000;
-        _trackBuilderService.AddRightCurve(25, 2);
-
+        _trackBuilderService.AddRightCurve(50, 2);
+        
         _trackBuilderService.NumberOfLanes = 4;
         _trackBuilderService.SegmentWidth = 1000;
         _trackBuilderService.AddRightStraight(25, 2);
