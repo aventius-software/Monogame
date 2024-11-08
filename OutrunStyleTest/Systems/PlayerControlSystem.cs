@@ -1,7 +1,7 @@
-﻿using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using OutrunStyleTest.Components;
 using Scellecs.Morpeh;
-using System.Numerics;
 
 namespace OutrunStyleTest.Systems;
 
@@ -14,10 +14,8 @@ internal class PlayerControlSystem : ISystem
 {
     public World World { get; set; }
 
-    private Entity _player;
-    private Filter _playerFilter;
-    private Entity _track;
-    private Filter _trackFilter;
+    private Entity _playerEntity;
+    private Entity _trackEntity;
 
     public PlayerControlSystem(World world)
     {
@@ -31,16 +29,16 @@ internal class PlayerControlSystem : ISystem
     public void OnAwake()
     {
         // Get player entity
-        _playerFilter = World.Filter.With<PlayerComponent>().Build();
-        _player = _playerFilter.First();
+        var playerFilter = World.Filter.With<PlayerComponent>().Build();
+        _playerEntity = playerFilter.First();
 
         // Get track entity
-        _trackFilter = World.Filter.With<TrackComponent>().Build();
-        _track = _trackFilter.First();
+        var trackFilter = World.Filter.With<TrackComponent>().Build();
+        _trackEntity = trackFilter.First();
 
         // Initialise the player
-        ref var playerComponent = ref _player.GetComponent<PlayerComponent>();
-        playerComponent.AccelerationRate = 10;
+        ref var playerComponent = ref _playerEntity.GetComponent<PlayerComponent>();
+        playerComponent.AccelerationRate = 25;
         playerComponent.Position = Vector3.Zero;
         playerComponent.MaxSpeed = 10000f;
         playerComponent.Speed = 0;
@@ -49,9 +47,8 @@ internal class PlayerControlSystem : ISystem
 
     public void OnUpdate(float deltaTime)
     {
-        // Move the player forward (Z position) according to the players speed
-        ref var playerComponent = ref _player.GetComponent<PlayerComponent>();
-        playerComponent.Position.Z += playerComponent.Speed * deltaTime;
+        // We'll need to reference the player component
+        ref var playerComponent = ref _playerEntity.GetComponent<PlayerComponent>();
 
         // Get keyboard state
         var keyboardState = Keyboard.GetState();
@@ -59,10 +56,12 @@ internal class PlayerControlSystem : ISystem
         // Acceleration and braking
         if (keyboardState.IsKeyDown(Keys.Up) && playerComponent.Speed < playerComponent.MaxSpeed - playerComponent.AccelerationRate)
         {
+            // Increase the players speed
             playerComponent.Speed += playerComponent.AccelerationRate;
         }
         else if (keyboardState.IsKeyDown(Keys.Down) && playerComponent.Speed > playerComponent.AccelerationRate)
         {
+            // Slow the players speed
             playerComponent.Speed -= playerComponent.AccelerationRate;
         }
 
@@ -76,10 +75,30 @@ internal class PlayerControlSystem : ISystem
             playerComponent.Position.X += playerComponent.SteeringRate;
         }
 
-        // Update the players position
-        ref var trackComponent = ref _track.GetComponent<TrackComponent>();
+        // Update the players position in the Z direction according to the current speed       
+        playerComponent.Position.Z += playerComponent.Speed * deltaTime;
 
-        // Back to start if finished
-        if (playerComponent.Position.Z >= trackComponent.Length) playerComponent.Position.Z -= trackComponent.Length;
+        // Back to start of the track if we've reached the end
+        ref var trackComponent = ref _trackEntity.GetComponent<TrackComponent>();
+        if (playerComponent.Position.Z >= trackComponent.Track.TotalLength) playerComponent.Position.Z -= trackComponent.Track.TotalLength;
+
+        // This is a little fiddly... but basically to put the player 'on' the track instead of just floating in the
+        // air we need to put the player at the same Y position of the current segment (the camera hovers a little above
+        // the player so that's no problem). The problem here is that each segment has a different Y coordinate to (unless
+        // its a flat section of track) the following segments Y coordinate. This means the player (or camera) will appear
+        // to 'snap' between the different Y coordinatea as the player travels in the Z direction through a segment until
+        // they hit the next segment. What we need is to smoothly move from the Y coordinate of the current segment to the
+        // next segments Y coordinate...
+        var currentSegment = trackComponent.Track.GetSegmentAtPosition(playerComponent.Position.Z);
+        var nextSegment = trackComponent.Track.GetSegmentAtPosition(playerComponent.Position.Z + trackComponent.Track.SegmentHeight);
+
+        // Figure out how far the player is (in the Z axis) through the current segment before they reach the next segment
+        var percent = (playerComponent.Position.Z % trackComponent.Track.SegmentHeight) / trackComponent.Track.SegmentHeight;
+
+        // Now we can interpolate between the current segments Y coordinate to the next segments Y coordinate
+        playerComponent.Position.Y = MathHelper.Lerp(
+            currentSegment.ZMap.WorldCoordinates.Y,
+            nextSegment.ZMap.WorldCoordinates.Y,
+            percent);
     }
 }

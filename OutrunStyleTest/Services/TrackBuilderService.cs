@@ -35,7 +35,7 @@ internal class TrackBuilderService
     public Color RoadColourLight = Color.Gray;
     public Color RumbleStripColourDark = Color.Red;
     public Color RumbleStripColourLight = Color.White;
-    public int SegmentHeight = 150;
+    public int SegmentHeight = 200;
     public int SegmentWidth = 1000;
     public int SegmentsPerStrip = 2;
 
@@ -86,7 +86,18 @@ internal class TrackBuilderService
         AddSection(numberOfTrackSegments, TrackHillType.EaseInAndOutDownhill, steepness);
     }
 
-    public TrackSegment[] Build() => [.. _trackSegments];
+    /// <summary>
+    /// Build the current track
+    /// </summary>
+    /// <returns></returns>
+    public Track Build()
+    {
+        return new Track
+        {
+            SegmentHeight = SegmentHeight,            
+            Segments = [.. _trackSegments]
+        };
+    }
 
     /// <summary>
     /// Add just a turn section, no hills
@@ -125,8 +136,8 @@ internal class TrackBuilderService
         var lastSegmentIndex = startingSegmentCount + numberOfTrackSegmentsToAdd;
 
         // Get the last x offset of the previous segment (or 0 if this is the first segment)
-        var previousSegmentOffsetX = startingSegmentCount == 0 ? 0 : _trackSegments.Last().OffsetX;
-        var previousSegmentOffsetY = startingSegmentCount == 0 ? 0 : _trackSegments.Last().OffsetY;
+        var previousSegmentWorldX = startingSegmentCount == 0 ? 0 : _trackSegments.Last().ZMap.WorldCoordinates.X;
+        var previousSegmentWorldY = startingSegmentCount == 0 ? 0 : _trackSegments.Last().ZMap.WorldCoordinates.Y;
 
         // Add segments according to the length (number of segements specified)
         for (var segmentIndex = startingSegmentCount; segmentIndex < lastSegmentIndex; segmentIndex++)
@@ -142,7 +153,7 @@ internal class TrackBuilderService
             var segmentStripIsAnEvenNumber = segmentStripIndex % 2 == 1;
 
             // Workout turns/curves            
-            float dx = 0;
+            float dx;
 
             switch (turnType)
             {
@@ -210,7 +221,7 @@ internal class TrackBuilderService
             }
 
             // Now hills
-            float dy = 0;
+            float dy;
 
             switch (hillType)
             {
@@ -280,9 +291,7 @@ internal class TrackBuilderService
             // Add a segment to the track
             _trackSegments.Add(new TrackSegment
             {
-                Index = segmentIndex,
-                OffsetX = previousSegmentOffsetX + dx,
-                OffsetY = previousSegmentOffsetY + dy,
+                Index = segmentIndex,                
                 SegmentStripIndex = segmentStripIndex,
                 GrassColour = segmentStripIsAnEvenNumber ? GrassColourLight : GrassColourDark,
                 RoadColour = segmentStripIsAnEvenNumber ? RoadColourLight : RoadColourDark,
@@ -292,7 +301,7 @@ internal class TrackBuilderService
                 Width = SegmentWidth,
                 ZMap = new ZMap
                 {
-                    WorldCoordinates = new Vector3(0, 0, segmentIndex * SegmentHeight),
+                    WorldCoordinates = new Vector3(previousSegmentWorldX + dx, previousSegmentWorldY + dy, segmentIndex * SegmentHeight),
                     ScreenCoordinates = new Vector3(0, 0, 0),
                     Scale = -1
                 },
