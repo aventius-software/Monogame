@@ -10,9 +10,12 @@ using Scellecs.Morpeh;
 namespace OutrunStyleTest;
 
 /// <summary>
-/// A simple demo of an outrun style road system, code based a lot on https://github.com/ssusnic/Pseudo-3d-Racer use the
-/// arrow keys up/down to accelerate and brake, and left/right arrow keys to move the camera left or right. Its a little 
-/// rough around the edges and some improvements could do with being made (to my code, not the original).
+/// A simple demo of an outrun style road system, code based a lot on https://github.com/ssusnic/Pseudo-3d-Racer and a
+/// few other examples I found knocking around on the web and github (see list below). So most of the credit goes to 
+/// those projects, this is just a bit of refactoring and some small changes/tweaks for doing it using Monogame.
+/// 
+/// Use the arrow keys up/down to accelerate and brake, and left/right arrow keys to move the camera left or right. Its 
+/// a little rough around the edges and some improvements could do with being made (to my code, not the original).
 /// 
 /// Some other useful links are:-
 /// 
@@ -62,7 +65,8 @@ public class GameMain : Game
 
         // Our ECS systems        
         services.AddSingleton<PlayerControlSystem>();
-        services.AddSingleton<TrackSystem>();
+        services.AddSingleton<TrackUpdateSystem>();
+        services.AddSingleton<TrackRenderSystem>();
         services.AddSingleton<CameraSystem>();
 
         // Build the service provider
