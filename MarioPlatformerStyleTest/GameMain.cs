@@ -54,6 +54,7 @@ public class GameMain : Game
         services.AddSingleton<PlatformCollisionSystem>();
         services.AddSingleton<PlayerControlSystem>();
         services.AddSingleton<PlayerRenderSystem>();
+        services.AddSingleton<PhysicsSystem>();
 
         // Build the service provider
         var serviceProvider = services.BuildServiceProvider();

@@ -8,11 +8,11 @@ using System.Collections.Generic;
 
 namespace MarioPlatformerStyleTest.Services;
 
+/// <summary>
+/// A basic tile map management and rendering service for use with 'Tiled' maps
+/// </summary>
 internal class MapService
 {
-    public int ActiveLayer { get; set; } = 0;
-    public int ActiveTileset {  get; set; } = 0;    
-
     private readonly ContentManager _contentManager;
     private int _numberOfVisibleTileColumns;
     private int _numberOfVisibleTileRows;
@@ -21,6 +21,16 @@ internal class MapService
     private Texture2D _tilesetTexture;
     private int _tileColumnPositionInTheWorld;
     private int _tileRowPositionInTheWorld;
+
+    /// <summary>
+    /// Gets or sets the active map layer to use
+    /// </summary>
+    public int ActiveLayer { get; set; } = 0;
+
+    /// <summary>
+    /// Gets or sets the active tileset to use
+    /// </summary>
+    public int ActiveTileset { get; set; } = 0;
 
     /// <summary>
     /// The world height in pixels
@@ -45,7 +55,7 @@ internal class MapService
     {
         // Get the layer and the tileset to draw
         var tileset = _tiledMap.Tilesets[ActiveTileset];
-        var layer = (TileLayer)_tiledMap.Layers[ActiveLayer];
+        var layer = GetLayer(ActiveLayer);
 
         // Calculate how many rows/columns we should draw, if no values have been
         // specified then we just draw all rows and columns
@@ -70,13 +80,13 @@ internal class MapService
                 if (column < 0 || row < 0 || column >= layer.Width || row >= layer.Height) continue;
 
                 // Otherwise lets find out which tile in the map is at the current row/column position                
-                var tile = GetTileAtPosition(layer, row, column);
+                var tile = GetTileAtPosition(row, column);
 
                 // If block is 0, i.e. air or nothing, then just continue...
                 if (tile == 0) continue;
 
                 // Get the correct tile 'image' rectangle from the tileset
-                var sourceRectangle = GetImageSourceRectangleForTile(tileset, tile);
+                var sourceRectangle = GetImageSourceRectangleForTile(tile);
 
                 // Draw this tile
                 _spriteBatch.Draw(
@@ -89,21 +99,15 @@ internal class MapService
     }
 
     /// <summary>
-    /// Returns the specified tile layer, or the first if no argument value is specified
-    /// </summary>
-    /// <param name="layerNumber"></param>
-    /// <returns></returns>
-    public TileLayer GetLayer(int layerNumber = 0) => (TileLayer)_tiledMap.Layers[layerNumber];
-
-    /// <summary>
     /// Helper method to work out the source rectangle for the specified tile
     /// </summary>
     /// <param name="tileset"></param>
     /// <param name="gid"></param>
     /// <returns></returns>
-    private static Rectangle GetImageSourceRectangleForTile(Tileset tileset, uint gid)
+    private Rectangle GetImageSourceRectangleForTile(uint gid)
     {
         var tileId = (int)gid - 1;
+        var tileset = _tiledMap.Tilesets[ActiveTileset];
 
         var row = tileId / ((int)tileset.TileCount / (int)tileset.Columns);
         var column = tileId % (int)tileset.Columns;
@@ -117,17 +121,34 @@ internal class MapService
     }
 
     /// <summary>
+    /// Returns the specified tile layer, or the first if no argument value is specified
+    /// </summary>
+    /// <param name="layerNumber"></param>
+    /// <returns></returns>
+    public TileLayer GetLayer(int layerNumber = 0) => (TileLayer)_tiledMap.Layers[layerNumber];
+
+    /// <summary>
+    /// Gets a list of rectangles for tiles that surround the specified rectangle
+    /// </summary>
+    /// <param name="tileRectangle"></param>
+    /// <returns></returns>
+    public List<Rectangle> GetSurroundingTileRectangles(Rectangle tileRectangle)
+    {
+        return GetSurroundingTileRectangles(new Vector2(tileRectangle.X, tileRectangle.Y), tileRectangle.Width, tileRectangle.Height);
+    }
+
+    /// <summary>
     /// Gets a list of rectangles for tiles that surround the specified world position and width/height
     /// </summary>
-    /// <param name="tileLayer"></param>
     /// <param name="position"></param>
     /// <param name="width"></param>
     /// <param name="height"></param>
     /// <returns></returns>
-    public List<Rectangle> GetSurroundingTileRectangles(TileLayer tileLayer, Vector2 position, int width, int height)
+    public List<Rectangle> GetSurroundingTileRectangles(Vector2 position, int width, int height)
     {
         // Create a list of rectangles
         var tiles = new List<Rectangle>();
+        var tileLayer = GetLayer(ActiveLayer);
         var tileWidth = (int)_tiledMap.TileWidth;
         var tileHeight = (int)_tiledMap.TileHeight;
 
@@ -137,19 +158,19 @@ internal class MapService
         var topTile = (int)Math.Floor(position.Y / tileHeight) - 1;
         var bottomTile = (int)Math.Ceiling((position.Y + height) / tileHeight) + 1;
 
-        // Restrict the surrounding tiles to the map dimensions
+        // Restrict the surrounding tiles to the map layer dimensions
         leftTile = (int)Math.Clamp(leftTile, 0, tileLayer.Width);
         rightTile = (int)Math.Clamp(rightTile, 0, tileLayer.Width);
         topTile = (int)Math.Clamp(topTile, 0, tileLayer.Height);
         bottomTile = (int)Math.Clamp(bottomTile, 0, tileLayer.Height);
-        
+
         // Loop through each of the surrounding tiles
         for (var row = topTile; row <= bottomTile; row++)
         {
             for (var column = leftTile; column <= rightTile; column++)
-            {                
+            {
                 // Find the tile at this position
-                var tile = GetTileAtPosition(tileLayer, row, column);
+                var tile = GetTileAtPosition(row, column);
 
                 // Only add a rectangle if there IS a tile...                
                 if (tile != 0) tiles.Add(GetRectangleAtMapPosition(row, column));
@@ -158,7 +179,7 @@ internal class MapService
 
         return tiles;
     }
-            
+
     /// <summary>
     /// Returns a rectangle with world coordinates for the specified map row/column
     /// </summary>    
@@ -175,13 +196,14 @@ internal class MapService
 
     /// <summary>
     /// Returns the tile id for the specified layer at the specified map row/column position
-    /// </summary>
-    /// <param name="tileLayer"></param>
+    /// </summary>    
     /// <param name="mapRow"></param>
     /// <param name="mapColumn"></param>
     /// <returns></returns>
-    private static uint GetTileAtPosition(TileLayer tileLayer, int mapRow, int mapColumn)
+    private uint GetTileAtPosition(int mapRow, int mapColumn)
     {
+        var tileLayer = GetLayer(ActiveLayer);
+
         // Calculate the index of the request tile in the map data
         var index = (mapRow * tileLayer.Width) + mapColumn;
 

@@ -16,6 +16,7 @@ internal class GamePlayScreen : IScreen
     private readonly World _ecsWorld;
     private readonly MapRenderSystem _mapRenderSystem;
     private readonly MapService _mapService;
+    private readonly PhysicsSystem _physicsSystem;
     private readonly PlatformCollisionSystem _platformCollisionSystem;
     private readonly PlayerControlSystem _playerControlSystem;
     private readonly PlayerRenderSystem _playerRenderSystem;
@@ -32,7 +33,8 @@ internal class GamePlayScreen : IScreen
         CameraSystem cameraSystem,
         PlayerRenderSystem playerRenderSystem,
         ContentManager contentManager,
-        PlatformCollisionSystem platformCollisionSystem)
+        PlatformCollisionSystem platformCollisionSystem,
+        PhysicsSystem physicsSystem)
     {
         _ecsWorld = ecsWorld;
         _mapRenderSystem = mapRenderSystem;
@@ -44,6 +46,7 @@ internal class GamePlayScreen : IScreen
         _playerRenderSystem = playerRenderSystem;
         _contentManager = contentManager;
         _platformCollisionSystem = platformCollisionSystem;
+        _physicsSystem = physicsSystem;
     }
 
     public void Draw(GameTime gameTime)
@@ -76,8 +79,9 @@ internal class GamePlayScreen : IScreen
         _renderSystemsGroup.AddSystem(_playerRenderSystem);
 
         // Add all our update systems - order matters!
-        _updateSystemsGroup = _ecsWorld.CreateSystemsGroup();
+        _updateSystemsGroup = _ecsWorld.CreateSystemsGroup();                        
         _updateSystemsGroup.AddSystem(_playerControlSystem);
+        _updateSystemsGroup.AddSystem(_physicsSystem);
         _updateSystemsGroup.AddSystem(_platformCollisionSystem);
         _updateSystemsGroup.AddSystem(_cameraSystem);
         
@@ -87,11 +91,19 @@ internal class GamePlayScreen : IScreen
         // Create the player entity
         var player = _ecsWorld.CreateEntity();
         player.AddComponent<PlayerComponent>();
+        player.AddComponent<CharacterComponent>();
+        player.AddComponent<TransformComponent>();
 
-        ref var playerComponent = ref player.GetComponent<PlayerComponent>();
-        playerComponent.Texture = _contentManager.Load<Texture2D>("character");
-        playerComponent.Width = playerComponent.Texture.Width;
-        playerComponent.Height = playerComponent.Texture.Height;
+        // Maybe should add this to a factory or one of the systems?
+        ref var characterComponent = ref player.GetComponent<CharacterComponent>();
+        characterComponent.Texture = _contentManager.Load<Texture2D>("character");
+        characterComponent.JumpStrength = 450;
+        
+        ref var transformComponent = ref player.GetComponent<TransformComponent>();
+        transformComponent.Width = characterComponent.Texture.Width;
+        transformComponent.Height = characterComponent.Texture.Height;
+        transformComponent.Speed = 250;
+        transformComponent.Position = new Vector2(150, 0);
 
         // Now we can initialise the systems
         _updateSystemsGroup.Initialize();

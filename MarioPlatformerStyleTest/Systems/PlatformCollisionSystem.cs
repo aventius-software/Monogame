@@ -1,29 +1,30 @@
-﻿using DotTiled;
-using MarioPlatformerStyleTest.Components;
+﻿using MarioPlatformerStyleTest.Components;
 using MarioPlatformerStyleTest.Services;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Scellecs.Morpeh;
-using System.Collections.Generic;
 using System;
-using System.Linq;
 
 namespace MarioPlatformerStyleTest.Systems;
 
 /// <summary>
-/// This system handles collisions between game characters with platforms
+/// This system handles collisions between game characters and platforms
 /// </summary>
 internal class PlatformCollisionSystem : ISystem
 {
     public World World { get; set; }
-    
+
+    private Filter _filter;
     private readonly MapService _mapService;
-    private Entity _playerEntity;
 
     public PlatformCollisionSystem(World world, MapService mapService)
     {
-        World = world;        
+        World = world;
         _mapService = mapService;
+    }
+
+    private static Rectangle CalculateBounds(Vector2 position, int offset, int width, int height)
+    {
+        return new((int)position.X + offset, (int)position.Y, width - (2 * offset), height);
     }
 
     public void Dispose()
@@ -32,82 +33,94 @@ internal class PlatformCollisionSystem : ISystem
 
     public void OnAwake()
     {
-        // We'll need the player entity to find out where they are
-        var playerFilter = World.Filter.With<PlayerComponent>().Build();
-        _playerEntity = playerFilter.First();        
+        // Build our filter
+        _filter = World.Filter.With<CharacterComponent>().Build();
     }
 
     public void OnUpdate(float deltaTime)
     {
-        // Get the player component
-        ref var playerComponent = ref _playerEntity.GetComponent<PlayerComponent>();        
-        var OFFSET =0; // TODO
-
-        playerComponent.IsOnTheGround = false;
-        var newPos = playerComponent.Position + (playerComponent.Velocity * deltaTime);
-        Rectangle newRect = CalculateBounds(newPos, OFFSET, playerComponent.Width, playerComponent.Height);
-        var layer = _mapService.GetLayer();
-
-        foreach (var collider in _mapService.GetSurroundingTileRectangles(layer, playerComponent.Position, playerComponent.Width, playerComponent.Height))
+        // Check platform collisions for each character and platforms. Credits for most of this go to gamedev quickie code which
+        // I've taken and slightly modified, see https://github.com/LubiiiCZ/DevQuickie/tree/master/Quickie021-JumpingAndGravity
+        foreach (var entity in _filter)
         {
-            if (newPos.X != playerComponent.Position.X)
+            // Get the components
+            ref var transformComponent = ref entity.GetComponent<TransformComponent>();
+            ref var characterComponent = ref entity.GetComponent<CharacterComponent>();
+
+            // On each update, reset the 'on ground' flag for this character
+            characterComponent.IsOnTheGround = false;
+
+            // Calculate the next position the player will be moved to (assuming we're not bumping into anything)
+            var currentPosition = transformComponent.Position;
+            var nextPosition = currentPosition + (transformComponent.Velocity * deltaTime);
+
+            // Check all the tiles surrounding the player to see if we're going to be inside one with our next position change
+            foreach (var tile in _mapService.GetSurroundingTileRectangles(currentPosition, transformComponent.Width, transformComponent.Height))
             {
-                newRect = CalculateBounds(new(newPos.X, playerComponent.Position.Y), OFFSET, playerComponent.Width, playerComponent.Height);
-                if (newRect.Intersects(collider))
+                // If the players next position has changed in the x axis
+                // then we check if they will be inside this current tile
+                if (nextPosition.X != currentPosition.X)
                 {
-                    if (newPos.X > playerComponent.Position.X) newPos.X = collider.Left - playerComponent.Width + OFFSET;
-                    else newPos.X = collider.Right - OFFSET;
-                    continue;
+                    // They've moved in the x axis, so lets get a rectangle for the
+                    // players next position in respect to the change in the x axis
+                    var newPositionX = new Vector2(nextPosition.X, currentPosition.Y);
+                    var newRectangleX = CalculateBounds(newPositionX, characterComponent.BoundryOffset, transformComponent.Width, transformComponent.Height);
+
+                    // So will the player be inside this tile?
+                    if (newRectangleX.Intersects(tile))
+                    {
+                        // Has the player moved right?
+                        if (nextPosition.X > currentPosition.X)
+                        {
+                            // Yes, they've hit a tile to their right side, so adjust the players position
+                            // to move them back outside the tile
+                            nextPosition.X = tile.Left - transformComponent.Width + characterComponent.BoundryOffset;
+                        }
+                        else
+                        {
+                            // No, the player has moved left, so must have hit a tile to their left. Adjust
+                            // the players position to move them back outside the tile
+                            nextPosition.X = tile.Right - characterComponent.BoundryOffset;
+                        }
+
+                        continue;
+                    }
+                }
+
+                // They've moved in the y axis, so lets get a rectangle for the
+                // players next position in respect to the change in the y axis
+                var newPositionY = new Vector2(currentPosition.X, (int)Math.Ceiling(nextPosition.Y));
+                var newRectangleY = CalculateBounds(newPositionY, characterComponent.BoundryOffset, transformComponent.Width, transformComponent.Height);
+
+                // Have we hit this this tile?
+                if (newRectangleY.Intersects(tile))
+                {
+                    // Yes, are we falling down?
+                    if (transformComponent.Velocity.Y > 0)
+                    {
+                        // Yes, we're falling down, so must have landed on a tile. Adjust the players
+                        // position to place them outside the tile and set velocity to zero (i.e. we
+                        // are now on the ground)
+                        nextPosition.Y = tile.Top - transformComponent.Height;
+                        characterComponent.IsOnTheGround = true;
+                    }
+                    else
+                    {
+                        // No, we're not falling downwards, we must have jumped and hit our head on a
+                        // tile above us. Adjust the players position to move them back outside the tile
+                        // and set velocity to zero so that they stop moving upwards and should just
+                        // start falling after the next physics update
+                        nextPosition.Y = tile.Bottom;
+                    }
+
+                    // Either way, we need to set the character velocity to zero (as we're either on the
+                    // ground or have just hit a platform above our head)
+                    transformComponent.Velocity.Y = 0;
                 }
             }
 
-            newRect = CalculateBounds(new(playerComponent.Position.X, newPos.Y), OFFSET, playerComponent.Width, playerComponent.Height);
-            if (newRect.Intersects(collider))
-            {
-                if (playerComponent.Velocity.Y > 0)
-                {
-                    newPos.Y = collider.Top - playerComponent.Height;
-                    playerComponent.IsOnTheGround = true;
-                    playerComponent.Velocity.Y = 0;
-                }
-                else
-                {
-                    newPos.Y = collider.Bottom;
-                    playerComponent.Velocity.Y = 0;
-                }
-            }
+            // Now update the players position
+            transformComponent.Position = nextPosition;
         }
-
-        playerComponent.Position = newPos;
     }
-
-    private static Rectangle CalculateBounds(Vector2 pos, int offset, int width, int height)
-    {
-        return new((int)pos.X + offset, (int)pos.Y, width - (2 * offset), height);
-    }
-
-    //public static List<Rectangle> GetNearestColliders(Rectangle bounds)
-    //{
-    //    int leftTile = (int)Math.Floor((float)bounds.Left / TILE_SIZE);
-    //    int rightTile = (int)Math.Ceiling((float)bounds.Right / TILE_SIZE) - 1;
-    //    int topTile = (int)Math.Floor((float)bounds.Top / TILE_SIZE);
-    //    int bottomTile = (int)Math.Ceiling((float)bounds.Bottom / TILE_SIZE) - 1;
-
-    //    leftTile = MathHelper.Clamp(leftTile, 0, tiles.GetLength(1));
-    //    rightTile = MathHelper.Clamp(rightTile, 0, tiles.GetLength(1));
-    //    topTile = MathHelper.Clamp(topTile, 0, tiles.GetLength(0));
-    //    bottomTile = MathHelper.Clamp(bottomTile, 0, tiles.GetLength(0));
-
-    //    List<Rectangle> result = new();
-
-    //    for (int x = topTile; x <= bottomTile; x++)
-    //    {
-    //        for (int y = leftTile; y <= rightTile; y++)
-    //        {
-    //            if (tiles[x, y] != 0) result.Add(Colliders[x, y]);
-    //        }
-    //    }
-
-    //    return result;
-    //}
 }

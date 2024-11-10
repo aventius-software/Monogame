@@ -47,10 +47,10 @@ internal class CameraSystem : ISystem
 
     public void OnUpdate(float deltaTime)
     {
-        // Get the player component
-        ref var playerComponent = ref _playerEntity.GetComponent<PlayerComponent>();
+        // Get the players transform component
+        ref var transformComponent = ref _playerEntity.GetComponent<TransformComponent>();
 
         // Make the camera 'look' at the current position of the player in the world
-        _camera.LookAt(playerComponent.Position, new Vector2(playerComponent.Width, playerComponent.Height));
+        _camera.LookAt(transformComponent.Position, new Vector2(transformComponent.Width, transformComponent.Height));
     }
 }

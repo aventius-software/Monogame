@@ -1,6 +1,5 @@
 ﻿using MarioPlatformerStyleTest.Components;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Scellecs.Morpeh;
 using System.Linq;
@@ -8,23 +7,19 @@ using System.Linq;
 namespace MarioPlatformerStyleTest.Systems;
 
 /// <summary>
-/// Handle player controls by checking the input device (e.g. keyboard) to see
-/// what we need to make the player do depending on what the user has pressed
+/// Handle player character drawing
 /// </summary>
 internal class PlayerRenderSystem : ISystem
 {
     public World World { get; set; }
 
-    //private readonly ContentManager _contentManager;
     private Entity _playerEntity;
-    //private Texture2D _playerTexture;
     private readonly SpriteBatch _spriteBatch;
 
-    public PlayerRenderSystem(World world, SpriteBatch spriteBatch)//, ContentManager contentManager)
+    public PlayerRenderSystem(World world, SpriteBatch spriteBatch)
     {
         World = world;
         _spriteBatch = spriteBatch;
-        //_contentManager = contentManager;
     }
 
     public void Dispose()
@@ -36,16 +31,15 @@ internal class PlayerRenderSystem : ISystem
         // Find the player entity
         var playerFilter = World.Filter.With<PlayerComponent>().Build();
         _playerEntity = playerFilter.First();
-
-        //_playerTexture = _contentManager.Load<Texture2D>("character");
     }
 
     public void OnUpdate(float deltaTime)
     {
-        // Get the component
-        ref var playerComponent = ref _playerEntity.GetComponent<PlayerComponent>();
+        // Get the components
+        ref var characterComponent = ref _playerEntity.GetComponent<CharacterComponent>();
+        ref var transformComponent = ref _playerEntity.GetComponent<TransformComponent>();
 
         // Draw the player        
-        _spriteBatch.Draw(texture: playerComponent.Texture, position: playerComponent.Position, color: Color.White);
+        _spriteBatch.Draw(texture: characterComponent.Texture, position: transformComponent.Position, color: Color.White);
     }
 }

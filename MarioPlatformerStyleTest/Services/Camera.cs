@@ -2,6 +2,9 @@
 
 namespace MarioPlatformerStyleTest.Services;
 
+/// <summary>
+/// This is just a basic 2D camera
+/// </summary>
 internal class Camera
 {
     private Vector2 _origin;
