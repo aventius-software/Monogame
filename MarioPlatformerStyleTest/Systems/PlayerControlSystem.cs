@@ -36,6 +36,8 @@ internal class PlayerControlSystem : ISystem
         playerComponent.Position = new Vector2(150, 0);
     }
 
+    const int GRAVITY = 500;
+    const int JUMP = 400;
     public void OnUpdate(float deltaTime)
     {
         // Get the component
@@ -44,16 +46,26 @@ internal class PlayerControlSystem : ISystem
         // Do player stuff like checking controls etc...
         var keyboard = Keyboard.GetState();
 
-        var direction = Vector2.Zero;
-        var speed = 8;
+        //var direction = Vector2.Zero;
+        var speed = 150;
 
-        if (keyboard.IsKeyDown(Keys.Up)) direction.Y = -speed;
-        if (keyboard.IsKeyDown(Keys.Down)) direction.Y = speed;
-        if (keyboard.IsKeyDown(Keys.Left)) direction.X = -speed;
-        if (keyboard.IsKeyDown(Keys.Right)) direction.X = speed;
+        //if (keyboard.IsKeyDown(Keys.Up)) direction.Y = -speed;
+        //if (keyboard.IsKeyDown(Keys.Down)) direction.Y = speed;
+        
+        if (keyboard.IsKeyDown(Keys.Left)) playerComponent.Velocity.X = -speed;
+        else if (keyboard.IsKeyDown(Keys.Right)) playerComponent.Velocity.X = speed;
+        else playerComponent.Velocity.X = 0;
 
         // Update the players position
-        playerComponent.Position += direction;
+        //playerComponent.Velocity = direction;
+        //playerComponent.Position += playerComponent.Velocity;
+
+        playerComponent.Velocity.Y += GRAVITY * deltaTime;
+
+        if (keyboard.IsKeyDown(Keys.Space) && playerComponent.IsOnTheGround)
+        {
+            playerComponent.Velocity.Y = -JUMP;
+        }
 
         // Restrict movement to the world
         //if (playerComponent.Position.X < 0) playerComponent.Position.X = speed;

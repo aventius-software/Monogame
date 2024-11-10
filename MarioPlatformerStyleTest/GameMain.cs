@@ -51,6 +51,7 @@ public class GameMain : Game
         // Our ECS systems
         services.AddSingleton<CameraSystem>();
         services.AddSingleton<MapRenderSystem>();
+        services.AddSingleton<PlatformCollisionSystem>();
         services.AddSingleton<PlayerControlSystem>();
         services.AddSingleton<PlayerRenderSystem>();
 

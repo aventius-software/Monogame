@@ -15,16 +15,16 @@ internal class PlayerRenderSystem : ISystem
 {
     public World World { get; set; }
 
-    private readonly ContentManager _contentManager;
+    //private readonly ContentManager _contentManager;
     private Entity _playerEntity;
-    private Texture2D _playerTexture;
+    //private Texture2D _playerTexture;
     private readonly SpriteBatch _spriteBatch;
 
-    public PlayerRenderSystem(World world, SpriteBatch spriteBatch, ContentManager contentManager)
+    public PlayerRenderSystem(World world, SpriteBatch spriteBatch)//, ContentManager contentManager)
     {
         World = world;
         _spriteBatch = spriteBatch;
-        _contentManager = contentManager;
+        //_contentManager = contentManager;
     }
 
     public void Dispose()
@@ -37,7 +37,7 @@ internal class PlayerRenderSystem : ISystem
         var playerFilter = World.Filter.With<PlayerComponent>().Build();
         _playerEntity = playerFilter.First();
 
-        _playerTexture = _contentManager.Load<Texture2D>("circle");
+        //_playerTexture = _contentManager.Load<Texture2D>("character");
     }
 
     public void OnUpdate(float deltaTime)
@@ -46,6 +46,6 @@ internal class PlayerRenderSystem : ISystem
         ref var playerComponent = ref _playerEntity.GetComponent<PlayerComponent>();
 
         // Draw the player        
-        _spriteBatch.Draw(texture: _playerTexture, position: playerComponent.Position, color: Color.White);
+        _spriteBatch.Draw(texture: playerComponent.Texture, position: playerComponent.Position, color: Color.White);
     }
 }

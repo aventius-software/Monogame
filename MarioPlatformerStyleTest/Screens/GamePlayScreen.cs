@@ -2,6 +2,7 @@
 using MarioPlatformerStyleTest.Services;
 using MarioPlatformerStyleTest.Systems;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Scellecs.Morpeh;
 
@@ -11,9 +12,11 @@ internal class GamePlayScreen : IScreen
 {
     private readonly Camera _camera;
     private readonly CameraSystem _cameraSystem;
+    private readonly ContentManager _contentManager;
     private readonly World _ecsWorld;
     private readonly MapRenderSystem _mapRenderSystem;
     private readonly MapService _mapService;
+    private readonly PlatformCollisionSystem _platformCollisionSystem;
     private readonly PlayerControlSystem _playerControlSystem;
     private readonly PlayerRenderSystem _playerRenderSystem;
     private SystemsGroup _renderSystemsGroup;
@@ -27,7 +30,9 @@ internal class GamePlayScreen : IScreen
         Camera camera, 
         PlayerControlSystem playerControlSystem,
         CameraSystem cameraSystem,
-        PlayerRenderSystem playerRenderSystem)
+        PlayerRenderSystem playerRenderSystem,
+        ContentManager contentManager,
+        PlatformCollisionSystem platformCollisionSystem)
     {
         _ecsWorld = ecsWorld;
         _mapRenderSystem = mapRenderSystem;
@@ -37,6 +42,8 @@ internal class GamePlayScreen : IScreen
         _playerControlSystem = playerControlSystem;
         _cameraSystem = cameraSystem;
         _playerRenderSystem = playerRenderSystem;
+        _contentManager = contentManager;
+        _platformCollisionSystem = platformCollisionSystem;
     }
 
     public void Draw(GameTime gameTime)
@@ -71,6 +78,7 @@ internal class GamePlayScreen : IScreen
         // Add all our update systems - order matters!
         _updateSystemsGroup = _ecsWorld.CreateSystemsGroup();
         _updateSystemsGroup.AddSystem(_playerControlSystem);
+        _updateSystemsGroup.AddSystem(_platformCollisionSystem);
         _updateSystemsGroup.AddSystem(_cameraSystem);
         
         // Load the map
@@ -79,6 +87,11 @@ internal class GamePlayScreen : IScreen
         // Create the player entity
         var player = _ecsWorld.CreateEntity();
         player.AddComponent<PlayerComponent>();
+
+        ref var playerComponent = ref player.GetComponent<PlayerComponent>();
+        playerComponent.Texture = _contentManager.Load<Texture2D>("character");
+        playerComponent.Width = playerComponent.Texture.Width;
+        playerComponent.Height = playerComponent.Texture.Height;
 
         // Now we can initialise the systems
         _updateSystemsGroup.Initialize();
