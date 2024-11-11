@@ -2,7 +2,6 @@
 using MarioPlatformerStyleTest.Services;
 using MarioPlatformerStyleTest.Systems;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Scellecs.Morpeh;
 
@@ -12,29 +11,30 @@ internal class GamePlayScreen : IScreen
 {
     private readonly Camera _camera;
     private readonly CameraSystem _cameraSystem;
-    private readonly ContentManager _contentManager;
     private readonly World _ecsWorld;
     private readonly MapRenderSystem _mapRenderSystem;
     private readonly MapService _mapService;
     private readonly PhysicsSystem _physicsSystem;
     private readonly PlatformCollisionSystem _platformCollisionSystem;
+    private Entity _player;
+    private readonly PlayerInitialiser _playerInitialiser;
     private readonly PlayerControlSystem _playerControlSystem;
     private readonly PlayerRenderSystem _playerRenderSystem;
     private SystemsGroup _renderSystemsGroup;
     private readonly SpriteBatch _spriteBatch;
     private SystemsGroup _updateSystemsGroup;
 
-    public GamePlayScreen(World ecsWorld, 
-        MapRenderSystem mapRenderSystem, 
-        MapService mapService, 
-        SpriteBatch spriteBatch, 
-        Camera camera, 
+    public GamePlayScreen(World ecsWorld,
+        MapRenderSystem mapRenderSystem,
+        MapService mapService,
+        SpriteBatch spriteBatch,
+        Camera camera,
         PlayerControlSystem playerControlSystem,
         CameraSystem cameraSystem,
         PlayerRenderSystem playerRenderSystem,
-        ContentManager contentManager,
         PlatformCollisionSystem platformCollisionSystem,
-        PhysicsSystem physicsSystem)
+        PhysicsSystem physicsSystem,
+        PlayerInitialiser playerInitialiser)
     {
         _ecsWorld = ecsWorld;
         _mapRenderSystem = mapRenderSystem;
@@ -44,9 +44,9 @@ internal class GamePlayScreen : IScreen
         _playerControlSystem = playerControlSystem;
         _cameraSystem = cameraSystem;
         _playerRenderSystem = playerRenderSystem;
-        _contentManager = contentManager;
         _platformCollisionSystem = platformCollisionSystem;
         _physicsSystem = physicsSystem;
+        _playerInitialiser = playerInitialiser;
     }
 
     public void Draw(GameTime gameTime)
@@ -79,31 +79,21 @@ internal class GamePlayScreen : IScreen
         _renderSystemsGroup.AddSystem(_playerRenderSystem);
 
         // Add all our update systems - order matters!
-        _updateSystemsGroup = _ecsWorld.CreateSystemsGroup();                        
+        _updateSystemsGroup = _ecsWorld.CreateSystemsGroup();
+        _updateSystemsGroup.AddInitializer(_playerInitialiser);
         _updateSystemsGroup.AddSystem(_playerControlSystem);
         _updateSystemsGroup.AddSystem(_physicsSystem);
         _updateSystemsGroup.AddSystem(_platformCollisionSystem);
         _updateSystemsGroup.AddSystem(_cameraSystem);
-        
+
         // Load the map
         _mapService.LoadTiledMap("test map.tmx", "test tile atlas");
-        
-        // Create the player entity
-        var player = _ecsWorld.CreateEntity();
-        player.AddComponent<PlayerComponent>();
-        player.AddComponent<CharacterComponent>();
-        player.AddComponent<TransformComponent>();
 
-        // Maybe should add this to a factory or one of the systems?
-        ref var characterComponent = ref player.GetComponent<CharacterComponent>();
-        characterComponent.Texture = _contentManager.Load<Texture2D>("character");
-        characterComponent.JumpStrength = 450;
-        
-        ref var transformComponent = ref player.GetComponent<TransformComponent>();
-        transformComponent.Width = characterComponent.Texture.Width;
-        transformComponent.Height = characterComponent.Texture.Height;
-        transformComponent.Speed = 250;
-        transformComponent.Position = new Vector2(150, 0);
+        // Create the player entity (if they don't already exist)
+        _player ??= _ecsWorld.CreateEntity();
+        _player.AddComponent<PlayerComponent>();
+        _player.AddComponent<CharacterComponent>();
+        _player.AddComponent<TransformComponent>();
 
         // Now we can initialise the systems
         _updateSystemsGroup.Initialize();

@@ -33,7 +33,8 @@ internal class PlayerControlSystem : ISystem
 
     public void OnUpdate(float deltaTime)
     {
-        // Get the component
+        // Get the components
+        ref var playerComponent = ref _playerEntity.GetComponent<PlayerComponent>();
         ref var transformComponent = ref _playerEntity.GetComponent<TransformComponent>();
         ref var characterComponent = ref _playerEntity.GetComponent<CharacterComponent>();
 
@@ -49,6 +50,8 @@ internal class PlayerControlSystem : ISystem
         if (keyboard.IsKeyDown(Keys.Space) && characterComponent.IsOnTheGround)
         {
             transformComponent.Velocity.Y = -characterComponent.JumpStrength;
+            playerComponent.IsJumpPressed = true;
         }
+        else playerComponent.IsJumpPressed = false;
     }
 }

@@ -56,13 +56,16 @@ public class GameMain : Game
         services.AddSingleton<PlayerRenderSystem>();
         services.AddSingleton<PhysicsSystem>();
 
+        // Add our ECS initialisers
+        services.AddSingleton<PlayerInitialiser>();
+
         // Build the service provider
         var serviceProvider = services.BuildServiceProvider();
 
         // We don't need to get the SpriteBatch like we did before, or anything else.. we only need to get the
         // screen management service that this class requires. The SpriteBatch will be created by the container
-        // since the screen management service needs it to be injected via its constructor... the joys
-        // of DI ;-)
+        // since the screen management service needs it to be injected via its constructor...
+        // ah, the joys of DI ;-)
         _screenManagementService = serviceProvider.GetService<ScreenManagementService>();
         _screenManagementService.ChangeScreen<GamePlayScreen>();
 

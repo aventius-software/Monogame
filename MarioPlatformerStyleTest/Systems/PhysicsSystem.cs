@@ -30,14 +30,38 @@ internal class PhysicsSystem : ISystem
         // Set initial gravity
         _gravity = 500f;
     }
-
+    
     public void OnUpdate(float deltaTime)
     {
         // Apply physics (like gravity) to all entities
         foreach (var entity in _filter)
-        {
+        {            
             ref var transformComponent = ref entity.GetComponent<TransformComponent>();
-            transformComponent.Velocity.Y += _gravity * deltaTime;
+            var modifiedGravity = _gravity;
+
+            // Special case for the player character
+            if (entity.Has<PlayerComponent>())
+            {
+                // Get the player component
+                ref var playerComponent = ref entity.GetComponent<PlayerComponent>();
+
+                // If the player is jumping
+                if (transformComponent.IsMovingUpwards && !playerComponent.IsJumpPressed)
+                {
+                    // If the player is jumping and not holding the jump button, reduce
+                    // the jump a bit quicker so they just do a small/low jump. Then
+                    // if they are holding the jump button they'll do a normal 'full' jump
+                    modifiedGravity = _gravity * playerComponent.LowJumpGravityMultiplier;
+                }
+                else if (transformComponent.IsMovingDownwards)
+                {
+                    // When falling, we can tweak the fall speed a little to make
+                    // the player drop faster than normal gravity would make them...
+                    modifiedGravity = _gravity * playerComponent.FallingGravityMultiplier;
+                }
+            }
+
+            transformComponent.Velocity.Y += modifiedGravity * deltaTime;
         }
     }
 }
