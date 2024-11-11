@@ -10,6 +10,7 @@ internal struct TransformComponent : IComponent
 
     public int Height;    
     public Vector2 Position;
+    public Vector2 PreviousPosition;
     public float Speed;
     public Vector2 Velocity;
     public int Width;

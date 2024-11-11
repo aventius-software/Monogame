@@ -33,12 +33,12 @@ internal class MapService
     public int ActiveTileset { get; set; } = 0;
 
     /// <summary>
-    /// The world height in pixels
+    /// The world height (in pixels)
     /// </summary>
     public int WorldHeight => (int)_tiledMap.Height * (int)_tiledMap.TileHeight;
 
     /// <summary>
-    /// The world width in pixels
+    /// The world width (in pixels)
     /// </summary>
     public int WorldWidth => (int)_tiledMap.Width * (int)_tiledMap.TileWidth;
 
@@ -49,7 +49,7 @@ internal class MapService
     }
 
     /// <summary>
-    /// Draw the current map (layer)
+    /// Draw the current map (using the active layer)
     /// </summary>
     public void Draw()
     {
@@ -99,7 +99,8 @@ internal class MapService
     }
 
     /// <summary>
-    /// Helper method to work out the source rectangle for the specified tile
+    /// Helper method to work out the source rectangle for the specified tile so we can
+    /// pick out the correct texture to use when drawing the tile
     /// </summary>
     /// <param name="tileset"></param>
     /// <param name="gid"></param>

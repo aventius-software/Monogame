@@ -7,6 +7,10 @@ using Scellecs.Morpeh;
 
 namespace MarioPlatformerStyleTest.Screens;
 
+/// <summary>
+/// This is the main gameplay screen, in a real game you would have probably other screens
+/// such as a splash screen and/or a title screen and a game over screen
+/// </summary>
 internal class GamePlayScreen : IScreen
 {
     private readonly Camera _camera;
@@ -15,7 +19,6 @@ internal class GamePlayScreen : IScreen
     private readonly MapRenderSystem _mapRenderSystem;
     private readonly MapService _mapService;
     private readonly PhysicsSystem _physicsSystem;
-    private readonly PlatformCollisionSystem _platformCollisionSystem;
     private Entity _player;
     private readonly PlayerInitialiser _playerInitialiser;
     private readonly PlayerControlSystem _playerControlSystem;
@@ -32,7 +35,6 @@ internal class GamePlayScreen : IScreen
         PlayerControlSystem playerControlSystem,
         CameraSystem cameraSystem,
         PlayerRenderSystem playerRenderSystem,
-        PlatformCollisionSystem platformCollisionSystem,
         PhysicsSystem physicsSystem,
         PlayerInitialiser playerInitialiser)
     {
@@ -44,7 +46,6 @@ internal class GamePlayScreen : IScreen
         _playerControlSystem = playerControlSystem;
         _cameraSystem = cameraSystem;
         _playerRenderSystem = playerRenderSystem;
-        _platformCollisionSystem = platformCollisionSystem;
         _physicsSystem = physicsSystem;
         _playerInitialiser = playerInitialiser;
     }
@@ -54,7 +55,7 @@ internal class GamePlayScreen : IScreen
         // Clear the screen first
         _spriteBatch.GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        // Start the sprite batch (using our camera to set the transform matrix)
+        // Start the sprite batch, note that we're using our camera to set the transform matrix
         _spriteBatch.Begin(
             sortMode: SpriteSortMode.Immediate,
             blendState: null,
@@ -83,10 +84,9 @@ internal class GamePlayScreen : IScreen
         _updateSystemsGroup.AddInitializer(_playerInitialiser);
         _updateSystemsGroup.AddSystem(_playerControlSystem);
         _updateSystemsGroup.AddSystem(_physicsSystem);
-        _updateSystemsGroup.AddSystem(_platformCollisionSystem);
         _updateSystemsGroup.AddSystem(_cameraSystem);
 
-        // Load the map
+        // Load the Tiled map
         _mapService.LoadTiledMap("test map.tmx", "test tile atlas");
 
         // Create the player entity (if they don't already exist)

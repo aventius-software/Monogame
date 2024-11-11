@@ -2,6 +2,11 @@
 
 namespace MarioPlatformerStyleTest.Services;
 
+/// <summary>
+/// This helps manage our game screens and transitioning between them. This could be improved
+/// with fancy features like fade or swipe style transitions between screens, but for demo
+/// purposes this does the trick
+/// </summary>
 internal class ScreenManagementService
 {
     private IScreen _currentScreen;
@@ -32,10 +37,15 @@ internal class ScreenManagementService
         _currentScreen = screen;
     }
 
-    public void Draw(GameTime gameTime)
-    {
-        _currentScreen?.Draw(gameTime);
-    }
+    /// <summary>
+    /// Draw the current screen
+    /// </summary>
+    /// <param name="gameTime"></param>
+    public void Draw(GameTime gameTime) => _currentScreen?.Draw(gameTime);
 
+    /// <summary>
+    /// Update the current screen
+    /// </summary>
+    /// <param name="gameTime"></param>
     public void Update(GameTime gameTime) => _currentScreen?.Update(gameTime);
 }

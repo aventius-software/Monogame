@@ -9,6 +9,20 @@ using Scellecs.Morpeh;
 
 namespace MarioPlatformerStyleTest;
 
+/// <summary>
+/// This is a rough attempt to build a very simple Super Mario style platform game demo. For 
+/// this project my objectives were as follows (for better or worse):-
+/// 
+/// - use Monogame
+/// - use dependency injection
+/// - use an ECS (Entity Component System)
+/// - use Tiled maps
+/// 
+/// I've used a little bit of code from some of the other projects in this solution, plus the 
+/// odd bit of code from projects I found on GitHub (no point re-inventing the wheel, so credits 
+/// go to those people for any of their code I've used - I've put mentions/links in the code 
+/// comments where I've used someones code)
+/// </summary>
 public class GameMain : Game
 {
     private readonly GraphicsDeviceManager _graphics;
@@ -51,7 +65,6 @@ public class GameMain : Game
         // Our ECS systems
         services.AddSingleton<CameraSystem>();
         services.AddSingleton<MapRenderSystem>();
-        services.AddSingleton<PlatformCollisionSystem>();
         services.AddSingleton<PlayerControlSystem>();
         services.AddSingleton<PlayerRenderSystem>();
         services.AddSingleton<PhysicsSystem>();

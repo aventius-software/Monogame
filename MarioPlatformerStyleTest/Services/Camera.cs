@@ -3,7 +3,8 @@
 namespace MarioPlatformerStyleTest.Services;
 
 /// <summary>
-/// This is just a basic 2D camera
+/// This is just a basic 2D camera which we can use in conjunction with 
+/// SpriteBatch for viewing our game world from different positions
 /// </summary>
 internal class Camera
 {

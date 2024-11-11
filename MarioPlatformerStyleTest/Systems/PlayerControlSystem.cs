@@ -41,16 +41,19 @@ internal class PlayerControlSystem : ISystem
         // Do player stuff like checking controls etc...
         var keyboard = Keyboard.GetState();
 
-        // Set velocity depending on movement
-        if (keyboard.IsKeyDown(Keys.Left)) transformComponent.Velocity.X = -transformComponent.Speed;
-        else if (keyboard.IsKeyDown(Keys.Right)) transformComponent.Velocity.X = transformComponent.Speed;
+        // Set velocity in the X axis depending on input
+        if (keyboard.IsKeyDown(Keys.Left)) transformComponent.Velocity.X = -transformComponent.Speed * deltaTime;
+        else if (keyboard.IsKeyDown(Keys.Right)) transformComponent.Velocity.X = transformComponent.Speed * deltaTime;
         else transformComponent.Velocity.X = 0;
 
         // Has the player pressed jump?
-        if (keyboard.IsKeyDown(Keys.Space) && characterComponent.IsOnTheGround)
+        if (keyboard.IsKeyDown(Keys.Space))
         {
-            transformComponent.Velocity.Y = -characterComponent.JumpStrength;
+            // Set flag for other systems to know the player has pressed (or still is pressing) the jump button
             playerComponent.IsJumpPressed = true;
+
+            // Only perform a jump though if the player is on the ground
+            if (characterComponent.IsOnTheGround) transformComponent.Velocity.Y = -characterComponent.JumpStrength;
         }
         else playerComponent.IsJumpPressed = false;
     }

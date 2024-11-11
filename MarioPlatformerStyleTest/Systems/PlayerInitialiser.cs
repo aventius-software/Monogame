@@ -33,19 +33,19 @@ internal class PlayerInitialiser : IInitializer
 
         // Configure players gravity multipliers
         ref var playerComponent = ref playerEntity.GetComponent<PlayerComponent>();
-        playerComponent.LowJumpGravityMultiplier = 1.25f;
-        playerComponent.FallingGravityMultiplier = 1f;
+        playerComponent.LowJumpGravityMultiplier = 2f;
+        playerComponent.FallingGravityMultiplier = 3.5f;
 
-        // Load player textures and set jump strength
+        // Load textures and set jump strength
         ref var characterComponent = ref playerEntity.GetComponent<CharacterComponent>();
         characterComponent.Texture ??= _contentManager.Load<Texture2D>("character");
-        characterComponent.JumpStrength = 450;
+        characterComponent.JumpStrength = 500;
 
         // Set initial position and speed
         ref var transformComponent = ref playerEntity.GetComponent<TransformComponent>();
         transformComponent.Width = characterComponent.Texture.Width;
         transformComponent.Height = characterComponent.Texture.Height;
-        transformComponent.Speed = 250;
-        transformComponent.Position = new Vector2(150, 0);
+        transformComponent.Speed = 10000;
+        transformComponent.Position = new Vector2(150, 50);
     }
 }

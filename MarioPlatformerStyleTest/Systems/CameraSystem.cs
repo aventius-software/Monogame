@@ -8,8 +8,10 @@ using System.Linq;
 namespace MarioPlatformerStyleTest.Systems;
 
 /// <summary>
-/// The camera system effectively just keeps making the camera 'follow' the 
-/// player. We could improve this with a more elaborate player tracking system.
+/// The camera system effectively makes the camera 'follow' the player. We 
+/// could improve this with a more elaborate player tracking system, for example, say by
+/// having some smoother camera movement instead of instant position changes, maybe 
+/// using some kind of interpolation to gradually bring the camera movement to a halt
 /// </summary>
 internal class CameraSystem : ISystem
 {
@@ -41,7 +43,8 @@ internal class CameraSystem : ISystem
         // Set the cameras 'origin' to the middle of the viewport, also note the offset for the size of the character sprite
         _camera.SetOrigin(new Vector2(_graphicsDevice.Viewport.Width / 2, _graphicsDevice.Viewport.Height / 2));
 
-        // We need to tell the camera the dimensions of the map
+        // We need to tell the camera the dimensions of the map as it will restrict its movement
+        // to within the confines of the map and won't 'scroll' outside the map
         _camera.SetWorldDimensions(new Vector2(_mapService.WorldWidth, _mapService.WorldHeight));
     }
 

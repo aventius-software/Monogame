@@ -1,5 +1,4 @@
 ﻿using MarioPlatformerStyleTest.Services;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Scellecs.Morpeh;
 
@@ -30,13 +29,11 @@ internal class MapRenderSystem : ISystem
 
     public void OnAwake()
     {
-        // We need to tell the camera the dimensions of the current map
-        _camera.SetWorldDimensions(new Vector2(_mapService.WorldWidth, _mapService.WorldHeight));
     }
 
     public void OnUpdate(float deltaTime)
     {
-        // This line is optional, but its to tell the map service 'where' the camera is currently looking
+        // This line is optional... but its here to tell the map service 'where' the camera is currently looking
         // at and how high/wide the screen is. The map service will then ONLY draw tiles that are visible
         // on screen. If we remove this line, nothing will change on screen, however the map service will
         // just draw all tiles in the map including ones that are not on screen. So this is just for a bit
