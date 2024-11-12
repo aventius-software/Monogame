@@ -34,28 +34,17 @@ internal class PlayerControlSystem : ISystem
 
     public void OnUpdate(float deltaTime)
     {
-        // Get the components
-        //ref var playerComponent = ref _playerEntity.GetComponent<PlayerComponent>();
-        //ref var transformComponent = ref _playerEntity.GetComponent<TransformComponent>();
+        // Get the components        
         ref var rigidBodyComponent = ref _playerEntity.GetComponent<RigidBodyComponent>();
 
         // Do player stuff like checking controls etc...
         var keyboard = Keyboard.GetState();
 
-        // Set velocity
-        //transformComponent.Velocity = Vector2.Zero;
-
-        //if (keyboard.IsKeyDown(Keys.Left)) transformComponent.Velocity.X = -transformComponent.Acceleration;
-        //else if (keyboard.IsKeyDown(Keys.Right)) transformComponent.Velocity.X = transformComponent.Acceleration;
-
-        //if (keyboard.IsKeyDown(Keys.Up)) transformComponent.Velocity.Y = -transformComponent.Acceleration;
-        //else if (keyboard.IsKeyDown(Keys.Down)) transformComponent.Velocity.Y = transformComponent.Acceleration;
-
-        //transformComponent.Position += transformComponent.Velocity * deltaTime;
-
+        // Apply forces to the player in the X axis
         if (keyboard.IsKeyDown(Keys.Left)) rigidBodyComponent.Body.ApplyForce(new Vector2(-10, 0));
         else if (keyboard.IsKeyDown(Keys.Right)) rigidBodyComponent.Body.ApplyForce(new Vector2(10, 0));
 
+        // Apply forces to the player in the Y axis
         if (keyboard.IsKeyDown(Keys.Up)) rigidBodyComponent.Body.ApplyForce(new Vector2(0, -10));
         else if (keyboard.IsKeyDown(Keys.Down)) rigidBodyComponent.Body.ApplyForce(new Vector2(0, 10));
     }

@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TiledMapsAndAetherPhysics.Services;
 
@@ -55,7 +56,7 @@ internal class MapService
     {
         // Get the layer and the tileset to draw
         var tileset = _tiledMap.Tilesets[ActiveTileset];
-        var layer = GetLayer(ActiveLayer);
+        var layer = GetTileLayer(ActiveLayer);
 
         // Calculate how many rows/columns we should draw, if no values have been
         // specified then we just draw all rows and columns
@@ -126,7 +127,17 @@ internal class MapService
     /// </summary>
     /// <param name="layerNumber"></param>
     /// <returns></returns>
-    public TileLayer GetLayer(int layerNumber = 0) => (TileLayer)_tiledMap.Layers[layerNumber];
+    public TileLayer GetTileLayer(int layerNumber = 0) => (TileLayer)_tiledMap.Layers[layerNumber];
+
+    /// <summary>
+    /// Get an object layer by name
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    public ObjectLayer GetObjectLayer(string name) => (ObjectLayer)_tiledMap
+        .Layers
+        .Where(layer => layer.Name == name && layer is ObjectLayer)
+        .FirstOrDefault();
 
     /// <summary>
     /// Gets a list of rectangles for tiles that surround the specified rectangle
@@ -149,7 +160,7 @@ internal class MapService
     {
         // Create a list of rectangles
         var tiles = new List<Rectangle>();
-        var tileLayer = GetLayer(ActiveLayer);
+        var tileLayer = GetTileLayer(ActiveLayer);
         var tileWidth = (int)_tiledMap.TileWidth;
         var tileHeight = (int)_tiledMap.TileHeight;
 
@@ -203,7 +214,7 @@ internal class MapService
     /// <returns></returns>
     private uint GetTileAtPosition(int mapRow, int mapColumn)
     {
-        var tileLayer = GetLayer(ActiveLayer);
+        var tileLayer = GetTileLayer(ActiveLayer);
 
         // Calculate the index of the request tile in the map data
         var index = (mapRow * tileLayer.Width) + mapColumn;
