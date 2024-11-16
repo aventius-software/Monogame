@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OutrunStyleTest", "OutrunSt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiledMapsAndAetherPhysics", "TiledMapsAndAetherPhysics\TiledMapsAndAetherPhysics.csproj", "{5D8D38AA-4491-4E2C-923C-10CF49CDB8AD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Basic3DCubeTest", "Basic3DCubeTest\Basic3DCubeTest.csproj", "{B43705A0-7E03-44C0-B310-D074D89E4A96}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -100,6 +102,10 @@ Global
 		{5D8D38AA-4491-4E2C-923C-10CF49CDB8AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D8D38AA-4491-4E2C-923C-10CF49CDB8AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D8D38AA-4491-4E2C-923C-10CF49CDB8AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B43705A0-7E03-44C0-B310-D074D89E4A96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B43705A0-7E03-44C0-B310-D074D89E4A96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B43705A0-7E03-44C0-B310-D074D89E4A96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B43705A0-7E03-44C0-B310-D074D89E4A96}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
