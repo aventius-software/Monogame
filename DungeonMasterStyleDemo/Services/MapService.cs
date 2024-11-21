@@ -60,7 +60,7 @@ internal class MapService
     /// <summary>
     /// Draw the current map (using the active layer)
     /// </summary>
-    public void Draw()
+    public virtual void Draw()
     {
         // Get the layer and the tileset to draw
         var tileset = _tiledMap.Tilesets[ActiveTileset];
@@ -84,40 +84,30 @@ internal class MapService
                 var x = _tileColumnPositionInTheWorld + column;
                 var y = _tileRowPositionInTheWorld + row;
 
-                // Otherwise lets find out which tile in the map is at the current row/column position                
-                var tile = GetTileAtPosition(y, x);
-
-                // If block is 0, i.e. air or nothing, then just continue...
-                if (tile == 0) continue;
-
-                // Get the correct tile 'image' rectangle from the tileset
-                var sourceRectangle = GetImageSourceRectangleForTile(tile);
-
-                // Draw this tile
-                _spriteBatch.Draw(
-                    texture: _tilesetTexture,
-                    position: new Vector2(column * tileset.TileWidth, row * tileset.TileHeight),
-                    sourceRectangle: sourceRectangle,
-                    color: Microsoft.Xna.Framework.Color.White);
+                // Draw it
+                DrawTile(y, x, new Vector2(column * tileset.TileWidth, row * tileset.TileHeight));
             }
         }
     }
 
-    public void DrawTile(int row, int column, Vector2 position)
+    public void DrawTile(int row, int column, Vector2 drawAtPosition)
     {
+        // Find the tile at the specified row/column in the map
         var tile = GetTileAtPosition(row, column);
 
-        // Get the correct tile 'image' rectangle from the tileset
-        var sourceRectangle = GetImageSourceRectangleForTile(tile);
+        // If block is 0, i.e. air or nothing, then just continue...
+        if (tile != 0)
+        {
+            // Get the correct tile 'image' rectangle from the tileset
+            var sourceRectangle = GetImageSourceRectangleForTile(tile);
 
-        var tileset = _tiledMap.Tilesets[ActiveTileset];
-
-        // Draw this tile
-        _spriteBatch.Draw(            
-            texture: _tilesetTexture,
-            position: position,
-            sourceRectangle: sourceRectangle,
-            color: Microsoft.Xna.Framework.Color.White);
+            // Draw this tile
+            _spriteBatch.Draw(
+                texture: _tilesetTexture,
+                position: drawAtPosition,
+                sourceRectangle: sourceRectangle,
+                color: Microsoft.Xna.Framework.Color.White);
+        }
     }
 
     /// <summary>

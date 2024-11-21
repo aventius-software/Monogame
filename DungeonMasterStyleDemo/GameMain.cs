@@ -6,10 +6,11 @@ using Microsoft.Xna.Framework.Input;
 namespace DungeonMasterStyleDemo
 {
     public class GameMain : Game
-    {
+    {        
         private GraphicsDeviceManager _graphics;
-        private MapService _mapService;
+        private DungeonMapService _mapService;
         private SpriteBatch _spriteBatch;
+        private Texture2D _texture;
         private Vector2 _position;
 
         public GameMain()
@@ -22,7 +23,7 @@ namespace DungeonMasterStyleDemo
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            _position = new Vector2(1, 9);
             base.Initialize();
         }
 
@@ -31,9 +32,11 @@ namespace DungeonMasterStyleDemo
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // Load the Tiled map
-            _mapService = new MapService(_spriteBatch, Content);
+            _mapService = new DungeonMapService(_spriteBatch, Content, new ShapeDrawingService(GraphicsDevice), GraphicsDevice);
             _mapService.LoadTiledMap("test map.tmx", "test tile atlas");
             _mapService.SetRotationAngle(MapRotationAngle.None);
+
+            _texture = Content.Load<Texture2D>("character");
         }
 
         int _tile;
@@ -43,8 +46,26 @@ namespace DungeonMasterStyleDemo
                 Exit();
 
             // TODO: Add your update logic here
-            _position = new Vector2(0, 2);
+            var keyboard = Keyboard.GetState();
+            var direction = Vector2.Zero;
 
+            if (keyboard.IsKeyDown(Keys.Up))
+            {
+                _position.Y--;
+            }
+            else if (keyboard.IsKeyDown(Keys.Down))
+            { 
+                _position.Y++; 
+            }
+            else if (keyboard.IsKeyDown(Keys.Left))
+            {
+                _position.X--;
+            }
+            else if (keyboard.IsKeyDown(Keys.Right))
+            {
+                _position.X++;
+            }
+                        
             _tile = _mapService.GetTileAtPosition((int)_position.Y, (int)_position.X);
 
             base.Update(gameTime);
@@ -52,7 +73,7 @@ namespace DungeonMasterStyleDemo
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             // Start the sprite batch, note that we're using our camera to set the transform matrix
             _spriteBatch.Begin(
@@ -65,11 +86,7 @@ namespace DungeonMasterStyleDemo
                 transformMatrix: null);
 
             _mapService.Draw();
-
-            _mapService.DrawTile((int)_position.Y, (int)_position.X, new Vector2(0, 400));
-            _mapService.DrawTile((int)_position.Y - 1, (int)_position.X, new Vector2(0, 400 - 32));
-            _mapService.DrawTile((int)_position.Y - 2, (int)_position.X, new Vector2(0, 400 - 64));
-
+            
             _spriteBatch.End();
 
             base.Draw(gameTime);
