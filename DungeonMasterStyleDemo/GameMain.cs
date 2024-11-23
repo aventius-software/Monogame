@@ -26,7 +26,7 @@ namespace DungeonMasterStyleDemo
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            _position = new Vector2(1, 8);
+            _position = new Vector2(4, 29);
             base.Initialize();
         }
 
