@@ -28,8 +28,9 @@ internal class MapService
     private readonly SpriteBatch _spriteBatch;
     private Map _tiledMap;
     private Texture2D _tilesetTexture;
-    private int _tileColumnPositionInTheWorld;
-    private int _tileRowPositionInTheWorld;
+
+    protected int _tileColumnPositionInTheWorld;
+    protected int _tileRowPositionInTheWorld;
 
     /// <summary>
     /// Gets or sets the active map layer to use
@@ -47,9 +48,19 @@ internal class MapService
     public int WorldHeight => (int)_tiledMap.Height * (int)_tiledMap.TileHeight;
 
     /// <summary>
+    /// The world height (in tiles)
+    /// </summary>
+    public int WorldHeightInTiles => (int)_tiledMap.Height;
+
+    /// <summary>
     /// The world width (in pixels)
     /// </summary>
     public int WorldWidth => (int)_tiledMap.Width * (int)_tiledMap.TileWidth;
+
+    /// <summary>
+    /// The world width (in tiles)
+    /// </summary>
+    public int WorldWidthInTiles => (int)_tiledMap.Width;
 
     public MapService(SpriteBatch spriteBatch, ContentManager contentManager)
     {
@@ -280,6 +291,12 @@ internal class MapService
         var loader = Loader.Default();
         _tiledMap = loader.LoadMap(_contentManager.RootDirectory + "/" + tiledMapPath);
         _tilesetTexture = _contentManager.Load<Texture2D>(tileAtlasName);
+    }
+    
+    public void SetTilePosition(int x, int y)
+    {
+        _tileRowPositionInTheWorld = y;
+        _tileColumnPositionInTheWorld = x;
     }
 
     /// <summary>
