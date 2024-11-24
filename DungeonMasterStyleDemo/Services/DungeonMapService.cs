@@ -8,11 +8,11 @@ internal class DungeonMapService : MapService
 {
     private readonly GraphicsDevice _graphicsDevice;
     private readonly ShapeDrawingService _shapeDrawingService;
-    
+
     private int _depthPerspectiveX = 40;
     private int _depthPerspectiveY = 20;
-    private int _depthToDraw = 8;
-    private int _horizontalBlocksToDraw = 2;
+    private int _depthToDraw = 6;
+    private int _horizontalBlocksToDraw = 6;
 
     public DungeonMapService(SpriteBatch spriteBatch, ContentManager contentManager, ShapeDrawingService shapeDrawingService, GraphicsDevice graphicsDevice) : base(spriteBatch, contentManager)
     {
@@ -23,42 +23,42 @@ internal class DungeonMapService : MapService
     public override void Draw()
     {
         // First we draw the floor and ceiling
-        for (var depth = _depthToDraw; depth > 0; depth--)
+        for (var depthOffset = _depthToDraw; depthOffset >= 0; depthOffset--)
         {
-            DrawFloor(depth);
-            DrawCeiling(depth);
+            DrawFloor(depthOffset);
+            DrawCeiling(depthOffset);
         }
-        
+
         // Draw from furthest away first, up to closest
-        for (var mapDepthOffset = _depthToDraw; mapDepthOffset > 0; mapDepthOffset--)
-        {            
-            for (var mapColumnOffset = -_horizontalBlocksToDraw / 2; mapColumnOffset < _horizontalBlocksToDraw / 2; mapColumnOffset++)
+        for (var depthOffset = _depthToDraw; depthOffset >= 0; depthOffset--)
+        {
+            for (var mapColumnOffset = -_horizontalBlocksToDraw; mapColumnOffset <= _horizontalBlocksToDraw; mapColumnOffset++)
             {
                 // Now get map 'offset' coordinates relative to our actual world/map position
-                var mapDrawPositionDepth = _tileRowPositionInTheWorld - mapDepthOffset;
+                var mapDrawPositionDepth = _tileRowPositionInTheWorld - depthOffset;
                 var mapDrawPositionX = _tileColumnPositionInTheWorld + mapColumnOffset;
 
                 // Find the tile at this relative position in the map                
                 var blockInFront = GetTileAtPosition(mapDrawPositionDepth - 1, mapDrawPositionX);
                 var blockOnTheLeft = GetTileAtPosition(mapDrawPositionDepth, mapDrawPositionX - 1);
-                var blockOnTheRight = GetTileAtPosition(mapDrawPositionDepth, mapDrawPositionX + 1);
+                var blockOnTheRight = GetTileAtPosition(mapDrawPositionDepth, mapDrawPositionX + 1);                
 
-                if (blockInFront == 2)
+                if (blockOnTheLeft == 2 && mapColumnOffset <= 0)
                 {
-                    DrawFrontFacingWall(mapDepthOffset, mapColumnOffset);
-                }
-
-                if (blockOnTheLeft == 2)
-                {
-                    DrawLeftSideWall(mapDepthOffset - 1, mapColumnOffset);
+                    DrawLeftSideWall(depthOffset, mapColumnOffset);
                 }
                 
-                if (blockOnTheRight == 2)
+                if (blockInFront == 2)// && blockOnTheRight != 2)
                 {
-                    DrawRightSideWall(mapDepthOffset - 1, mapColumnOffset);
-                }                               
+                    DrawFrontFacingWall(depthOffset, mapColumnOffset);
+                }
+
+                if (blockOnTheRight == 2 && mapColumnOffset >= 0)
+                {
+                    DrawRightSideWall(depthOffset, mapColumnOffset);
+                }
             }
-        }                    
+        }
     }
 
     private int GetBlockHorizontalWidth(int depth)
@@ -73,40 +73,36 @@ internal class DungeonMapService : MapService
 
     private void DrawFloor(int depth)
     {
-        var yOffset = depth * _depthPerspectiveY;
-
         // Scale the wall colour so that walls further away get darker        
         var colour = Color.Lerp(Color.Green, Color.DarkGreen, GetDepthPercentage(depth));
 
-        _shapeDrawingService.DrawFilledRectangle(colour, 
-            0, _graphicsDevice.Viewport.Height - yOffset,
-            _graphicsDevice.Viewport.Width, yOffset);
+        _shapeDrawingService.DrawFilledRectangle(colour,
+            0, _graphicsDevice.Viewport.Height - (_depthPerspectiveY + (_depthPerspectiveY * depth)),
+            _graphicsDevice.Viewport.Width, _depthPerspectiveY);
     }
 
     private void DrawCeiling(int depth)
     {
-        var yOffset = depth * _depthPerspectiveY;
-
         // Scale the wall colour so that walls further away get darker
         var colour = Color.Lerp(Color.Red, Color.DarkRed, GetDepthPercentage(depth));
 
-        _shapeDrawingService.DrawFilledRectangle(colour, 0, 0,
-            _graphicsDevice.Viewport.Width, yOffset);
+        _shapeDrawingService.DrawFilledRectangle(colour,
+            0, depth * _depthPerspectiveY,
+            _graphicsDevice.Viewport.Width, _depthPerspectiveY);
     }
 
     private void DrawFrontFacingWall(int depth, int offsetX)
-    {        
-        // Start with a default wall face, which is a rectangle covering the
-        // viewport. We'll then scale this down depending on the 'depth' we
-        // are drawing at
-        var defaultWallFace = new Rectangle(0, 0, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
+    {
+        // Draw the wall of the block in front, not the
+        // current block depth! ;-)
+        depth++;
 
-        // Scale the default wall rectangle down to the relevant size for
-        // the depth we're drawing at        
-        var scaledX = defaultWallFace.X + (_depthPerspectiveX * depth);
-        var scaledY = defaultWallFace.Y + (_depthPerspectiveY * depth);
-        var scaledWidth = defaultWallFace.Width - (2 * _depthPerspectiveX * depth);
-        var scaledHeight = defaultWallFace.Height - (2 * _depthPerspectiveY * depth);
+        // Scale the default wall rectangle down to the relevant
+        // size for the depth we're drawing at        
+        var scaledX = _depthPerspectiveX * depth;
+        var scaledY = _depthPerspectiveY * depth;
+        var scaledWidth = _graphicsDevice.Viewport.Width - (2 * _depthPerspectiveX * depth);
+        var scaledHeight = _graphicsDevice.Viewport.Height - (2 * _depthPerspectiveY * depth);
 
         // Now we can create a new front facing wall with the correct
         // size we want for the depth we're drawing at. Also as we'll
@@ -128,7 +124,7 @@ internal class DungeonMapService : MapService
     }
 
     private void DrawLeftSideWall(int depth, int offsetX)
-    {        
+    {
         // Build 'default' quad coordinates, as if the wall
         // was just to the side of the player (not taking
         // distance/depth into account...
@@ -148,7 +144,7 @@ internal class DungeonMapService : MapService
         var colour = Color.Lerp(Color.DarkGray, Color.Gray, GetDepthPercentage(depth));
         var scaledWallWidth = GetBlockHorizontalWidth(depth);
 
-        _shapeDrawingService.DrawFilledQuadrilateral(colour, 
+        _shapeDrawingService.DrawFilledQuadrilateral(colour,
             (int)scaledTopLeft.X + (scaledWallWidth * offsetX),
             (int)scaledTopLeft.Y,
             (int)scaledTopRight.X + (scaledWallWidth * offsetX),
@@ -189,5 +185,5 @@ internal class DungeonMapService : MapService
             (int)scaledbottomRight.Y,
             (int)scaledbottomLeft.X + (scaledWallWidth * offsetX),
             (int)scaledbottomLeft.Y);
-    }          
+    }
 }
