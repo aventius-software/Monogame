@@ -39,6 +39,7 @@ internal class DungeonMapService : MapService
                 var mapDrawPositionX = _tileColumnPositionInTheWorld + mapColumnOffset;
 
                 // Find the tile at this relative position in the map                
+                var currentBlock = GetTileAtPosition(mapDrawPositionDepth, mapDrawPositionX);
                 var blockInFront = GetTileAtPosition(mapDrawPositionDepth - 1, mapDrawPositionX);
                 var blockOnTheLeft = GetTileAtPosition(mapDrawPositionDepth, mapDrawPositionX - 1);
                 var blockOnTheRight = GetTileAtPosition(mapDrawPositionDepth, mapDrawPositionX + 1);                
@@ -46,16 +47,16 @@ internal class DungeonMapService : MapService
                 if (blockOnTheLeft == 2 && mapColumnOffset <= 0)
                 {
                     DrawLeftSideWall(depthOffset, mapColumnOffset);
-                }
-                
-                if (blockInFront == 2)// && blockOnTheRight != 2)
-                {
-                    DrawFrontFacingWall(depthOffset, mapColumnOffset);
-                }
+                }                                
 
                 if (blockOnTheRight == 2 && mapColumnOffset >= 0)
                 {
                     DrawRightSideWall(depthOffset, mapColumnOffset);
+                }
+
+                if (blockInFront == 2 && currentBlock != 2)
+                {
+                    DrawFrontFacingWall(depthOffset, mapColumnOffset);
                 }
             }
         }
@@ -68,7 +69,7 @@ internal class DungeonMapService : MapService
 
     private float GetDepthPercentage(int depth)
     {
-        return ((1f * depth) % (_depthToDraw + 1)) / (_depthToDraw + 1);
+        return ((1f * depth) % (_depthToDraw + 2)) / (_depthToDraw + 2);
     }
 
     private void DrawFloor(int depth)
