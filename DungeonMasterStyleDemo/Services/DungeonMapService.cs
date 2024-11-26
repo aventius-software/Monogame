@@ -6,18 +6,22 @@ namespace DungeonMasterStyleDemo.Services;
 
 internal class DungeonMapService : MapService
 {
+    private readonly int _depthPerspectiveX = 40;
+    private readonly int _depthPerspectiveY = 20;
+    private readonly int _depthToDraw = 6;
     private readonly GraphicsDevice _graphicsDevice;
+    private readonly int _horizontalBlocksToDraw = 12;
     private readonly ShapeDrawingService _shapeDrawingService;
-
-    private int _depthPerspectiveX = 40;
-    private int _depthPerspectiveY = 20;
-    private int _depthToDraw = 6;
-    private int _horizontalBlocksToDraw = 6;
 
     public DungeonMapService(SpriteBatch spriteBatch, ContentManager contentManager, ShapeDrawingService shapeDrawingService, GraphicsDevice graphicsDevice) : base(spriteBatch, contentManager)
     {
         _shapeDrawingService = shapeDrawingService;
         _graphicsDevice = graphicsDevice;
+    }
+
+    public void DrawTileMap()
+    {
+        base.Draw();
     }
 
     public override void Draw()
@@ -32,46 +36,36 @@ internal class DungeonMapService : MapService
         // Draw from furthest away first, up to closest
         for (var depthOffset = _depthToDraw; depthOffset >= 0; depthOffset--)
         {
-            for (var mapColumnOffset = -_horizontalBlocksToDraw; mapColumnOffset <= _horizontalBlocksToDraw; mapColumnOffset++)
+            for (var mapOffsetX = -_horizontalBlocksToDraw; mapOffsetX <= _horizontalBlocksToDraw; mapOffsetX++)
             {
-                // Now get map 'offset' coordinates relative to our actual world/map position
-                var mapDrawPositionDepth = _tileRowPositionInTheWorld - depthOffset;
-                var mapDrawPositionX = _tileColumnPositionInTheWorld + mapColumnOffset;
+                // Now get map 'offset' coordinates relative to our actual world/map position                
+                var mapDrawPositionX = (int)RotatedPosition.X + mapOffsetX;
+                var mapDrawPositionDepth = (int)RotatedPosition.Y - depthOffset;                
 
                 // Find the tile at this relative position in the map                
-                var currentBlock = GetTileAtPosition(mapDrawPositionDepth, mapDrawPositionX);
-                var blockInFront = GetTileAtPosition(mapDrawPositionDepth - 1, mapDrawPositionX);
-                var blockOnTheLeft = GetTileAtPosition(mapDrawPositionDepth, mapDrawPositionX - 1);
-                var blockOnTheRight = GetTileAtPosition(mapDrawPositionDepth, mapDrawPositionX + 1);                
+                var currentBlock = IsBlockingTile(mapDrawPositionX, mapDrawPositionDepth);
+                var blockInFront = IsBlockingTile(mapDrawPositionX, mapDrawPositionDepth - 1);
+                var blockOnTheLeft = IsBlockingTile(mapDrawPositionX - 1, mapDrawPositionDepth);
+                var blockOnTheRight = IsBlockingTile(mapDrawPositionX + 1, mapDrawPositionDepth);
 
-                if (blockOnTheLeft == 2 && mapColumnOffset <= 0)
+                if (blockOnTheLeft && mapOffsetX <= 0)
                 {
-                    DrawLeftSideWall(depthOffset, mapColumnOffset);
-                }                                
-
-                if (blockOnTheRight == 2 && mapColumnOffset >= 0)
-                {
-                    DrawRightSideWall(depthOffset, mapColumnOffset);
+                    DrawLeftSideWall(depthOffset, mapOffsetX);
                 }
 
-                if (blockInFront == 2 && currentBlock != 2)
+                if (blockOnTheRight && mapOffsetX >= 0)
                 {
-                    DrawFrontFacingWall(depthOffset, mapColumnOffset);
+                    DrawRightSideWall(depthOffset, mapOffsetX);
+                }
+
+                if (blockInFront && !currentBlock)
+                {
+                    DrawFrontFacingWall(depthOffset, mapOffsetX);
                 }
             }
         }
     }
-
-    private int GetBlockHorizontalWidth(int depth)
-    {
-        return _graphicsDevice.Viewport.Width - (2 * _depthPerspectiveX * depth);
-    }
-
-    private float GetDepthPercentage(int depth)
-    {
-        return ((1f * depth) % (_depthToDraw + 2)) / (_depthToDraw + 2);
-    }
-
+    
     private void DrawFloor(int depth)
     {
         // Scale the wall colour so that walls further away get darker        
@@ -142,7 +136,7 @@ internal class DungeonMapService : MapService
         var scaledbottomLeft = new Vector2(bottomLeft.X + (_depthPerspectiveX * depth), bottomLeft.Y - (_depthPerspectiveY * depth));
 
         // Scale the wall colour so that walls further away get darker        
-        var colour = Color.Lerp(Color.DarkGray, Color.Gray, GetDepthPercentage(depth));
+        var colour = Color.Lerp(new Color(200, 200, 200), new Color(50, 50, 50), GetDepthPercentage(depth));
         var scaledWallWidth = GetBlockHorizontalWidth(depth);
 
         _shapeDrawingService.DrawFilledQuadrilateral(colour,
@@ -174,7 +168,7 @@ internal class DungeonMapService : MapService
         var scaledbottomLeft = new Vector2(bottomLeft.X - (_depthPerspectiveX * depth), bottomLeft.Y - (_depthPerspectiveY * depth));
 
         // Scale the wall colour so that walls further away get darker
-        var colour = Color.Lerp(Color.DarkGray, Color.Gray, GetDepthPercentage(depth));
+        var colour = Color.Lerp(new Color(200, 200, 200), new Color(50, 50, 50), GetDepthPercentage(depth));
         var scaledWallWidth = GetBlockHorizontalWidth(depth);
 
         _shapeDrawingService.DrawFilledQuadrilateral(colour,
@@ -187,4 +181,14 @@ internal class DungeonMapService : MapService
             (int)scaledbottomLeft.X + (scaledWallWidth * offsetX),
             (int)scaledbottomLeft.Y);
     }
+
+    private int GetBlockHorizontalWidth(int depth)
+    {
+        return _graphicsDevice.Viewport.Width - (2 * _depthPerspectiveX * depth);
+    }
+
+    private float GetDepthPercentage(int depth)
+    {
+        return ((1f * depth) % (_depthToDraw + 2)) / (_depthToDraw + 2);
+    }    
 }
