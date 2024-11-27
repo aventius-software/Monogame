@@ -94,8 +94,7 @@ internal class MapService
     /// <param name="id"></param>
     public void AddBlockingTileID(int id)
     {
-        if (_blockingTileIDList.Contains(id)) return;
-        _blockingTileIDList.Add(id);
+        if (!_blockingTileIDList.Contains(id)) _blockingTileIDList.Add(id);
     }
 
     /// <summary>
@@ -324,7 +323,14 @@ internal class MapService
     public int GetTileAtPosition() => GetTileAtPosition((int)_position.X, (int)_position.Y);
 
     /// <summary>
-    /// Returns the tile id for the specified layer at the specified map row/column position
+    /// Returns the tile id for the specified layer at the specified map position
+    /// </summary>
+    /// <param name="position"></param>
+    /// <returns></returns>
+    public int GetTileAtPosition(Vector2 position) => GetTileAtPosition((int)position.X, (int)position.Y);
+
+    /// <summary>
+    /// Returns the tile id for the specified layer at the specified map position
     /// </summary>    
     /// <param name="x"></param>
     /// <param name="y"></param>
@@ -346,42 +352,46 @@ internal class MapService
         // Otherwise return the tile
         return (int)tileLayer.Data.Value.GlobalTileIDs.Value[index];
     }
-
-    /// <summary>
-    /// Gets the tile at the offset from the current position
-    /// </summary>
-    /// <param name="offsetX"></param>
-    /// <param name="offsetY"></param>
-    /// <returns></returns>
-    public int GetTileAtOffsetFromCurrentPosition(int offsetX, int offsetY) => GetTileAtPosition((int)_position.X + offsetX, (int)_position.Y + offsetY);
-
+    
     /// <summary>
     /// Get the tile above the current position, optionally offset by the specified number of tiles
     /// </summary>
     /// <param name="tileOffset"></param>
     /// <returns></returns>
-    public int GetTileAbove(int tileOffset = 1) => GetTileAtOffsetFromCurrentPosition(0, -tileOffset);
+    public int GetTileAbove(int tileOffset = 1)
+    {
+        return GetTileAtPosition(GetPositionForMovementInDirection(Direction.Up, tileOffset));
+    }
 
     /// <summary>
     /// Get the tile below the current position, optionally offset by the specified number of tiles
     /// </summary>
     /// <param name="tileOffset"></param>
     /// <returns></returns>
-    public int GetTileBelow(int tileOffset = 1) => GetTileAtOffsetFromCurrentPosition(0, tileOffset);
+    public int GetTileBelow(int tileOffset = 1)
+    {
+        return GetTileAtPosition(GetPositionForMovementInDirection(Direction.Down, tileOffset));
+    }
 
     /// <summary>
     /// Get the tile to the left of the current position, optionally offset by the specified number of tiles
     /// </summary>
     /// <param name="tileOffset"></param>
     /// <returns></returns>
-    public int GetTileToTheLeft(int tileOffset = 1) => GetTileAtOffsetFromCurrentPosition(-tileOffset, 0);
+    public int GetTileToTheLeft(int tileOffset = 1)
+    {
+        return GetTileAtPosition(GetPositionForMovementInDirection(Direction.Left, tileOffset));
+    }
 
     /// <summary>
     /// Get the tile to the right of the current position, optionally offset by the specified number of tiles
     /// </summary>
     /// <param name="tileOffset"></param>
     /// <returns></returns>
-    public int GetTileToTheRight(int tileOffset = 1) => GetTileAtOffsetFromCurrentPosition(tileOffset, 0);
+    public int GetTileToTheRight(int tileOffset = 1)
+    {
+        return GetTileAtPosition(GetPositionForMovementInDirection(Direction.Right, tileOffset));
+    }
 
     /// <summary>
     /// Returns true if the tile above the current position is a blocking tile
@@ -389,8 +399,7 @@ internal class MapService
     /// <returns></returns>
     public bool IsBlockedAbove()
     {
-        var newPosition = GetPositionForMovementInDirection(Direction.Up);
-        return IsBlockingTile(GetTileAtPosition((int)newPosition.X, (int)newPosition.Y));
+        return IsBlockingTile(GetTileAtPosition(GetPositionForMovementInDirection(Direction.Up)));
     }
 
     /// <summary>
@@ -399,8 +408,7 @@ internal class MapService
     /// <returns></returns>
     public bool IsBlockedBelow()
     {
-        var newPosition = GetPositionForMovementInDirection(Direction.Down);
-        return IsBlockingTile(GetTileAtPosition((int)newPosition.X, (int)newPosition.Y));
+        return IsBlockingTile(GetTileAtPosition(GetPositionForMovementInDirection(Direction.Down)));
     }
 
     /// <summary>
@@ -409,8 +417,7 @@ internal class MapService
     /// <returns></returns>
     public bool IsBlockedToTheLeft()
     {
-        var newPosition = GetPositionForMovementInDirection(Direction.Left);
-        return IsBlockingTile(GetTileAtPosition((int)newPosition.X, (int)newPosition.Y));
+        return IsBlockingTile(GetTileAtPosition(GetPositionForMovementInDirection(Direction.Left)));
     }
 
     /// <summary>
@@ -419,8 +426,7 @@ internal class MapService
     /// <returns></returns>
     public bool IsBlockedToTheRight()
     {
-        var newPosition = GetPositionForMovementInDirection(Direction.Right);
-        return IsBlockingTile(GetTileAtPosition((int)newPosition.X, (int)newPosition.Y));
+        return IsBlockingTile(GetTileAtPosition(GetPositionForMovementInDirection(Direction.Right)));
     }
 
     /// <summary>
@@ -455,11 +461,13 @@ internal class MapService
                         break;
                     case Direction.Left:
                         newX = x;
-                        newY = y + movementOffset;
+                        //newY = y + movementOffset;
+                        newY = y - movementOffset;
                         break;
                     case Direction.Right:
                         newX = x;
-                        newY = y - movementOffset;
+                        //newY = y - movementOffset;
+                        newY = y + movementOffset;
                         break;
                 }
                 break;
@@ -494,16 +502,20 @@ internal class MapService
                         newY = y;
                         break;
                     case Direction.Down:
-                        newX = x + movementOffset;
+                        newX = x + movementOffset;                        
                         newY = y;
                         break;
                     case Direction.Left:
-                        newX = x;
-                        newY = y - movementOffset;
-                        break;
-                    case Direction.Right:
+                        //newX = x;
+                        //newY = y - movementOffset;
                         newX = x;
                         newY = y + movementOffset;
+                        break;
+                    case Direction.Right:
+                        //newX = x;
+                        //newY = y + movementOffset;
+                        newX = x;
+                        newY = y - movementOffset;
                         break;
                 }
                 break;

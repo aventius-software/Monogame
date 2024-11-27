@@ -46,6 +46,7 @@ namespace DungeonMasterStyleDemo
 
         int _tile;
         int _frontTile;
+        int _backTile;
         int _leftTile;
         int _rightTile;
         int _timer;
@@ -62,19 +63,19 @@ namespace DungeonMasterStyleDemo
                 var keyboard = Keyboard.GetState();
                 var direction = Vector2.Zero;
 
-                if (keyboard.IsKeyDown(Keys.Up))// && _mapService.Position.Y > 0)
+                if (keyboard.IsKeyDown(Keys.Up))
                 {
                     if (!_mapService.IsBlockedAbove()) _mapService.MoveUp();
                 }
-                else if (keyboard.IsKeyDown(Keys.Down))// && _mapService.Position.Y < _mapService.WorldHeightInTiles -1)
+                else if (keyboard.IsKeyDown(Keys.Down))
                 {
                     if (!_mapService.IsBlockedBelow()) _mapService.MoveDown();
                 }
-                else if (keyboard.IsKeyDown(Keys.Left))// && _mapService.Position.X > 0)
+                else if (keyboard.IsKeyDown(Keys.Left))
                 {
                     if (!_mapService.IsBlockedToTheLeft()) _mapService.MoveLeft();
                 }
-                else if (keyboard.IsKeyDown(Keys.Right))// && _mapService.Position.X < _mapService.WorldWidthInTiles-1)
+                else if (keyboard.IsKeyDown(Keys.Right))
                 {
                     if (!_mapService.IsBlockedToTheRight()) _mapService.MoveRight();
                 }
@@ -113,6 +114,7 @@ namespace DungeonMasterStyleDemo
 
             _tile = _mapService.GetTileAtPosition();
             _frontTile = _mapService.GetTileAbove();
+            _backTile = _mapService.GetTileBelow();
             _leftTile = _mapService.GetTileToTheLeft();
             _rightTile = _mapService.GetTileToTheRight();
 
@@ -162,9 +164,10 @@ namespace DungeonMasterStyleDemo
             _spriteBatch.DrawString(_font, "Position: " + _mapService.Position.X.ToString() + "," + _mapService.Position.Y.ToString(), new Vector2(0, 0), Color.White);
             _spriteBatch.DrawString(_font, "Standing on: " + _tile.ToString(), new Vector2(0, 30), Color.White);
             _spriteBatch.DrawString(_font, "In front: " + _frontTile.ToString(), new Vector2(0, 60), Color.White);
-            _spriteBatch.DrawString(_font, "To the left: " + _leftTile.ToString(), new Vector2(0, 90), Color.White);
-            _spriteBatch.DrawString(_font, "To the right: " + _rightTile.ToString(), new Vector2(0, 120), Color.White);
-            _spriteBatch.DrawString(_font, "Rotation: " + _mapService.RotationAngle.ToString(), new Vector2(0, 150), Color.White);
+            _spriteBatch.DrawString(_font, "Behind: " + _backTile.ToString(), new Vector2(0, 90), Color.White);
+            _spriteBatch.DrawString(_font, "To the left: " + _leftTile.ToString(), new Vector2(0, 120), Color.White);
+            _spriteBatch.DrawString(_font, "To the right: " + _rightTile.ToString(), new Vector2(0, 150), Color.White);
+            _spriteBatch.DrawString(_font, "Rotation: " + _mapService.RotationAngle.ToString(), new Vector2(0, 180), Color.White);
 
             _spriteBatch.End();
 
