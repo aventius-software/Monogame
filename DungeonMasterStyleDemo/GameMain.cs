@@ -23,9 +23,7 @@ namespace DungeonMasterStyleDemo
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-            //_position = new Vector2(5, 25);
-
+            // TODO: Add your initialization logic here            
             base.Initialize();
         }
 
@@ -37,6 +35,7 @@ namespace DungeonMasterStyleDemo
             _mapService = new DungeonMapService(_spriteBatch, Content, new ShapeDrawingService(GraphicsDevice), GraphicsDevice);
             _mapService.LoadTiledMap("test map.tmx", "test tile atlas");
             _mapService.SetRotationAngle(MapRotationAngle.None);
+            _mapService.SetDrawOffset(new Vector2(200, 200));
             _mapService.AddBlockingTileID(2);
             _mapService.AddBlockingTileID(0);
             _mapService.MoveTo(1, 28);

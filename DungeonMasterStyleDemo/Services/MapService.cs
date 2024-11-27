@@ -8,12 +8,14 @@ using System.Collections.Generic;
 
 namespace DungeonMasterStyleDemo.Services;
 
+internal enum Direction
+{
+    Up, Down, Left, Right
+}
+
 internal enum MapRotationAngle
 {
-    None,
-    Ninety,
-    OneHundredAndEighty,
-    TwoHundredAndSeventy
+    None, Ninety, OneHundredAndEighty, TwoHundredAndSeventy
 }
 
 /// <summary>
@@ -23,7 +25,8 @@ internal class MapService
 {
     private readonly List<int> _blockingTileIDList = [];
     private readonly ContentManager _contentManager;
-    private int _drawOffset = 200;
+    private int _drawOffsetX = 0;
+    private int _drawOffsetY = 0;
     private int _numberOfVisibleTileColumns;
     private int _numberOfVisibleTileRows;
     private readonly Vector2 _outOfBounds = new(-1, -1);
@@ -46,8 +49,13 @@ internal class MapService
     /// <summary>
     /// Current position in the map
     /// </summary>
-    public Vector2 Position => _position;// GetRotatedMapPosition((int)_position.X, (int)_position.Y);
+    public Vector2 Position => _position;
+
+    /// <summary>
+    /// Get the position in the map taking map rotation angle into account
+    /// </summary>
     public Vector2 RotatedPosition => GetRotatedMapPosition((int)_position.X, (int)_position.Y);
+
     /// <summary>
     /// Get the current angle of rotation for the map
     /// </summary>
@@ -143,7 +151,7 @@ internal class MapService
             // Draw this tile
             _spriteBatch.Draw(
                 texture: _tilesetTexture,
-                position: drawAtPositionOnScreen + new Vector2(_drawOffset, _drawOffset),
+                position: drawAtPositionOnScreen + new Vector2(_drawOffsetX, _drawOffsetY),
                 sourceRectangle: sourceRectangle,
                 color: Microsoft.Xna.Framework.Color.White);
         }
@@ -381,44 +389,8 @@ internal class MapService
     /// <returns></returns>
     public bool IsBlockedAbove()
     {
-        var numberOfTiles = 1;
-        var newX = (int)_position.X;
-        var newY = (int)_position.Y;
-
-        switch (_rotationAngle)
-        {
-            // When the map is rotated 90 degrees clockwise then:
-            // x axis becomes the y axis
-            // y axis becomes the inverted x axis
-            // So moving up becomes moving left in the map
-            case MapRotationAngle.Ninety:
-                newX -= numberOfTiles;
-                break;
-
-            // When the map is rotated 180 degrees clockwise then:
-            // x axis becomes inverted
-            // y axis also becomes inverted
-            // So moving up becomes moving down in the map
-            case MapRotationAngle.OneHundredAndEighty:
-                newY += numberOfTiles;
-                break;
-
-            // When the map is rotated 270 degrees clockwise then:
-            // x axis becomes the inverted y axis
-            // y axis becomes the x axis
-            // So moving up is moving right in the map
-            case MapRotationAngle.TwoHundredAndSeventy:
-                newX += numberOfTiles;
-                break;
-
-            // For no rotation, up is just up in the map
-            case MapRotationAngle.None:
-            default:
-                newY -= numberOfTiles;
-                break;
-        };
-
-        return IsBlockingTile(GetTileAtPosition(newX, newY));
+        var newPosition = GetPositionForMovementInDirection(Direction.Up);
+        return IsBlockingTile(GetTileAtPosition((int)newPosition.X, (int)newPosition.Y));
     }
 
     /// <summary>
@@ -427,44 +399,8 @@ internal class MapService
     /// <returns></returns>
     public bool IsBlockedBelow()
     {
-        var numberOfTiles = 1;
-        var newX = (int)_position.X;
-        var newY = (int)_position.Y;
-
-        switch (_rotationAngle)
-        {
-            // When the map is rotated 90 degrees clockwise then:
-            // x axis becomes the y axis
-            // y axis becomes the inverted x axis
-            // So moving down becomes moving right in the map
-            case MapRotationAngle.Ninety:
-                newX += numberOfTiles;
-                break;
-
-            // When the map is rotated 180 degrees clockwise then:
-            // x axis becomes inverted
-            // y axis also becomes inverted
-            // So moving down becomes moving up in the map
-            case MapRotationAngle.OneHundredAndEighty:
-                newY -= numberOfTiles;
-                break;
-
-            // When the map is rotated 270 degrees clockwise then:
-            // x axis becomes the inverted y axis
-            // y axis becomes the x axis
-            // So moving down becomes moving left in the map
-            case MapRotationAngle.TwoHundredAndSeventy:
-                newX -= numberOfTiles;
-                break;
-
-            // For no rotation, down is just down in the map
-            case MapRotationAngle.None:
-            default:
-                newY += numberOfTiles;
-                break;
-        };
-
-        return IsBlockingTile(GetTileAtPosition(newX, newY));
+        var newPosition = GetPositionForMovementInDirection(Direction.Down);
+        return IsBlockingTile(GetTileAtPosition((int)newPosition.X, (int)newPosition.Y));
     }
 
     /// <summary>
@@ -473,44 +409,8 @@ internal class MapService
     /// <returns></returns>
     public bool IsBlockedToTheLeft()
     {
-        var numberOfTiles = 1;
-        var newX = (int)_position.X;
-        var newY = (int)_position.Y;
-
-        switch (_rotationAngle)
-        {
-            // When the map is rotated 90 degrees clockwise then:
-            // x axis becomes the y axis
-            // y axis becomes the inverted x axis
-            // So moving left becomes moving up in the map
-            case MapRotationAngle.Ninety:
-                newY -= numberOfTiles;
-                break;
-
-            // When the map is rotated 180 degrees clockwise then:
-            // x axis becomes inverted
-            // y axis also becomes inverted
-            // So moving left becomes moving right in the map
-            case MapRotationAngle.OneHundredAndEighty:
-                newX += numberOfTiles;
-                break;
-
-            // When the map is rotated 270 degrees clockwise then:
-            // x axis becomes the inverted y axis
-            // y axis becomes the x axis
-            // So moving left becomes moving down in the map
-            case MapRotationAngle.TwoHundredAndSeventy:
-                newY += numberOfTiles;
-                break;
-
-            // For no rotation, left is just left in the map
-            case MapRotationAngle.None:
-            default:
-                newX -= numberOfTiles;
-                break;
-        };
-
-        return IsBlockingTile(GetTileAtPosition(newX, newY));
+        var newPosition = GetPositionForMovementInDirection(Direction.Left);
+        return IsBlockingTile(GetTileAtPosition((int)newPosition.X, (int)newPosition.Y));
     }
 
     /// <summary>
@@ -519,44 +419,120 @@ internal class MapService
     /// <returns></returns>
     public bool IsBlockedToTheRight()
     {
-        var numberOfTiles = 1;
-        var newX = (int)_position.X;
-        var newY = (int)_position.Y;
+        var newPosition = GetPositionForMovementInDirection(Direction.Right);
+        return IsBlockingTile(GetTileAtPosition((int)newPosition.X, (int)newPosition.Y));
+    }
 
+    /// <summary>
+    /// Returns a new position for movement in the specified direction
+    /// </summary>
+    /// <param name="direction"></param>
+    /// <param name="movementOffset"></param>
+    /// <returns></returns>
+    public Vector2 GetPositionForMovementInDirection(Direction direction, int movementOffset = 1)
+    {
+        // Get the current position
+        var x = (int)_position.X;
+        var y = (int)_position.Y;
+
+        // For changes in the position
+        int newX = x;
+        int newY = y;
+
+        // Calculate new position depending on map rotation and direction of movement
         switch (_rotationAngle)
         {
-            // When the map is rotated 90 degrees clockwise then:
-            // x axis becomes the y axis
-            // y axis becomes the inverted x axis
-            // So moving right becomes moving down in the map
             case MapRotationAngle.Ninety:
-                newY += numberOfTiles;
+                switch (direction)
+                {
+                    case Direction.Up:
+                        newX = x + movementOffset;
+                        newY = y;
+                        break;
+                    case Direction.Down:
+                        newX = x - movementOffset;
+                        newY = y;
+                        break;
+                    case Direction.Left:
+                        newX = x;
+                        newY = y + movementOffset;
+                        break;
+                    case Direction.Right:
+                        newX = x;
+                        newY = y - movementOffset;
+                        break;
+                }
                 break;
 
-            // When the map is rotated 180 degrees clockwise then:
-            // x axis becomes inverted
-            // y axis also becomes inverted
-            // So moving right becomes moving left in the map
             case MapRotationAngle.OneHundredAndEighty:
-                newX -= numberOfTiles;
+                switch (direction)
+                {
+                    case Direction.Up:
+                        newX = x;
+                        newY = y + movementOffset;
+                        break;
+                    case Direction.Down:
+                        newX = x;
+                        newY = y - movementOffset;
+                        break;
+                    case Direction.Left:
+                        newX = x + movementOffset;
+                        newY = y;
+                        break;
+                    case Direction.Right:
+                        newX = x - movementOffset;
+                        newY = y;
+                        break;
+                }
                 break;
 
-            // When the map is rotated 270 degrees clockwise then:
-            // x axis becomes the inverted y axis
-            // y axis becomes the x axis
-            // So moving right becomes moving up in the map
             case MapRotationAngle.TwoHundredAndSeventy:
-                newY -= numberOfTiles;
+                switch (direction)
+                {
+                    case Direction.Up:
+                        newX = x - movementOffset;
+                        newY = y;
+                        break;
+                    case Direction.Down:
+                        newX = x + movementOffset;
+                        newY = y;
+                        break;
+                    case Direction.Left:
+                        newX = x;
+                        newY = y - movementOffset;
+                        break;
+                    case Direction.Right:
+                        newX = x;
+                        newY = y + movementOffset;
+                        break;
+                }
                 break;
 
-            // For no rotation, right is just right in the map
             case MapRotationAngle.None:
             default:
-                newX += numberOfTiles;
+                switch (direction)
+                {
+                    case Direction.Up:
+                        newX = x;
+                        newY = y - movementOffset;
+                        break;
+                    case Direction.Down:
+                        newX = x;
+                        newY = y + movementOffset;
+                        break;
+                    case Direction.Left:
+                        newX = x - movementOffset;
+                        newY = y;
+                        break;
+                    case Direction.Right:
+                        newX = x + movementOffset;
+                        newY = y;
+                        break;
+                }
                 break;
-        };
+        }
 
-        return IsBlockingTile(GetTileAtPosition(newX, newY));
+        return new Vector2(newX, newY);
     }
 
     /// <summary>
@@ -593,44 +569,7 @@ internal class MapService
     /// <param name="numberOfTiles"></param>
     public void MoveDown(int numberOfTiles = 1)
     {
-        var newX = (int)_position.X;
-        var newY = (int)_position.Y;
-
-        switch (_rotationAngle)
-        {
-            // When the map is rotated 90 degrees clockwise then:
-            // x axis becomes the y axis
-            // y axis becomes the inverted x axis
-            // So moving down becomes moving right in the map
-            case MapRotationAngle.Ninety:
-                newX += numberOfTiles;
-                break;
-
-            // When the map is rotated 180 degrees clockwise then:
-            // x axis becomes inverted
-            // y axis also becomes inverted
-            // So moving down becomes moving up in the map
-            case MapRotationAngle.OneHundredAndEighty:
-                newY -= numberOfTiles;
-                break;
-
-            // When the map is rotated 270 degrees clockwise then:
-            // x axis becomes the inverted y axis
-            // y axis becomes the x axis
-            // So moving down becomes moving left in the map
-            case MapRotationAngle.TwoHundredAndSeventy:
-                newX -= numberOfTiles;
-                break;
-
-            // For no rotation, down is just down in the map
-            case MapRotationAngle.None:
-            default:
-                newY += numberOfTiles;
-                break;
-        };
-
-        // Adjust the position
-        MoveTo(newX, newY);
+        MoveTo(GetPositionForMovementInDirection(Direction.Down, numberOfTiles));
     }
 
     /// <summary>
@@ -639,44 +578,7 @@ internal class MapService
     /// <param name="numberOfTiles"></param>
     public void MoveLeft(int numberOfTiles = 1)
     {
-        var newX = (int)_position.X;
-        var newY = (int)_position.Y;
-
-        switch (_rotationAngle)
-        {
-            // When the map is rotated 90 degrees clockwise then:
-            // x axis becomes the y axis
-            // y axis becomes the inverted x axis
-            // So moving left becomes moving up in the map
-            case MapRotationAngle.Ninety:
-                newY -= numberOfTiles;
-                break;
-
-            // When the map is rotated 180 degrees clockwise then:
-            // x axis becomes inverted
-            // y axis also becomes inverted
-            // So moving left becomes moving right in the map
-            case MapRotationAngle.OneHundredAndEighty:
-                newX += numberOfTiles;
-                break;
-
-            // When the map is rotated 270 degrees clockwise then:
-            // x axis becomes the inverted y axis
-            // y axis becomes the x axis
-            // So moving left becomes moving down in the map
-            case MapRotationAngle.TwoHundredAndSeventy:
-                newY += numberOfTiles;
-                break;
-
-            // For no rotation, left is just left in the map
-            case MapRotationAngle.None:
-            default:
-                newX -= numberOfTiles;
-                break;
-        };
-
-        // Adjust the position
-        MoveTo(newX, newY);
+        MoveTo(GetPositionForMovementInDirection(Direction.Left, numberOfTiles));
     }
 
     /// <summary>
@@ -685,44 +587,7 @@ internal class MapService
     /// <param name="numberOfTiles"></param>
     public void MoveRight(int numberOfTiles = 1)
     {
-        var newX = (int)_position.X;
-        var newY = (int)_position.Y;
-
-        switch (_rotationAngle)
-        {
-            // When the map is rotated 90 degrees clockwise then:
-            // x axis becomes the y axis
-            // y axis becomes the inverted x axis
-            // So moving right becomes moving down in the map
-            case MapRotationAngle.Ninety:
-                newY += numberOfTiles;
-                break;
-
-            // When the map is rotated 180 degrees clockwise then:
-            // x axis becomes inverted
-            // y axis also becomes inverted
-            // So moving right becomes moving left in the map
-            case MapRotationAngle.OneHundredAndEighty:
-                newX -= numberOfTiles;
-                break;
-
-            // When the map is rotated 270 degrees clockwise then:
-            // x axis becomes the inverted y axis
-            // y axis becomes the x axis
-            // So moving right becomes moving up in the map
-            case MapRotationAngle.TwoHundredAndSeventy:
-                newY -= numberOfTiles;
-                break;
-
-            // For no rotation, right is just right in the map
-            case MapRotationAngle.None:
-            default:
-                newX += numberOfTiles;
-                break;
-        };
-
-        // Adjust the position
-        MoveTo(newX, newY);
+        MoveTo(GetPositionForMovementInDirection(Direction.Right, numberOfTiles));
     }
 
     /// <summary>
@@ -736,49 +601,21 @@ internal class MapService
     }
 
     /// <summary>
+    /// Move to the specified position in the map
+    /// </summary>
+    /// <param name="position"></param>
+    public void MoveTo(Vector2 position)
+    {
+        if (!IsBlockingTile((int)position.X, (int)position.Y)) _position = position;
+    }
+
+    /// <summary>
     /// Move up from the current position by the specified number of tiles
     /// </summary>
     /// <param name="numberOfTiles"></param>
     public void MoveUp(int numberOfTiles = 1)
     {
-        var newX = (int)_position.X;
-        var newY = (int)_position.Y;
-
-        switch (_rotationAngle)
-        {
-            // When the map is rotated 90 degrees clockwise then:
-            // x axis becomes the y axis
-            // y axis becomes the inverted x axis
-            // So moving up becomes moving left in the map
-            case MapRotationAngle.Ninety:
-                newX -= numberOfTiles;
-                break;
-
-            // When the map is rotated 180 degrees clockwise then:
-            // x axis becomes inverted
-            // y axis also becomes inverted
-            // So moving up becomes moving down in the map
-            case MapRotationAngle.OneHundredAndEighty:
-                newY += numberOfTiles;
-                break;
-
-            // When the map is rotated 270 degrees clockwise then:
-            // x axis becomes the inverted y axis
-            // y axis becomes the x axis
-            // So moving up is moving right in the map
-            case MapRotationAngle.TwoHundredAndSeventy:
-                newX += numberOfTiles;
-                break;
-
-            // For no rotation, up is just up in the map
-            case MapRotationAngle.None:
-            default:
-                newY -= numberOfTiles;
-                break;
-        };
-
-        // Adjust the position
-        MoveTo(newX, newY);
+        MoveTo(GetPositionForMovementInDirection(Direction.Up, numberOfTiles));
     }
 
     /// <summary>
@@ -823,6 +660,16 @@ internal class MapService
                 _rotationAngle = MapRotationAngle.None;
                 break;
         };
+    }
+
+    /// <summary>
+    /// Set a draw offset for when drawing the map
+    /// </summary>
+    /// <param name="offset"></param>
+    public void SetDrawOffset(Vector2 offset)
+    {
+        _drawOffsetX = (int)offset.X;
+        _drawOffsetY = (int)offset.Y;
     }
 
     /// <summary>
