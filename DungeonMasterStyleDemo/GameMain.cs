@@ -6,14 +6,14 @@ using Microsoft.Xna.Framework.Input;
 namespace DungeonMasterStyleDemo
 {
     public class GameMain : Game
-    {        
+    {
+        private int _tileBehind, _currentTile, _tileInFront, _tileToTheLeft, _tileToTheRight;
         private GraphicsDeviceManager _graphics;
-        private DungeonMapService _mapService;
-        private SpriteBatch _spriteBatch;
-        private Texture2D _texture;
-        //private Vector2 _position;
+        private DungeonMapService _dungeonMapService;
         private SpriteFont _font;
-        
+        private int _inputDelayTimer;
+        private SpriteBatch _spriteBatch;
+
         public GameMain()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -30,93 +30,75 @@ namespace DungeonMasterStyleDemo
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            var shapeDrawingService = new ShapeDrawingService(GraphicsDevice);
 
             // Load the Tiled map
-            _mapService = new DungeonMapService(_spriteBatch, Content, new ShapeDrawingService(GraphicsDevice), GraphicsDevice);
-            _mapService.LoadTiledMap("test map.tmx", "test tile atlas");
-            _mapService.SetRotationAngle(MapRotationAngle.None);
-            _mapService.SetDrawOffset(new Vector2(200, 200));
-            _mapService.AddBlockingTileID(2);
-            _mapService.AddBlockingTileID(0);
-            _mapService.MoveTo(1, 28);
+            _dungeonMapService = new DungeonMapService(_spriteBatch, Content, shapeDrawingService, GraphicsDevice);
+            _dungeonMapService.LoadTiledMap("test map.tmx", "test tile atlas");
+            _dungeonMapService.SetRotationAngle(MapRotationAngle.None);
+            _dungeonMapService.SetDrawOffset(new Vector2(200, 200));
+            _dungeonMapService.AddBlockingTileID(2);
+            _dungeonMapService.AddBlockingTileID(0);
 
-            _texture = Content.Load<Texture2D>("character");
+            // Must start on a clear block!
+            _dungeonMapService.MoveTo(1, 28);
+
+            // Load the font
             _font = Content.Load<SpriteFont>("font");
         }
-
-        int _tile;
-        int _frontTile;
-        int _backTile;
-        int _leftTile;
-        int _rightTile;
-        int _timer;
 
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
-            if (_timer <= 0)
+            // Use a timer to slow down the input
+            if (_inputDelayTimer <= 0)
             {
-                _timer = 5;
-                var keyboard = Keyboard.GetState();
-                var direction = Vector2.Zero;
+                // Reset timer
+                _inputDelayTimer = 5;
 
+                // Get the current keyboard state
+                var keyboard = Keyboard.GetState();
+
+                // Move around the map
                 if (keyboard.IsKeyDown(Keys.Up))
                 {
-                    if (!_mapService.IsBlockedAbove()) _mapService.MoveUp();
+                    if (!_dungeonMapService.IsBlockedAbove()) _dungeonMapService.MoveUp();
                 }
                 else if (keyboard.IsKeyDown(Keys.Down))
                 {
-                    if (!_mapService.IsBlockedBelow()) _mapService.MoveDown();
+                    if (!_dungeonMapService.IsBlockedBelow()) _dungeonMapService.MoveDown();
                 }
                 else if (keyboard.IsKeyDown(Keys.Left))
                 {
-                    if (!_mapService.IsBlockedToTheLeft()) _mapService.MoveLeft();
+                    if (!_dungeonMapService.IsBlockedToTheLeft()) _dungeonMapService.MoveLeft();
                 }
                 else if (keyboard.IsKeyDown(Keys.Right))
                 {
-                    if (!_mapService.IsBlockedToTheRight()) _mapService.MoveRight();
+                    if (!_dungeonMapService.IsBlockedToTheRight()) _dungeonMapService.MoveRight();
                 }
 
+                // Rotate the map
                 if (keyboard.IsKeyDown(Keys.Q))
-                {                    
-                    _mapService.RotateAnticlockwise();
+                {
+                    _dungeonMapService.RotateAnticlockwise();
                 }
                 else if (keyboard.IsKeyDown(Keys.W))
-                {                    
-                    _mapService.RotateClockwise();
-                }
-
-                if (keyboard.IsKeyDown(Keys.NumPad0))
                 {
-                    _mapService.SetRotationAngle(MapRotationAngle.None);
-                }
-
-                if (keyboard.IsKeyDown(Keys.NumPad1))
-                {
-                    _mapService.SetRotationAngle(MapRotationAngle.Ninety);
-                }
-
-                if (keyboard.IsKeyDown(Keys.NumPad2))
-                {
-                    _mapService.SetRotationAngle(MapRotationAngle.OneHundredAndEighty);
-                }
-
-                if (keyboard.IsKeyDown(Keys.NumPad3))
-                {
-                    _mapService.SetRotationAngle(MapRotationAngle.TwoHundredAndSeventy);
+                    _dungeonMapService.RotateClockwise();
                 }
             }
 
-            _timer--;
+            // Reduce the timer
+            _inputDelayTimer--;
 
-            _tile = _mapService.GetTileAtPosition();
-            _frontTile = _mapService.GetTileAbove();
-            _backTile = _mapService.GetTileBelow();
-            _leftTile = _mapService.GetTileToTheLeft();
-            _rightTile = _mapService.GetTileToTheRight();
+            // Get the tiles types around the players position
+            _currentTile = _dungeonMapService.GetTileAtPosition();
+            _tileInFront = _dungeonMapService.GetTileAbove();
+            _tileBehind = _dungeonMapService.GetTileBelow();
+            _tileToTheLeft = _dungeonMapService.GetTileToTheLeft();
+            _tileToTheRight = _dungeonMapService.GetTileToTheRight();
 
             base.Update(gameTime);
         }
@@ -125,53 +107,64 @@ namespace DungeonMasterStyleDemo
         {
             GraphicsDevice.Clear(Color.Black);
 
-            // Start the sprite batch, note that we're using our camera to set the transform matrix
-            _spriteBatch.Begin(
-                sortMode: SpriteSortMode.Immediate,
-                blendState: null,
-                samplerState: SamplerState.PointClamp,
-                depthStencilState: null,
-                rasterizerState: null,
-                effect: null,
-                transformMatrix: null);
-
-            _mapService.Draw();
-
-            _spriteBatch.End();
-
-            //_spriteBatch.Begin(
-            //    sortMode: SpriteSortMode.Immediate,
-            //    blendState: null,
-            //    samplerState: SamplerState.PointClamp,
-            //    depthStencilState: null,
-            //    rasterizerState: null,
-            //    effect: null,
-            //    transformMatrix: null);
-
-            //_mapService.DrawTileMap();
-
-            //_spriteBatch.End();
-
-            _spriteBatch.Begin(
-                sortMode: SpriteSortMode.Immediate,
-                blendState: null,
-                samplerState: SamplerState.PointClamp,
-                depthStencilState: null,
-                rasterizerState: null,
-                effect: null,
-                transformMatrix: null);
-
-            _spriteBatch.DrawString(_font, "Position: " + _mapService.Position.X.ToString() + "," + _mapService.Position.Y.ToString(), new Vector2(0, 0), Color.White);
-            _spriteBatch.DrawString(_font, "Standing on: " + _tile.ToString(), new Vector2(0, 30), Color.White);
-            _spriteBatch.DrawString(_font, "In front: " + _frontTile.ToString(), new Vector2(0, 60), Color.White);
-            _spriteBatch.DrawString(_font, "Behind: " + _backTile.ToString(), new Vector2(0, 90), Color.White);
-            _spriteBatch.DrawString(_font, "To the left: " + _leftTile.ToString(), new Vector2(0, 120), Color.White);
-            _spriteBatch.DrawString(_font, "To the right: " + _rightTile.ToString(), new Vector2(0, 150), Color.White);
-            _spriteBatch.DrawString(_font, "Rotation: " + _mapService.RotationAngle.ToString(), new Vector2(0, 180), Color.White);
-
-            _spriteBatch.End();
+            DrawDungeon();
+            DrawInfo();
 
             base.Draw(gameTime);
+        }
+
+        public void DrawDungeon()
+        {
+            _spriteBatch.Begin(
+                sortMode: SpriteSortMode.Immediate,
+                blendState: null,
+                samplerState: SamplerState.PointClamp,
+                depthStencilState: null,
+                rasterizerState: null,
+                effect: null,
+                transformMatrix: null);
+
+            _dungeonMapService.Draw();
+
+            _spriteBatch.End();
+        }
+
+        public void DrawInfo()
+        {
+            _spriteBatch.Begin(
+                sortMode: SpriteSortMode.Immediate,
+                blendState: null,
+                samplerState: SamplerState.PointClamp,
+                depthStencilState: null,
+                rasterizerState: null,
+                effect: null,
+                transformMatrix: null);
+
+            _spriteBatch.DrawString(_font, "Current map position: " + _dungeonMapService.Position.X.ToString() + "," + _dungeonMapService.Position.Y.ToString(), new Vector2(0, 0), Color.White);
+            _spriteBatch.DrawString(_font, "Standing on: " + _currentTile.ToString(), new Vector2(0, 30), Color.White);
+            _spriteBatch.DrawString(_font, "To the front: " + _tileInFront.ToString(), new Vector2(0, 60), Color.White);
+            _spriteBatch.DrawString(_font, "To the rear: " + _tileBehind.ToString(), new Vector2(0, 90), Color.White);
+            _spriteBatch.DrawString(_font, "To the left: " + _tileToTheLeft.ToString(), new Vector2(0, 120), Color.White);
+            _spriteBatch.DrawString(_font, "To the right: " + _tileToTheRight.ToString(), new Vector2(0, 150), Color.White);
+            _spriteBatch.DrawString(_font, "Map rotation angle: " + _dungeonMapService.RotationAngle.ToString(), new Vector2(0, 180), Color.White);
+
+            _spriteBatch.End();
+        }
+
+        public void DrawTileMap()
+        {
+            _spriteBatch.Begin(
+                sortMode: SpriteSortMode.Immediate,
+                blendState: null,
+                samplerState: SamplerState.PointClamp,
+                depthStencilState: null,
+                rasterizerState: null,
+                effect: null,
+                transformMatrix: null);
+
+            _dungeonMapService.DrawTileMap();
+
+            _spriteBatch.End();
         }
     }
 }
