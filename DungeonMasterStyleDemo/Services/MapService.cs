@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 
 namespace DungeonMasterStyleDemo.Services;
 
@@ -50,12 +51,7 @@ internal class MapService
     /// Current position in the map
     /// </summary>
     public Vector2 Position => _position;
-
-    /// <summary>
-    /// Get the position in the map taking map rotation angle into account
-    /// </summary>
-    public Vector2 RotatedPosition => GetRotatedMapPosition((int)_position.X, (int)_position.Y);
-
+    
     /// <summary>
     /// Get the current angle of rotation for the map
     /// </summary>
@@ -120,39 +116,26 @@ internal class MapService
         {
             for (int row = -tilesToOverDraw; row < rowsToDraw + (2 * tilesToOverDraw); row++)
             {
-                // Calculate the tile position to fetch/draw                
-                var x = (int)_position.X + column;
-                var y = (int)_position.Y + row;
+                // Calculate the tile position to fetch/draw                                
+                var position = GetNewPositionFromOffset(_position, column, row);
 
-                // Draw it
-                DrawTile(x, y, new Vector2(column * tileset.TileWidth, row * tileset.TileHeight));
+                // Find the tile at the specified position in the map
+                var tile = GetTileAtPosition(position);
+
+                // If block is 0, i.e. air or nothing, then just continue...
+                if (tile != 0)
+                {
+                    // Get the correct tile 'image' rectangle from the tileset
+                    var sourceRectangle = GetImageSourceRectangleForTile(tile);
+
+                    // Draw this tile
+                    _spriteBatch.Draw(
+                        texture: _tilesetTexture,
+                        position: new Vector2(column * tileset.TileWidth, row * tileset.TileHeight) + new Vector2(_drawOffsetX, _drawOffsetY),
+                        sourceRectangle: sourceRectangle,
+                        color: Microsoft.Xna.Framework.Color.White);
+                }
             }
-        }
-    }
-
-    /// <summary>
-    /// Draws the map tile from the specified map coordinates at the specified position on screen
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <param name="drawAtPositionOnScreen"></param>
-    public void DrawTile(int x, int y, Vector2 drawAtPositionOnScreen)
-    {
-        // Find the tile at the specified position in the map
-        var tile = GetTileAtPosition(x, y);
-
-        // If block is 0, i.e. air or nothing, then just continue...
-        if (tile != 0)
-        {
-            // Get the correct tile 'image' rectangle from the tileset
-            var sourceRectangle = GetImageSourceRectangleForTile(tile);
-
-            // Draw this tile
-            _spriteBatch.Draw(
-                texture: _tilesetTexture,
-                position: drawAtPositionOnScreen + new Vector2(_drawOffsetX, _drawOffsetY),
-                sourceRectangle: sourceRectangle,
-                color: Microsoft.Xna.Framework.Color.White);
         }
     }
 
@@ -184,6 +167,64 @@ internal class MapService
     /// <param name="layerNumber"></param>
     /// <returns></returns>
     public TileLayer GetLayer(int layerNumber = 0) => (TileLayer)_tiledMap.Layers[layerNumber];
+
+    /// <summary>
+    /// Returns a new position relative to the specified position, calculated using the offsets for x and y
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="offsetX"></param>
+    /// <param name="offsetY"></param>
+    /// <returns></returns>
+    protected Vector2 GetNewPositionFromOffset(Vector2 position, int offsetX, int offsetY)
+    {
+        var newX = (int)position.X;
+        var newY = (int)position.Y;        
+
+        switch (_rotationAngle)
+        {
+            case MapRotationAngle.Ninety:
+                {
+                    // When the map is rotated 90 degrees clockwise then:
+                    // x axis becomes the y axis
+                    // y axis becomes the inverted x axis
+                    newX -= offsetY;
+                    newY += offsetX;
+                }
+                break;
+
+            case MapRotationAngle.OneHundredAndEighty:
+                {
+                    // When the map is rotated 180 degrees clockwise then:
+                    // x axis becomes inverted
+                    // y axis also becomes inverted
+                    newX -= offsetX;
+                    newY -= offsetY;
+                }
+                break;
+
+            case MapRotationAngle.TwoHundredAndSeventy:
+                {
+                    // When the map is rotated 270 degrees clockwise then:
+                    // x axis becomes the inverted y axis
+                    // y axis becomes the x axis
+                    newX += offsetY;
+                    newY -= offsetX;
+                }
+                break;
+
+            case MapRotationAngle.None:
+                {
+                    // No rotation, so just add the offsets
+                    newX += offsetX;
+                    newY += offsetY;
+                }
+                break;
+
+            default: break;
+        }
+
+        return new Vector2(newX, newY);
+    }
 
     /// <summary>
     /// Gets a list of rectangles for tiles that surround the specified rectangle
@@ -253,70 +294,6 @@ internal class MapService
     }
 
     /// <summary>
-    /// Gets the map position for x and y, taking map rotation into account
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
-    private Vector2 GetRotatedMapPosition(int x, int y)
-    {
-        // Get the active map layer
-        var tileLayer = GetLayer(ActiveLayer);
-
-        // Out of bounds?
-        if (x < 0 || y < 0 || x >= tileLayer.Width || y >= tileLayer.Height) return _outOfBounds;
-
-        // We'll assign to new variables as we may modify due to rotation
-        var newX = x;
-        var newY = y;
-
-        var mapWidth = (int)tileLayer.Width - 1;
-        var mapHeight = (int)tileLayer.Height - 1;
-
-        // Handle any requested rotation
-        switch (_rotationAngle)
-        {
-            case MapRotationAngle.Ninety:
-                {
-                    // When the map is rotated 90 degrees clockwise then:
-                    // x axis becomes the y axis
-                    // y axis becomes the inverted x axis
-                    newX = y;
-                    newY = mapWidth - x;
-                }
-                break;
-
-            case MapRotationAngle.OneHundredAndEighty:
-                {
-                    // When the map is rotated 180 degrees clockwise then:
-                    // x axis becomes inverted
-                    // y axis also becomes inverted
-                    newX = mapWidth - x;
-                    newY = mapHeight - y;
-                }
-                break;
-
-            case MapRotationAngle.TwoHundredAndSeventy:
-                {
-                    // When the map is rotated 270 degrees clockwise then:
-                    // x axis becomes the inverted y axis
-                    // y axis becomes the x axis
-                    newX = mapHeight - y;
-                    newY = x;
-                }
-                break;
-
-            case MapRotationAngle.None:
-            default: break;
-        }
-
-        // Out of bounds?
-        if (newX < 0 || newY < 0 || newX >= tileLayer.Width || newY >= tileLayer.Height) return _outOfBounds;
-
-        return new Vector2(newX, newY);
-    }
-
-    /// <summary>
     /// Returns the tile id at the current map position
     /// </summary>
     /// <returns></returns>
@@ -337,22 +314,19 @@ internal class MapService
     /// <returns></returns>
     public int GetTileAtPosition(int x, int y)
     {
-        // Get the new position
-        var position = GetRotatedMapPosition(x, y);
-
-        // Out of bounds?
-        if (position == _outOfBounds) return 0;
-
         // Get the active map layer
         var tileLayer = GetLayer(ActiveLayer);
 
+        // Out of bounds?
+        if (x < 0 || y < 0 || x >= tileLayer.Width || y >= tileLayer.Height) return 0;
+
         // Calculate the index of the request tile in the map data
-        var index = ((int)position.Y * tileLayer.Width) + (int)position.X;
+        var index = (y * tileLayer.Width) + x;
 
         // Otherwise return the tile
         return (int)tileLayer.Data.Value.GlobalTileIDs.Value[index];
     }
-    
+
     /// <summary>
     /// Get the tile above the current position, optionally offset by the specified number of tiles
     /// </summary>
@@ -360,7 +334,7 @@ internal class MapService
     /// <returns></returns>
     public int GetTileAbove(int tileOffset = 1)
     {
-        return GetTileAtPosition(GetPositionForMovementInDirection(Direction.Up, tileOffset));
+        return GetTileAtPosition(GetNewPositionFromOffset(_position, 0, -tileOffset));
     }
 
     /// <summary>
@@ -370,7 +344,7 @@ internal class MapService
     /// <returns></returns>
     public int GetTileBelow(int tileOffset = 1)
     {
-        return GetTileAtPosition(GetPositionForMovementInDirection(Direction.Down, tileOffset));
+        return GetTileAtPosition(GetNewPositionFromOffset(_position, 0, tileOffset));
     }
 
     /// <summary>
@@ -380,7 +354,7 @@ internal class MapService
     /// <returns></returns>
     public int GetTileToTheLeft(int tileOffset = 1)
     {
-        return GetTileAtPosition(GetPositionForMovementInDirection(Direction.Left, tileOffset));
+        return GetTileAtPosition(GetNewPositionFromOffset(_position, -tileOffset, 0));
     }
 
     /// <summary>
@@ -390,7 +364,7 @@ internal class MapService
     /// <returns></returns>
     public int GetTileToTheRight(int tileOffset = 1)
     {
-        return GetTileAtPosition(GetPositionForMovementInDirection(Direction.Right, tileOffset));
+        return GetTileAtPosition(GetNewPositionFromOffset(_position, tileOffset, 0));
     }
 
     /// <summary>
@@ -399,7 +373,7 @@ internal class MapService
     /// <returns></returns>
     public bool IsBlockedAbove()
     {
-        return IsBlockingTile(GetTileAtPosition(GetPositionForMovementInDirection(Direction.Up)));
+        return IsBlockingTile(GetTileAbove());
     }
 
     /// <summary>
@@ -408,7 +382,7 @@ internal class MapService
     /// <returns></returns>
     public bool IsBlockedBelow()
     {
-        return IsBlockingTile(GetTileAtPosition(GetPositionForMovementInDirection(Direction.Down)));
+        return IsBlockingTile(GetTileBelow());
     }
 
     /// <summary>
@@ -417,7 +391,7 @@ internal class MapService
     /// <returns></returns>
     public bool IsBlockedToTheLeft()
     {
-        return IsBlockingTile(GetTileAtPosition(GetPositionForMovementInDirection(Direction.Left)));
+        return IsBlockingTile(GetTileToTheLeft());
     }
 
     /// <summary>
@@ -426,7 +400,7 @@ internal class MapService
     /// <returns></returns>
     public bool IsBlockedToTheRight()
     {
-        return IsBlockingTile(GetTileAtPosition(GetPositionForMovementInDirection(Direction.Right)));
+        return IsBlockingTile(GetTileToTheRight());
     }
 
     /// <summary>
@@ -435,7 +409,7 @@ internal class MapService
     /// <param name="direction"></param>
     /// <param name="movementOffset"></param>
     /// <returns></returns>
-    public Vector2 GetPositionForMovementInDirection(Direction direction, int movementOffset = 1)
+    /*public Vector2 GetPositionForMovementInDirection(Direction direction, int movementOffset = 1)
     {
         // Get the current position
         var x = (int)_position.X;
@@ -545,7 +519,7 @@ internal class MapService
         }
 
         return new Vector2(newX, newY);
-    }
+    }*/
 
     /// <summary>
     /// Returns true if the specified tile ID is a blocking tile ID
@@ -581,7 +555,7 @@ internal class MapService
     /// <param name="numberOfTiles"></param>
     public void MoveDown(int numberOfTiles = 1)
     {
-        MoveTo(GetPositionForMovementInDirection(Direction.Down, numberOfTiles));
+        MoveTo(GetNewPositionFromOffset(_position, 0, numberOfTiles));
     }
 
     /// <summary>
@@ -590,7 +564,7 @@ internal class MapService
     /// <param name="numberOfTiles"></param>
     public void MoveLeft(int numberOfTiles = 1)
     {
-        MoveTo(GetPositionForMovementInDirection(Direction.Left, numberOfTiles));
+        MoveTo(GetNewPositionFromOffset(_position, -numberOfTiles, 0));
     }
 
     /// <summary>
@@ -599,7 +573,7 @@ internal class MapService
     /// <param name="numberOfTiles"></param>
     public void MoveRight(int numberOfTiles = 1)
     {
-        MoveTo(GetPositionForMovementInDirection(Direction.Right, numberOfTiles));
+        MoveTo(GetNewPositionFromOffset(_position, numberOfTiles, 0));
     }
 
     /// <summary>
@@ -627,7 +601,7 @@ internal class MapService
     /// <param name="numberOfTiles"></param>
     public void MoveUp(int numberOfTiles = 1)
     {
-        MoveTo(GetPositionForMovementInDirection(Direction.Up, numberOfTiles));
+        MoveTo(GetNewPositionFromOffset(_position, 0, -numberOfTiles));
     }
 
     /// <summary>
@@ -649,7 +623,7 @@ internal class MapService
             case MapRotationAngle.TwoHundredAndSeventy:
                 _rotationAngle = MapRotationAngle.OneHundredAndEighty;
                 break;
-        };
+        };        
     }
 
     /// <summary>
@@ -671,8 +645,83 @@ internal class MapService
             case MapRotationAngle.TwoHundredAndSeventy:
                 _rotationAngle = MapRotationAngle.None;
                 break;
-        };
+        };        
     }
+
+    /*
+    /// <summary>
+    /// Rotates the specified map coordinates depending on current map rotation angle
+    /// </summary>
+    /// <param name="position"></param>
+    /// <returns></returns>
+    private Vector2 RotateCoordinates(Vector2 position)
+    {
+        return RotateCoordinates((int)position.X, (int)position.Y);
+    }
+
+    /// <summary>
+    /// Rotates the specified map coordinates depending on current map rotation angle
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    private Vector2 RotateCoordinates(int x, int y)
+    {
+        // Get the active map layer
+        var tileLayer = GetLayer(ActiveLayer);
+
+        // Out of bounds?
+        if (x < 0 || y < 0 || x >= tileLayer.Width || y >= tileLayer.Height) return _outOfBounds;
+
+        // We'll assign to new variables as we may modify due to rotation
+        var newX = x;
+        var newY = y;
+
+        var mapWidth = (int)tileLayer.Width - 1;
+        var mapHeight = (int)tileLayer.Height - 1;
+
+        // Handle any requested rotation
+        switch (_rotationAngle)
+        {
+            case MapRotationAngle.Ninety:
+                {
+                    // When the map is rotated 90 degrees clockwise then:
+                    // x axis becomes the y axis
+                    // y axis becomes the inverted x axis
+                    newX = y;
+                    newY = mapWidth - x;
+                }
+                break;
+
+            case MapRotationAngle.OneHundredAndEighty:
+                {
+                    // When the map is rotated 180 degrees clockwise then:
+                    // x axis becomes inverted
+                    // y axis also becomes inverted
+                    newX = mapWidth - x;
+                    newY = mapHeight - y;
+                }
+                break;
+
+            case MapRotationAngle.TwoHundredAndSeventy:
+                {
+                    // When the map is rotated 270 degrees clockwise then:
+                    // x axis becomes the inverted y axis
+                    // y axis becomes the x axis
+                    newX = mapHeight - y;
+                    newY = x;
+                }
+                break;
+
+            case MapRotationAngle.None:
+            default: break;
+        }
+
+        // Out of bounds?
+        if (newX < 0 || newY < 0 || newX >= tileLayer.Width || newY >= tileLayer.Height) return _outOfBounds;
+
+        return new Vector2(newX, newY);
+    }*/
 
     /// <summary>
     /// Set a draw offset for when drawing the map

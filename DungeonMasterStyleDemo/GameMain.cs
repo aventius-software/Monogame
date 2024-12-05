@@ -108,6 +108,7 @@ namespace DungeonMasterStyleDemo
             GraphicsDevice.Clear(Color.Black);
 
             DrawDungeon();
+            //DrawTileMap();
             DrawInfo();
 
             base.Draw(gameTime);

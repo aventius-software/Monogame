@@ -48,37 +48,40 @@ internal class DungeonMapService : MapService
         }
 
         // Now we draw the dungeon walls, draw from furthest away first, up to closest
-        for (var depthOffset = _depthToDraw; depthOffset >= 0; depthOffset--)
+        for (var distanceOffset = _depthToDraw; distanceOffset >= 0; distanceOffset--)
         {
             // For each depth layer (further to closer) we draw a horizontal line of 'walls'
             for (var mapOffsetX = -_horizontalBlocksToDraw; mapOffsetX <= _horizontalBlocksToDraw; mapOffsetX++)
             {
-                // Get map 'offset' coordinates relative to our actual world/map position                
-                var mapDrawPositionX = (int)RotatedPosition.X + mapOffsetX;
-                var mapDrawPositionDepth = (int)RotatedPosition.Y - depthOffset;
+                // Get map 'offset' coordinates relative to our actual world/map position
+                var position = GetNewPositionFromOffset(Position, mapOffsetX, -distanceOffset);
+                var currentBlock = IsBlockingTile((int)position.X, (int)position.Y);
 
-                // Find if the tiles around this position are 'blocking' tile types
-                var currentBlock = IsBlockingTile(mapDrawPositionX, mapDrawPositionDepth);
-                var blockInFront = IsBlockingTile(mapDrawPositionX, mapDrawPositionDepth - 1);
-                var blockToTheLeft = IsBlockingTile(mapDrawPositionX - 1, mapDrawPositionDepth);
-                var blockToTheRight = IsBlockingTile(mapDrawPositionX + 1, mapDrawPositionDepth);
+                var frontPosition = GetNewPositionFromOffset(Position, mapOffsetX, -distanceOffset - 1);
+                var blockInFront = IsBlockingTile((int)frontPosition.X, (int)frontPosition.Y);
 
+                var leftPosition = GetNewPositionFromOffset(Position, mapOffsetX - 1, -distanceOffset);
+                var blockToTheLeft = IsBlockingTile((int)leftPosition.X, (int)leftPosition.Y);
+
+                var rightPosition = GetNewPositionFromOffset(Position, mapOffsetX + 1, -distanceOffset);
+                var blockToTheRight = IsBlockingTile((int)rightPosition.X, (int)rightPosition.Y);
+                
                 // If there is a block (wall) to the left of the player, draw a left side wall
                 if (blockToTheLeft && mapOffsetX <= 0)
                 {
-                    DrawLeftSideWall(depthOffset, mapOffsetX);
+                    DrawLeftSideWall(distanceOffset, mapOffsetX);
                 }
 
                 // If there is a block (wall) to the right of the player, draw a right side wall
                 if (blockToTheRight && mapOffsetX >= 0)
                 {
-                    DrawRightSideWall(depthOffset, mapOffsetX);
+                    DrawRightSideWall(distanceOffset, mapOffsetX);
                 }
 
                 // If there is a block (wall) in front of the player draw a front facing wall
                 if (blockInFront && !currentBlock)
                 {
-                    DrawFrontFacingWall(depthOffset, mapOffsetX);
+                    DrawFrontFacingWall(distanceOffset, mapOffsetX);
                 }
             }
         }
