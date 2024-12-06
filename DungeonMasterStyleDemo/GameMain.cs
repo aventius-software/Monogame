@@ -33,10 +33,9 @@ namespace DungeonMasterStyleDemo
             var shapeDrawingService = new ShapeDrawingService(GraphicsDevice);
 
             // Load the Tiled map
-            _dungeonMapService = new DungeonMapService(_spriteBatch, Content, shapeDrawingService, GraphicsDevice);
-            _dungeonMapService.LoadTiledMap("test map.tmx", "test tile atlas");
+            _dungeonMapService = new DungeonMapService(Content, shapeDrawingService, GraphicsDevice);
+            _dungeonMapService.LoadDungeonTiledMap("test map.tmx");
             _dungeonMapService.SetRotationAngle(MapRotationAngle.None);
-            _dungeonMapService.SetDrawOffset(new Vector2(200, 200));
             _dungeonMapService.AddBlockingTileID(2);
             _dungeonMapService.AddBlockingTileID(0);
 
@@ -108,7 +107,6 @@ namespace DungeonMasterStyleDemo
             GraphicsDevice.Clear(Color.Black);
 
             DrawDungeon();
-            //DrawTileMap();
             DrawInfo();
 
             base.Draw(gameTime);
@@ -148,22 +146,6 @@ namespace DungeonMasterStyleDemo
             _spriteBatch.DrawString(_font, "To the left: " + _tileToTheLeft.ToString(), new Vector2(0, 120), Color.White);
             _spriteBatch.DrawString(_font, "To the right: " + _tileToTheRight.ToString(), new Vector2(0, 150), Color.White);
             _spriteBatch.DrawString(_font, "Map rotation angle: " + _dungeonMapService.RotationAngle.ToString(), new Vector2(0, 180), Color.White);
-
-            _spriteBatch.End();
-        }
-
-        public void DrawTileMap()
-        {
-            _spriteBatch.Begin(
-                sortMode: SpriteSortMode.Immediate,
-                blendState: null,
-                samplerState: SamplerState.PointClamp,
-                depthStencilState: null,
-                rasterizerState: null,
-                effect: null,
-                transformMatrix: null);
-
-            _dungeonMapService.DrawTileMap();
 
             _spriteBatch.End();
         }

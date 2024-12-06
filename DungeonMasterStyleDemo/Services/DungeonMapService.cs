@@ -1,8 +1,17 @@
-﻿using Microsoft.Xna.Framework;
+﻿using DotTiled;
+using DotTiled.Serialization;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
+using Color = Microsoft.Xna.Framework.Color;
 
 namespace DungeonMasterStyleDemo.Services;
+
+internal enum MapRotationAngle
+{
+    None, Ninety, OneHundredAndEighty, TwoHundredAndSeventy
+}
 
 /// <summary>
 /// A really rough dungeon (or maze?) map and map drawing service. You'd probably want
@@ -11,34 +20,53 @@ namespace DungeonMasterStyleDemo.Services;
 /// you'd also probably want (maybe) to size things different so side/front walls look
 /// similar in size depending on viewport size (or some other size)
 /// </summary>
-internal class DungeonMapService : MapService
-{    
-    private readonly int _depthPerspectiveBottomY = 20;    
+internal class DungeonMapService
+{
+    /// <summary>
+    /// Current position in the map
+    /// </summary>
+    public Vector2 Position => _position;
+
+    /// <summary>
+    /// Get the current angle of rotation for the map
+    /// </summary>
+    /// <returns></returns>
+    public MapRotationAngle RotationAngle => _rotationAngle;
+
+    private int _activeLayer = 0;
+    private readonly List<int> _blockingTileIDList = [];
+    private readonly ContentManager _contentManager;
+    private readonly int _depthPerspectiveBottomY = 20;
     private readonly int _depthPerspectiveTopY = 10;
     private readonly int _depthPerspectiveX = 40;
     private readonly int _depthToDraw = 6;
     private readonly GraphicsDevice _graphicsDevice;
     private readonly int _horizontalBlocksToDraw = 12; // Should calculate this dynamically really
+    private Vector2 _position = Vector2.Zero;
+    private MapRotationAngle _rotationAngle = MapRotationAngle.None;
     private readonly ShapeDrawingService _shapeDrawingService;
+    private Map _tiledMap;
 
-    public DungeonMapService(SpriteBatch spriteBatch, ContentManager contentManager, ShapeDrawingService shapeDrawingService, GraphicsDevice graphicsDevice) : base(spriteBatch, contentManager)
+    public DungeonMapService(ContentManager contentManager, ShapeDrawingService shapeDrawingService, GraphicsDevice graphicsDevice)
     {
+        _contentManager = contentManager;
         _shapeDrawingService = shapeDrawingService;
         _graphicsDevice = graphicsDevice;
     }
 
     /// <summary>
-    /// Draw the tile map
+    /// Add the id of tile to the list of blocking tile id's
     /// </summary>
-    public void DrawTileMap()
+    /// <param name="id"></param>
+    public void AddBlockingTileID(int id)
     {
-        base.Draw();
+        if (!_blockingTileIDList.Contains(id)) _blockingTileIDList.Add(id);
     }
 
     /// <summary>
     /// Draw the dungeon
     /// </summary>
-    public override void Draw()
+    public void Draw()
     {
         // First we draw the floor and ceiling first
         for (var depthOffset = _depthToDraw; depthOffset >= 0; depthOffset--)
@@ -54,8 +82,8 @@ internal class DungeonMapService : MapService
             for (var mapOffsetX = -_horizontalBlocksToDraw; mapOffsetX <= _horizontalBlocksToDraw; mapOffsetX++)
             {
                 // Get map 'offset' coordinates relative to our actual world/map position
-                var position = GetNewPositionFromOffset(Position, mapOffsetX, -distanceOffset);
-                var currentBlock = IsBlockingTile((int)position.X, (int)position.Y);
+                var currentPosition = GetNewPositionFromOffset(Position, mapOffsetX, -distanceOffset);
+                var currentBlock = IsBlockingTile((int)currentPosition.X, (int)currentPosition.Y);
 
                 var frontPosition = GetNewPositionFromOffset(Position, mapOffsetX, -distanceOffset - 1);
                 var blockInFront = IsBlockingTile((int)frontPosition.X, (int)frontPosition.Y);
@@ -65,7 +93,7 @@ internal class DungeonMapService : MapService
 
                 var rightPosition = GetNewPositionFromOffset(Position, mapOffsetX + 1, -distanceOffset);
                 var blockToTheRight = IsBlockingTile((int)rightPosition.X, (int)rightPosition.Y);
-                
+
                 // If there is a block (wall) to the left of the player, draw a left side wall
                 if (blockToTheLeft && mapOffsetX <= 0)
                 {
@@ -246,5 +274,315 @@ internal class DungeonMapService : MapService
     private float GetDepthPercentage(int depth)
     {
         return ((1f * depth) % (_depthToDraw + 2)) / (_depthToDraw + 2);
+    }
+
+    /// <summary>
+    /// Returns the specified tile layer, or the first if no argument value is specified
+    /// </summary>
+    /// <param name="layerNumber"></param>
+    /// <returns></returns>
+    private TileLayer GetLayer(int layerNumber = 0) => (TileLayer)_tiledMap.Layers[layerNumber];
+
+    /// <summary>
+    /// Returns a new position relative to the specified position, calculated using the offsets for x and y
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="offsetX"></param>
+    /// <param name="offsetY"></param>
+    /// <returns></returns>
+    private Vector2 GetNewPositionFromOffset(Vector2 position, int offsetX, int offsetY)
+    {
+        var newX = (int)position.X;
+        var newY = (int)position.Y;
+
+        switch (_rotationAngle)
+        {
+            case MapRotationAngle.Ninety:
+                {
+                    // When the map is rotated 90 degrees clockwise then:
+                    // x axis becomes the y axis
+                    // y axis becomes the inverted x axis
+                    newX -= offsetY;
+                    newY += offsetX;
+                }
+                break;
+
+            case MapRotationAngle.OneHundredAndEighty:
+                {
+                    // When the map is rotated 180 degrees clockwise then:
+                    // x axis becomes inverted
+                    // y axis also becomes inverted
+                    newX -= offsetX;
+                    newY -= offsetY;
+                }
+                break;
+
+            case MapRotationAngle.TwoHundredAndSeventy:
+                {
+                    // When the map is rotated 270 degrees clockwise then:
+                    // x axis becomes the inverted y axis
+                    // y axis becomes the x axis
+                    newX += offsetY;
+                    newY -= offsetX;
+                }
+                break;
+
+            case MapRotationAngle.None:
+                {
+                    // No rotation, so just add the offsets
+                    newX += offsetX;
+                    newY += offsetY;
+                }
+                break;
+
+            default: break;
+        }
+
+        return new Vector2(newX, newY);
+    }
+
+    /// <summary>
+    /// Returns the tile id at the current map position
+    /// </summary>
+    /// <returns></returns>
+    public int GetTileAtPosition() => GetTileAtPosition((int)_position.X, (int)_position.Y);
+
+    /// <summary>
+    /// Returns the tile id for the specified layer at the specified map position
+    /// </summary>
+    /// <param name="position"></param>
+    /// <returns></returns>
+    public int GetTileAtPosition(Vector2 position) => GetTileAtPosition((int)position.X, (int)position.Y);
+
+    /// <summary>
+    /// Returns the tile id for the specified layer at the specified map position
+    /// </summary>    
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    public int GetTileAtPosition(int x, int y)
+    {
+        // Get the active map layer
+        var tileLayer = GetLayer(_activeLayer);
+
+        // Out of bounds?
+        if (x < 0 || y < 0 || x >= tileLayer.Width || y >= tileLayer.Height) return 0;
+
+        // Calculate the index of the request tile in the map data
+        var index = (y * tileLayer.Width) + x;
+
+        // Otherwise return the tile
+        return (int)tileLayer.Data.Value.GlobalTileIDs.Value[index];
+    }
+
+    /// <summary>
+    /// Get the tile above the current position, optionally offset by the specified number of tiles
+    /// </summary>
+    /// <param name="tileOffset"></param>
+    /// <returns></returns>
+    public int GetTileAbove(int tileOffset = 1)
+    {
+        return GetTileAtPosition(GetNewPositionFromOffset(_position, 0, -tileOffset));
+    }
+
+    /// <summary>
+    /// Get the tile below the current position, optionally offset by the specified number of tiles
+    /// </summary>
+    /// <param name="tileOffset"></param>
+    /// <returns></returns>
+    public int GetTileBelow(int tileOffset = 1)
+    {
+        return GetTileAtPosition(GetNewPositionFromOffset(_position, 0, tileOffset));
+    }
+
+    /// <summary>
+    /// Get the tile to the left of the current position, optionally offset by the specified number of tiles
+    /// </summary>
+    /// <param name="tileOffset"></param>
+    /// <returns></returns>
+    public int GetTileToTheLeft(int tileOffset = 1)
+    {
+        return GetTileAtPosition(GetNewPositionFromOffset(_position, -tileOffset, 0));
+    }
+
+    /// <summary>
+    /// Get the tile to the right of the current position, optionally offset by the specified number of tiles
+    /// </summary>
+    /// <param name="tileOffset"></param>
+    /// <returns></returns>
+    public int GetTileToTheRight(int tileOffset = 1)
+    {
+        return GetTileAtPosition(GetNewPositionFromOffset(_position, tileOffset, 0));
+    }
+
+    /// <summary>
+    /// Returns true if the tile above the current position is a blocking tile
+    /// </summary>
+    /// <returns></returns>
+    public bool IsBlockedAbove()
+    {
+        return IsBlockingTile(GetTileAbove());
+    }
+
+    /// <summary>
+    /// Returns true if the tile below the current position is a blocking tile
+    /// </summary>
+    /// <returns></returns>
+    public bool IsBlockedBelow()
+    {
+        return IsBlockingTile(GetTileBelow());
+    }
+
+    /// <summary>
+    /// Returns true if the tile to the left of the current position is a blocking tile
+    /// </summary>
+    /// <returns></returns>
+    public bool IsBlockedToTheLeft()
+    {
+        return IsBlockingTile(GetTileToTheLeft());
+    }
+
+    /// <summary>
+    /// Returns true if the tile to the right of the current position is a blocking tile
+    /// </summary>
+    /// <returns></returns>
+    public bool IsBlockedToTheRight()
+    {
+        return IsBlockingTile(GetTileToTheRight());
+    }
+
+    /// <summary>
+    /// Returns true if the specified tile ID is a blocking tile ID
+    /// </summary>
+    /// <param name="tileID"></param>
+    /// <returns></returns>
+    private bool IsBlockingTile(int tileID) => _blockingTileIDList.Contains(tileID);
+
+    /// <summary>
+    /// Returns true if the specified tile at the specified map position is a blocking tile
+    /// </summary>
+    /// <param name="tileID"></param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    private bool IsBlockingTile(int x, int y) => IsBlockingTile(GetTileAtPosition(x, y));
+
+    /// <summary>
+    /// Load a Tiled map for the dungeon
+    /// </summary>
+    /// <param name="tiledMapPath"></param>    
+    public void LoadDungeonTiledMap(string tiledMapPath)
+    {
+        var loader = Loader.Default();
+        _tiledMap = loader.LoadMap(_contentManager.RootDirectory + "/" + tiledMapPath);
+    }
+
+    /// <summary>
+    /// Move down from the current position by the specified number of tiles
+    /// </summary>
+    /// <param name="numberOfTiles"></param>
+    public void MoveDown(int numberOfTiles = 1)
+    {
+        MoveTo(GetNewPositionFromOffset(_position, 0, numberOfTiles));
+    }
+
+    /// <summary>
+    /// Move left from the current position by the specified number of tiles
+    /// </summary>
+    /// <param name="numberOfTiles"></param>
+    public void MoveLeft(int numberOfTiles = 1)
+    {
+        MoveTo(GetNewPositionFromOffset(_position, -numberOfTiles, 0));
+    }
+
+    /// <summary>
+    /// Move right from the current position by the specified number of tiles
+    /// </summary>
+    /// <param name="numberOfTiles"></param>
+    public void MoveRight(int numberOfTiles = 1)
+    {
+        MoveTo(GetNewPositionFromOffset(_position, numberOfTiles, 0));
+    }
+
+    /// <summary>
+    /// Move to the specified position in the map
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    public void MoveTo(int x, int y)
+    {
+        if (!IsBlockingTile(x, y)) _position = new Vector2(x, y);
+    }
+
+    /// <summary>
+    /// Move to the specified position in the map
+    /// </summary>
+    /// <param name="position"></param>
+    public void MoveTo(Vector2 position)
+    {
+        if (!IsBlockingTile((int)position.X, (int)position.Y)) _position = position;
+    }
+
+    /// <summary>
+    /// Move up from the current position by the specified number of tiles
+    /// </summary>
+    /// <param name="numberOfTiles"></param>
+    public void MoveUp(int numberOfTiles = 1)
+    {
+        MoveTo(GetNewPositionFromOffset(_position, 0, -numberOfTiles));
+    }
+
+    /// <summary>
+    /// Rotates the map anticlockwise 90 degrees from its current angle of rotation
+    /// </summary>
+    public void RotateAnticlockwise()
+    {
+        switch (_rotationAngle)
+        {
+            case MapRotationAngle.None:
+                _rotationAngle = MapRotationAngle.TwoHundredAndSeventy;
+                break;
+            case MapRotationAngle.Ninety:
+                _rotationAngle = MapRotationAngle.None;
+                break;
+            case MapRotationAngle.OneHundredAndEighty:
+                _rotationAngle = MapRotationAngle.Ninety;
+                break;
+            case MapRotationAngle.TwoHundredAndSeventy:
+                _rotationAngle = MapRotationAngle.OneHundredAndEighty;
+                break;
+        };
+    }
+
+    /// <summary>
+    /// Rotates the map clockwise 90 degrees from its current angle of rotation
+    /// </summary>
+    public void RotateClockwise()
+    {
+        switch (_rotationAngle)
+        {
+            case MapRotationAngle.None:
+                _rotationAngle = MapRotationAngle.Ninety;
+                break;
+            case MapRotationAngle.Ninety:
+                _rotationAngle = MapRotationAngle.OneHundredAndEighty;
+                break;
+            case MapRotationAngle.OneHundredAndEighty:
+                _rotationAngle = MapRotationAngle.TwoHundredAndSeventy;
+                break;
+            case MapRotationAngle.TwoHundredAndSeventy:
+                _rotationAngle = MapRotationAngle.None;
+                break;
+        };
+    }
+
+    /// <summary>
+    /// Set the rotation angle in increments of 90 degrees, affects the drawing 
+    /// of the map and retrieval of map tiles data from the map
+    /// </summary>
+    /// <param name="rotationAngle"></param>
+    public void SetRotationAngle(MapRotationAngle rotationAngle)
+    {
+        _rotationAngle = rotationAngle;
     }
 }
