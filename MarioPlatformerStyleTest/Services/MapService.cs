@@ -72,9 +72,9 @@ internal class MapService
         }
 
         // Draw the relevant tiles on screen
-        for (int row = _tileRowPositionInTheWorld; row < _tileRowPositionInTheWorld + rowsToDraw; row++)
+        for (int row = _tileRowPositionInTheWorld; row <= _tileRowPositionInTheWorld + rowsToDraw; row++)
         {
-            for (int column = _tileColumnPositionInTheWorld; column < _tileColumnPositionInTheWorld + colsToDraw; column++)
+            for (int column = _tileColumnPositionInTheWorld; column <= _tileColumnPositionInTheWorld + colsToDraw; column++)
             {
                 // Don't bother if the row/column position is out of bounds of the map
                 if (column < 0 || row < 0 || column >= layer.Width || row >= layer.Height) continue;
