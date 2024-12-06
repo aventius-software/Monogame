@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiledMapsAndAetherPhysics",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Basic3DCubeTest", "Basic3DCubeTest\Basic3DCubeTest.csproj", "{B43705A0-7E03-44C0-B310-D074D89E4A96}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DungeonMasterStyleDemo", "DungeonMasterStyleDemo\DungeonMasterStyleDemo.csproj", "{807A95AE-2961-4CA1-9E4A-A54847916925}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -106,6 +108,10 @@ Global
 		{B43705A0-7E03-44C0-B310-D074D89E4A96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B43705A0-7E03-44C0-B310-D074D89E4A96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B43705A0-7E03-44C0-B310-D074D89E4A96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{807A95AE-2961-4CA1-9E4A-A54847916925}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{807A95AE-2961-4CA1-9E4A-A54847916925}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{807A95AE-2961-4CA1-9E4A-A54847916925}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{807A95AE-2961-4CA1-9E4A-A54847916925}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
