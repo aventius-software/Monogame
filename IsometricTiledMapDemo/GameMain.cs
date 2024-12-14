@@ -13,6 +13,7 @@ public class GameMain : Game
     private IsometricTiledMapService _isometricMapService;
     private Point _mousePosition;
     private Vector2 _position;
+    private Vector3 _selectedTile;
     private SpriteBatch _spriteBatch;
 
     public GameMain()
@@ -85,7 +86,7 @@ public class GameMain : Game
         _mousePosition = Mouse.GetState().Position;
         var worldMouse = _mousePosition + _camera.Position.ToPoint();
 
-        _isometricMapService.HighlightTile(worldMouse.ToVector2());
+        _selectedTile = _isometricMapService.HighlightTile(worldMouse.ToVector2());
 
         base.Update(gameTime);
     }
@@ -110,7 +111,8 @@ public class GameMain : Game
 
         _spriteBatch.Begin();
         _spriteBatch.DrawString(_font, $"Mouse: {_mousePosition.X}, {_mousePosition.Y}", new Vector2(0, 0), Color.White);
-        _spriteBatch.DrawString(_font, $"Camera: {_camera.Position.X}, {_camera.Position.Y}", new Vector2(0, 24), Color.White);
+        _spriteBatch.DrawString(_font, $"Camera: {_camera.Position.X}, {_camera.Position.Y}", new Vector2(0, 16), Color.White);
+        _spriteBatch.DrawString(_font, $"Selected: {_selectedTile.X}, {_selectedTile.Y}, {_selectedTile.Z}", new Vector2(0, 32), Color.White);
         _spriteBatch.End();
 
         base.Draw(gameTime);
