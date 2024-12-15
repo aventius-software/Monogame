@@ -53,17 +53,17 @@ internal class IsometricTiledMapService
                 { 1,1,1,1,1 },
             },
             {
-                { 0,0,0,0,0 },
+                { 1,1,0,0,1 },
                 { 0,0,0,0,0 },
                 { 0,0,0,0,0 },
                 { 0,0,0,0,0 },
                 { 0,0,0,0,0 }
             },
             {
+                { 0,0,0,0,1 },
                 { 0,0,0,0,0 },
                 { 0,0,0,0,0 },
-                { 0,0,0,0,0 },
-                { 0,0,0,0,0 },
+                { 0,0,0,1,0 },
                 { 0,0,0,0,0 }
             }
         };
@@ -110,7 +110,7 @@ internal class IsometricTiledMapService
                     {
                         var colour = Color.White;
 
-                        if (_selectedTile.X == x && _selectedTile.Y == y)// && _selectedTile.Z == elevation)
+                        if ((int)_selectedTile.X == x && (int)_selectedTile.Y == y && _selectedTile.Z == elevation)
                         {
                             colour = Color.Red;
                         }
@@ -124,10 +124,10 @@ internal class IsometricTiledMapService
             }
         }
        
-        _spriteBatch.Draw(
-            texture: _texture,
-            position: MapToScreenCoordinates(new Point((int)_selectedTile.X, (int)_selectedTile.Y), 0).ToVector2(),
-            color: Color.Blue);
+        //_spriteBatch.Draw(
+        //    texture: _texture,
+        //    position: MapToScreenCoordinates(new Point((int)_selectedTile.X, (int)_selectedTile.Y), 0).ToVector2(),
+        //    color: Color.Blue);
     }
 
     public Vector3 HighlightTile(Point screenCoordinates)
@@ -157,32 +157,31 @@ internal class IsometricTiledMapService
         // When at a negative position we're offset by, so -0.1 is actually coordinate -1, so adjust for this
         if (flatMapCoordinates.X < 0) flatMapCoordinates.X = (int)Math.Floor(flatMapCoordinates.X);
         if (flatMapCoordinates.Y < 0) flatMapCoordinates.Y = (int)Math.Floor(flatMapCoordinates.Y);
-        
+
         // At this point we're effectively looking at the tile map where elevation (Z) is zero. However, if
         // other tiles are at further coordinates X,Y but higher elevation (Z) position then those tiles will
         // appear at the same screen position as the tile at our current calculated map X,Y position, so we
         // need to move closer to the camera in the X,Y and check for higher tiles (Z) at those X,Y coordinates
         // then if we find one with the same screen position, then that 'higher' elevation tile is the one that
         // is selected (as its hiding the lower tiles behind it)                
-        //_selectedTileOffset = new Vector3(flatMapCoordinates.ToVector2(), 0);// + (Vector2.One * (MapDepth - 1)), 0);//new Vector3(newY, newX, 0);
 
         // Work backwards from new starting position, checking the elevation
         // at each position to see if a tile is there...
-        //for (var z = MapDepth - 1; z > 1; z--)
-        //{
-        //    // Move to the current offset position
-        //    var offsetPosition = new Vector3(flatMapCoordinates.ToVector2() + (Vector2.One * z), 0);
+        for (var z = MapDepth - 1; z >= 1; z--)
+        {
+            // Move to the current offset position
+            var offsetPosition = flatMapCoordinates + new Vector3(z, z, 0);
 
-        //    // If we're out of map bounds at this position, skip to the checking the next position...
-        //    if (offsetPosition.X < 0 || offsetPosition.Y < 0 || offsetPosition.X >= MapWidth || offsetPosition.Y >= MapHeight) continue;
+            // If we're out of map bounds at this position, skip to the checking the next position...
+            if (offsetPosition.X < 0 || offsetPosition.Y < 0 || offsetPosition.X >= MapWidth || offsetPosition.Y >= MapHeight) continue;
 
-        //    // Otherwise, if there is a tile at this X,Y position and elevation (Z)...
-        //    if (_tiles[z, (int)offsetPosition.X, (int)offsetPosition.Y] != 0)
-        //    {
-        //        // Then we selected it ;-)
-        //        return new Vector3((int)offsetPosition.X, (int)offsetPosition.Y, z);
-        //    }
-        //}
+            // Otherwise, if there is a tile at this X,Y position and elevation (Z)...
+            if (_tiles[z, (int)offsetPosition.X, (int)offsetPosition.Y] > 0)
+            {
+                // Then we selected it ;-)
+                return new Vector3((int)offsetPosition.X, (int)offsetPosition.Y, z);
+            }
+        }
 
         // If we reached here, the best match was the original tile at zero elevation
         return flatMapCoordinates;
