@@ -15,6 +15,7 @@ public class GameMain : Game
     private Vector2 _position;
     private Vector3 _selectedTile;
     private SpriteBatch _spriteBatch;
+    private Vector3 _tileOver;
 
     public GameMain()
     {
@@ -38,7 +39,7 @@ public class GameMain : Game
         _font = Content.Load<SpriteFont>("font");
 
         // Set the origin for the camera
-        var origin = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
+        var origin = new Point(GraphicsDevice.Viewport.Width / 2, 128);// GraphicsDevice.Viewport.Height / 2);
 
         // Setup isometric map service        
         _isometricMapService = new IsometricTiledMapService(Content, _spriteBatch)
@@ -86,7 +87,8 @@ public class GameMain : Game
         _mousePosition = Mouse.GetState().Position;
         var worldMouse = _mousePosition + _camera.Position.ToPoint();
 
-        _selectedTile = _isometricMapService.HighlightTile(worldMouse.ToVector2());
+        _isometricMapService.HighlightTile(worldMouse);
+        _tileOver = _isometricMapService.TileOver;
 
         base.Update(gameTime);
     }
@@ -113,6 +115,7 @@ public class GameMain : Game
         _spriteBatch.DrawString(_font, $"Mouse: {_mousePosition.X}, {_mousePosition.Y}", new Vector2(0, 0), Color.White);
         _spriteBatch.DrawString(_font, $"Camera: {_camera.Position.X}, {_camera.Position.Y}", new Vector2(0, 16), Color.White);
         _spriteBatch.DrawString(_font, $"Selected: {_selectedTile.X}, {_selectedTile.Y}, {_selectedTile.Z}", new Vector2(0, 32), Color.White);
+        _spriteBatch.DrawString(_font, $"Over: {_tileOver.X}, {_tileOver.Y}, {_tileOver.Z}", new Vector2(0, 48), Color.White);
         _spriteBatch.End();
 
         base.Draw(gameTime);
