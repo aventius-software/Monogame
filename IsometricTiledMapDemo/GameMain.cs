@@ -12,7 +12,7 @@ public class GameMain : Game
     private readonly GraphicsDeviceManager _graphics;
     private IsometricTiledMapService _isometricMapService;
     private Point _mousePosition;
-    private Vector2 _position;    
+    private Vector2 _position;
     private SpriteBatch _spriteBatch;
     private Vector3 _tileOver;
 
@@ -46,6 +46,7 @@ public class GameMain : Game
             Origin = origin
         };
 
+        // Load a Tiled isometric map
         _isometricMapService.LoadTiledMap("tile-block-map.tmx", "tile-block");
 
         // Create a camera
@@ -111,7 +112,7 @@ public class GameMain : Game
         // Draw some debugging info
         _spriteBatch.Begin();
         _spriteBatch.DrawString(_font, $"Mouse: {_mousePosition.X}, {_mousePosition.Y}", new Vector2(0, 0), Color.White);
-        _spriteBatch.DrawString(_font, $"Camera: {_camera.Position.X}, {_camera.Position.Y}", new Vector2(0, 16), Color.White);        
+        _spriteBatch.DrawString(_font, $"Camera: {_camera.Position.X}, {_camera.Position.Y}", new Vector2(0, 16), Color.White);
         _spriteBatch.DrawString(_font, $"Over: {_tileOver.X}, {_tileOver.Y}, {_tileOver.Z}", new Vector2(0, 32), Color.White);
         _spriteBatch.End();
 
