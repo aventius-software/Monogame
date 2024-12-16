@@ -7,6 +7,8 @@ A Visual Studio 2022 solution with various example projects for Monogame related
 - An example of how to use dependency injection with Monogame
 - How to use the DotTiled library to work with Tiled maps
 - Drawing simple shapes reasonably efficiently
+- Dungeon master (classic 80's game from the 16bit era) style demo
+- Isometric 2D demo using Tiled maps and a camera
 - Mario style platformer basic demo, using DI and Morpeh ECS
 - Example of how to use the Morpeh ECS library with Monogame (uses the same code as the 2D top down car physics example, but refactoring the code to work with an ECS)
 - One way of doing an Outrun style track in Monogame
