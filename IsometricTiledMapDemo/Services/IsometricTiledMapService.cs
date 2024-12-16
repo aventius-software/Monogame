@@ -1,7 +1,10 @@
-﻿using Microsoft.Xna.Framework;
+﻿using DotTiled;
+using DotTiled.Serialization;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using Color = Microsoft.Xna.Framework.Color;
 
 namespace IsometricTiledMapDemo.Services;
 
@@ -17,9 +20,9 @@ namespace IsometricTiledMapDemo.Services;
 internal class IsometricTiledMapService
 {
     public Point Origin { get; set; } = Point.Zero;
-    public int TileMapDepth => _tileMap.GetLength(0);
-    public int TileMapHeight => _tileMap.GetLength(2);
-    public int TileMapWidth => _tileMap.GetLength(1);    
+    public int TileMapDepth => (int)_tiledMap.Layers.Count;// _tileMap.GetLength(0);
+    public int TileMapHeight => (int)_tiledMap.Height;// _tileMap.GetLength(2);
+    public int TileMapWidth => (int)_tiledMap.Width; // _tileMap.GetLength(1);    
     public int WorldWidth { get; private set; }
     public int WorldHeight { get; private set; }
 
@@ -27,9 +30,11 @@ internal class IsometricTiledMapService
     private Vector3 _selectedTile;
     private readonly SpriteBatch _spriteBatch;
     private readonly Texture2D _texture;
-    private readonly int _tileBlockHeight;
-    private readonly int _tileBlockWidth;
+    private int _tileBlockHeight;
+    private int _tileBlockWidth;
     private readonly int[,,] _tileMap;
+    private Map _tiledMap;
+    private Texture2D _tilesetTexture;
     private Matrix _translationMatrix;
     private Matrix _transformationMatrixInverted;
 
@@ -38,7 +43,7 @@ internal class IsometricTiledMapService
         _contentManager = contentManager;
         _spriteBatch = spriteBatch;
 
-        _texture = _contentManager.Load<Texture2D>("tile");
+        _texture = _contentManager.Load<Texture2D>("tile-block");
 
         // We're using a tile block sprite instead of a flat 'diamond' tile
         _tileBlockWidth = _texture.Width;
@@ -101,30 +106,85 @@ internal class IsometricTiledMapService
                 for (int x = 0; x < TileMapWidth; x++)
                 {
                     // Get the tile at this map position
-                    var tile = _tileMap[elevation, x, y];
+                    //var tile = _tileMap[elevation, x, y];
+                    var tile = GetTileAtPosition(x, y, elevation);
 
                     // If there is a tile here and not empty space...
-                    if (tile == 1)
+                    if (tile == 0) continue;
+                                                                
+                    // By default, use white
+                    var colour = Color.White;
+
+                    // If there is a 'selected' tile at these coordinates...
+                    if ((int)_selectedTile.X == x && (int)_selectedTile.Y == y && _selectedTile.Z == elevation)
                     {
-                        // By default, use white
-                        var colour = Color.White;
-
-                        // If there is a 'selected' tile at these coordinates...
-                        if ((int)_selectedTile.X == x && (int)_selectedTile.Y == y && _selectedTile.Z == elevation)
-                        {
-                            // Highlight it in red
-                            colour = Color.Red;
-                        }
-
-                        // Draw the map tile at this position and elevation
-                        _spriteBatch.Draw(
-                            texture: _texture,
-                            position: MapToScreenCoordinates(new Point(x, y), elevation).ToVector2(),
-                            color: colour);
+                        // Highlight it in red
+                        colour = Color.Red;
                     }
+
+                    // Get the correct tile 'image' rectangle from the tileset
+                    var sourceRectangle = GetImageSourceRectangleForTile(tile);
+
+                    // Draw the map tile at this position and elevation
+                    _spriteBatch.Draw(
+                        texture: _tilesetTexture,
+                        position: MapToScreenCoordinates(new Point(x, y), elevation).ToVector2(),
+                        sourceRectangle: sourceRectangle,
+                        color: colour);                   
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Helper method to work out the source rectangle for the specified tile so we can
+    /// pick out the correct texture to use when drawing the tile
+    /// </summary>    
+    /// <param name="gid"></param>
+    /// <param name="tileSetId"></param>
+    /// <returns></returns>
+    private Rectangle GetImageSourceRectangleForTile(uint gid, int tileSetId = 0)
+    {
+        var tileId = (int)gid - 1;
+        var tileset = _tiledMap.Tilesets[tileSetId];
+
+        var row = tileId / ((int)tileset.TileCount / (int)tileset.Columns);
+        var column = tileId % (int)tileset.Columns;
+
+        var tileWidth = (int)tileset.TileWidth;
+        var tileHeight = (int)tileset.TileHeight;
+        var x = tileWidth * column;
+        var y = tileHeight * row;
+
+        return new Rectangle(x, y, tileWidth, tileHeight);
+    }
+
+    /// <summary>
+    /// Returns the specified tile layer, or the first if no argument value is specified
+    /// </summary>
+    /// <param name="layerNumber"></param>
+    /// <returns></returns>
+    private TileLayer GetLayer(int layerNumber = 0) => (TileLayer)_tiledMap.Layers[layerNumber];
+
+    /// <summary>
+    /// Get the tile a the specified position in the map
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="z"></param>
+    /// <returns></returns>
+    private uint GetTileAtPosition(int x, int y, int z)
+    {
+        var tileLayer = GetLayer(z);
+
+        // Calculate the index of the request tile in the map data
+        var index = (y * tileLayer.Width) + x;
+
+        // If the index is out of bounds then just return 'no tile' (i.e. 0)
+        if (index >= tileLayer.Data.Value.GlobalTileIDs.Value.Length - 1 || index < 0) return 0;
+
+        // Otherwise return the tile
+        return tileLayer.Data.Value.GlobalTileIDs.Value[index];
     }
 
     /// <summary>
@@ -137,6 +197,73 @@ internal class IsometricTiledMapService
         _selectedTile = ScreenToMapCoordinates(screenCoordinates);
 
         return _selectedTile;
+    }
+
+
+    /// <summary>
+    /// Load a Tiled map
+    /// </summary>
+    /// <param name="tiledMapPath"></param>
+    /// <param name="tileAtlasName"></param>
+    public void LoadTiledMap(string tiledMapPath, string tileAtlasName)
+    {
+        var loader = Loader.Default();
+        _tiledMap = loader.LoadMap(_contentManager.RootDirectory + "/" + tiledMapPath);
+        _tilesetTexture = _contentManager.Load<Texture2D>(tileAtlasName);
+
+        var tileset = _tiledMap.Tilesets[0];
+        _tileBlockWidth = (int)tileset.TileWidth;// _texture.Width;
+        _tileBlockHeight = (int)tileset.TileHeight;// _texture.Height;
+
+        
+        var tileWidth = (int)tileset.TileWidth;
+        var tileHeight = (int)tileset.TileHeight;
+
+        /*
+        _tileMap = new int[,,]
+        {
+            {
+                { 1,1,1,1,1 },
+                { 1,1,1,1,1 },
+                { 1,1,1,1,1 },
+                { 1,1,1,1,1 },
+                { 1,1,1,1,1 },
+            },
+            {
+                { 1,1,0,0,1 },
+                { 0,0,0,0,0 },
+                { 0,0,0,0,0 },
+                { 0,0,0,0,0 },
+                { 0,0,0,0,0 }
+            },
+            {
+                { 0,0,0,0,1 },
+                { 0,0,0,0,0 },
+                { 0,0,0,0,0 },
+                { 0,0,0,1,0 },
+                { 0,0,0,0,0 }
+            }
+        };
+        */
+
+        WorldWidth = (int)_tiledMap.Width * _tileBlockWidth;// _tileMap.GetLength(0) * _tileBlockWidth;
+        WorldHeight = (int)_tiledMap.Height * _tileBlockHeight;// _tileMap.GetLength(1) * _tileBlockHeight;
+
+        // Get dimensions for a 'flat' version of our tile block
+        var w = _tileBlockWidth / 2;
+        var h = _tileBlockHeight / 4;
+
+        // We'll use a matrix and its inverse to translate coordinates. See the link below for some of the maths behind this
+        // https://gamedev.stackexchange.com/questions/34787/how-to-convert-mouse-coordinates-to-isometric-indexes/34791#34791
+        _translationMatrix = new Matrix(
+            m11: w, m21: -w, m31: 0, m41: 0,
+            m12: h, m22: h, m32: 0, m42: 0,
+            m13: 0, m23: 0, m33: 1, m43: 0,
+            m14: 0, m24: 0, m34: 0, m44: 1
+        );
+
+        // Get the inverse of the matrix to translate coordinates back
+        _transformationMatrixInverted = Matrix.Invert(_translationMatrix);
     }
 
     /// <summary>

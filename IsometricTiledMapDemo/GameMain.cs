@@ -46,6 +46,8 @@ public class GameMain : Game
             Origin = origin
         };
 
+        _isometricMapService.LoadTiledMap("tile-block-map.tmx", "tile-block");
+
         // Create a camera
         _camera = new Camera();
         _camera.SetWorldDimensions(new Vector2(_isometricMapService.WorldWidth, _isometricMapService.WorldHeight));
