@@ -39,6 +39,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DungeonMasterStyleDemo", "D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsometricTiledMapDemo", "IsometricTiledMapDemo\IsometricTiledMapDemo.csproj", "{E1947523-BDB9-4D16-A9F0-206621F8C0F3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleShaders", "SimpleShaders\SimpleShaders.csproj", "{5756FAFE-EC28-485B-93E0-D51CED8956A0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple2DLightingWithShaders", "Simple2DLightingWithShaders\Simple2DLightingWithShaders.csproj", "{C7B5C41E-A41D-44BD-916B-FEB9F4D7ADB5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -118,6 +122,14 @@ Global
 		{E1947523-BDB9-4D16-A9F0-206621F8C0F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1947523-BDB9-4D16-A9F0-206621F8C0F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1947523-BDB9-4D16-A9F0-206621F8C0F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5756FAFE-EC28-485B-93E0-D51CED8956A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5756FAFE-EC28-485B-93E0-D51CED8956A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5756FAFE-EC28-485B-93E0-D51CED8956A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5756FAFE-EC28-485B-93E0-D51CED8956A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7B5C41E-A41D-44BD-916B-FEB9F4D7ADB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7B5C41E-A41D-44BD-916B-FEB9F4D7ADB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7B5C41E-A41D-44BD-916B-FEB9F4D7ADB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7B5C41E-A41D-44BD-916B-FEB9F4D7ADB5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
