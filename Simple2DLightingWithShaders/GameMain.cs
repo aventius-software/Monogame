@@ -66,8 +66,10 @@ public class GameMain : Game
         // Now draw some light sources to the light sources render target
         DrawLightSourcesToRenderTarget();
 
-        // Pass parameters to our shader... give it the background 'texture' and the lighting 'texture'        
-        _lightingShader.Parameters["backgroundTexture"].SetValue(_backgroundRenderTarget);
+        // Pass parameters to our shader... note that the sprite batch 'draw' further down
+        // below will pass the background render target 'texture' as the first texture parameter
+        // to the shader, so we don't need to explicitly pass this parameter. We do need to pass
+        // the light sources render target 'texture' though as the 2nd parameter ;-)
         _lightingShader.Parameters["lightSourcesTexture"].SetValue(_lightSourcesRenderTarget);
 
         // If you want to give some light to the whole background, set this between 0 and 1
@@ -76,7 +78,7 @@ public class GameMain : Game
         // sources will have any effect or be seen...
         _lightingShader.Parameters["backgroundAmbientLightStrength"].SetValue(0.15f);
 
-        // Now, we draw the background render target to the screen, with our shader applied to it. The shader
+        // Now, we draw the background render target to the screen, with our shader applied. The shader
         // will apply the 'lighting' by mixing the light sources texture pixels colours with the background
         // texture pixels colours and hey presto, we've got some 'fake' 2D lighting ;-)
         _spriteBatch.Begin(effect: _lightingShader);
@@ -86,6 +88,9 @@ public class GameMain : Game
         base.Draw(gameTime);
     }
 
+    /// <summary>
+    /// Draw some 'light sources' to the light sources render target
+    /// </summary>
     private void DrawLightSourcesToRenderTarget()
     {
         // Draw some light sources to the light sources render target
@@ -124,7 +129,8 @@ public class GameMain : Game
     }
 
     /// <summary>
-    /// This just draws a load of tiles on the screen, but the background could be anything
+    /// This just draws a load of tiles on the background render target, but 
+    /// the background could be anything you want
     /// </summary>
     private void DrawTiledBackgroundToRenderTarget()
     {

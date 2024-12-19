@@ -7,11 +7,14 @@
 	#define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-// Strength of the background ambient light if no light present, values 0.0 to 1.0
+// Strength of the background ambient light if no light source is present, values 0.0 to 1.0
 float backgroundAmbientLightStrength;
 
-// The 2 textures we want details for
+// The sprite batch draw texture will be the first texture passed to the shader, so
+// we will assume this to be the background texture
 sampler backgroundTexture;
+
+// Next we need our texture containing all the light sources we've drawn to it...
 sampler lightSourcesTexture;
 
 float4 Simple2DLighting(float2 backgroundTextureCoordinates : TEXCOORD0) : COLOR0
@@ -40,7 +43,6 @@ float4 Simple2DLighting(float2 backgroundTextureCoordinates : TEXCOORD0) : COLOR
 	// background pixel colour and multiply by the light source pixel colour to get the final
 	// colour for our background texture pixel ;-)
     return backgroundPixelColour * lightSourcesPixelColour;
-
 }
 
 technique LightingDrawing
