@@ -1,44 +1,32 @@
-﻿#if OPENGL
-	#define SV_POSITION POSITION
-	#define VS_SHADERMODEL vs_3_0
+﻿#if OPENGL	
 	#define PS_SHADERMODEL ps_3_0
-#else
-	#define VS_SHADERMODEL vs_4_0_level_9_1
+#else	
 	#define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-Texture2D SpriteTexture;
+// Size of the pixels
+float PixelSize;
 
-sampler2D SpriteTextureSampler = sampler_state
+// Width and height of the texture
+float2 TextureDimensions;
+
+// This is the texture, gets passed to the shader by the sprite draw method
+sampler Texture;
+
+float4 Pixelate(float2 textureCoordinates : TEXCOORD0) : COLOR0
 {
-	Texture = <SpriteTexture>;
-};
-
-struct VertexShaderOutput
-{
-	float4 Position : SV_POSITION;
-	float4 Color : COLOR0;
-	float2 TextureCoordinates : TEXCOORD0;
-};
-
-float4 MainPS(VertexShaderOutput input) : COLOR
-{
-	float pixels = 64.0f;
-    float pixelation = 4.0f;
-    float mx = input.TextureCoordinates.x * pixels;
-    float my = input.TextureCoordinates.y * pixels;
-
-    float x = round(mx / pixelation) * pixelation;
-    float y = round(my / pixelation) * pixelation;
-    float2 coord = float2(x / pixels, y / pixels);
-
-    return tex2D(SpriteTextureSampler, coord);
+    // Adjust the texture coordinates so we get the same pixel position depending
+    // on the size of the pixelation requested (PixelSize) and the texture dimensions
+    float2 newTextureCoordinates = floor(textureCoordinates * TextureDimensions / PixelSize) * PixelSize / TextureDimensions;
+    
+    // Get the pixel colour of the texture at the adjusted coordinates
+    return tex2D(Texture, newTextureCoordinates);
 }
 
-technique SpriteDrawing
+technique PixelateTechnique
 {
 	pass P0
 	{
-		PixelShader = compile PS_SHADERMODEL MainPS();
-	}
+        PixelShader = compile PS_SHADERMODEL Pixelate();
+    }
 };

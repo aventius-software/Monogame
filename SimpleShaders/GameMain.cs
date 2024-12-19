@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Runtime.InteropServices;
 
 namespace SimpleShaders;
 
@@ -11,7 +12,8 @@ namespace SimpleShaders;
 /// https://marketplace.visualstudio.com/items?itemName=TimGJones.HLSLToolsforVisualStudio
 /// 
 /// Also you can play around using ShaderToy here which can be useful and there's lots of
-/// examples. Although can be complex examples https://www.shadertoy.com/
+/// examples. Although can be complex examples https://www.shadertoy.com/ and also try this
+/// cheatsheet for shader toy https://gist.github.com/markknol/d06c0167c75ab5c6720fe9083e4319e1
 /// 
 /// See also:
 /// 
@@ -19,10 +21,11 @@ namespace SimpleShaders;
 /// https://gamedev.net/tutorials/_/technical/apis-and-tools/2d-lighting-system-in-monogame-r4131/
 /// https://thebookofshaders.com/
 /// https://www.ronja-tutorials.com/
+/// https://github.com/butterw/bShaders
 /// </summary>
 public class GameMain : Game
 {
-    private float _cycleValue = 0f;
+    private float _cycleFloatValue = 0f;
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private Texture2D _spriteTexture1;
@@ -30,6 +33,7 @@ public class GameMain : Game
 
     private Effect _alterColourShader;
     private Effect _blendingTexturesShader;
+    private Effect _colourTintShader;
     private Effect _greyscaleShader;
     private Effect _minimalShader;
     private Effect _noiseShader;
@@ -65,6 +69,7 @@ public class GameMain : Game
         // Load shaders
         _alterColourShader = Content.Load<Effect>("Shaders/alter colour");
         _blendingTexturesShader = Content.Load<Effect>("Shaders/blending textures");
+        _colourTintShader = Content.Load<Effect>("Shaders/coloured tint");
         _greyscaleShader = Content.Load<Effect>("Shaders/greyscale");
         _minimalShader = Content.Load<Effect>("Shaders/minimal shader");
         _noiseShader = Content.Load<Effect>("Shaders/noise");
@@ -80,11 +85,10 @@ public class GameMain : Game
     {
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
-
-        // TODO: Add your update logic here
-        _cycleValue += 0.005f;
-        if (_cycleValue > 1) _cycleValue = 0;
-
+        
+        _cycleFloatValue += 0.005f;
+        if (_cycleFloatValue > 1) _cycleFloatValue = 0;
+        
         base.Update(gameTime);
     }
 
@@ -106,34 +110,59 @@ public class GameMain : Game
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
-        // 3. Draw blended textures        
-        _blendingTexturesShader.Parameters["blendingAmount"].SetValue(_cycleValue);
-        _blendingTexturesShader.Parameters["blendWithTexture"].SetValue(_spriteTexture2);
+        // 3. Draw texture with a coloured tint
+        _colourTintShader.Parameters["Colour"].SetValue(Color.Green.ToVector4());
+        _spriteBatch.Begin(effect: _colourTintShader);
+        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
+        _spriteBatch.End();
+        position.X += _spriteTexture1.Width;
+
+        // 4. Draw blended textures        
+        _blendingTexturesShader.Parameters["BlendingAmount"].SetValue(_cycleFloatValue);
+        _blendingTexturesShader.Parameters["BlendingTexture"].SetValue(_spriteTexture2);
         _spriteBatch.Begin(effect: _blendingTexturesShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
-        // 4. Draw texture with greyscale effect
+        // 5. Draw texture with greyscale effect
+        _greyscaleShader.Parameters["GreyscaleLevel"].SetValue(0.5f);
         _spriteBatch.Begin(effect: _greyscaleShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
-        // 5. Draw texture but entire texture pixels changed to same colour
+        // 6. Draw texture but entire texture pixels changed to same colour
         _spriteBatch.Begin(effect: _minimalShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
-        // 6. Draw texture but make partly transparent
-        _transparencyShader.Parameters["transparencyLevel"].SetValue(0.25f);
+        // 7. Noise
+        //_noiseShader.Parameters["iResolution"].SetValue(new Vector2(_spriteTexture1.Width, _spriteTexture1.Height)); // viewport resolution (in pixels)
+        //_noiseShader.Parameters["iTime"].SetValue(_cycleFloatValue * 10); // shader playback time (in seconds)
+        //_noiseShader.Parameters["iMouse"].SetValue(_cycleFloatValue * 10); // mouse pixel coords. xy: current (if MLB down), zw: click
+        _spriteBatch.Begin(effect: _noiseShader);
+        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
+        _spriteBatch.End();
+        position.X += _spriteTexture1.Width;
+
+        // 8. Draw texture with a pixelated effect
+        _pixelateShader.Parameters["PixelSize"].SetValue(_cycleFloatValue * 10);
+        _pixelateShader.Parameters["TextureDimensions"].SetValue(new Vector2(_spriteTexture1.Width, _spriteTexture1.Height));        
+        _spriteBatch.Begin(effect: _pixelateShader);
+        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
+        _spriteBatch.End();
+        position.X += _spriteTexture1.Width;
+
+        // 9. Draw texture but make partly transparent
+        _transparencyShader.Parameters["TransparencyLevel"].SetValue(0.25f);
         _spriteBatch.Begin(effect: _transparencyShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
         
-        // 7. Draw texture but add a sine wave style wobble to the pixels
+        // 10. Draw texture but add a sine wave style wobble to the pixels
         _spriteBatch.Begin(effect: _wavyShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();

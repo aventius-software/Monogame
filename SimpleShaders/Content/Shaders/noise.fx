@@ -1,48 +1,68 @@
 ﻿#if OPENGL
-	#define SV_POSITION POSITION
-	#define VS_SHADERMODEL vs_3_0
 	#define PS_SHADERMODEL ps_3_0
 #else
-	#define VS_SHADERMODEL vs_4_0_level_9_1
 	#define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-matrix WorldViewProjection;
+//float2 iResolution; // viewport resolution (in pixels)
+//float iTime; // shader playback time (in seconds)
+//float2 iMouse; // mouse pixel coords. xy: current (if MLB down), zw: click
 
-struct VertexShaderInput
+float3 hash3(float2 p)
 {
-	float4 Position : POSITION0;
-	float4 Color : COLOR0;
-};
-
-struct VertexShaderOutput
-{
-	float4 Position : SV_POSITION;
-	float4 Color : COLOR0;
-};
-
-VertexShaderOutput MainVS(in VertexShaderInput input)
-{
-	VertexShaderOutput output = (VertexShaderOutput)0;
-
-	output.Position = mul(input.Position, WorldViewProjection);
-	output.Color = input.Color;
-
-	return output;
+    float3 q = float3(dot(p, float2(127.1, 311.7)),
+				   dot(p, float2(269.5, 183.3)),
+				   dot(p, float2(419.2, 371.9)));
+    
+    return frac(sin(q) * 43758.5453);
 }
 
-float4 MainPS(VertexShaderOutput input) : COLOR
+float voronoise(in float2 p, float u, float v)
 {
-	return input.Color;
+    float k = 1.0 + 63.0 * pow(1.0 - v, 6.0);
+
+    float2 i = floor(p);
+    float2 f = frac(p);
+    
+    float2 a = float2(0.0, 0.0);
+    for (int y = -2; y <= 2; y++)
+        for (int x = -2; x <= 2; x++)
+        {
+            float2 g = float2(x, y);
+            float3 o = hash3(i + g) * float3(u, u, 1.0);
+            float2 d = g - f + o.xy;
+            float w = pow(1.0 - smoothstep(0.0, 1.414, length(d)), k);
+            a += float2(o.z * w, w);
+        }
+	
+    return a.x / a.y;
 }
 
-technique BasicColorDrawing
+float4 Noise(float2 textureCoordinates : TEXCOORD0) : COLOR0
+{
+    float2 uv = textureCoordinates;// / iResolution.xx;
+
+    float iTime = 4;
+    float2 p = 0.5 - 0.5 * cos(iTime + float2(0.0, 2.0));
+    
+    //if (iMouse.w > 0.001)
+    //    p = float2(0.0, 1.0) + float2(1.0, -1.0) * iMouse.xy / iResolution.xy;
+	
+    p = p * p * (3.0 - 2.0 * p);
+    p = p * p * (3.0 - 2.0 * p);
+    p = p * p * (3.0 - 2.0 * p);
+	
+    float f = voronoise(24.0 * uv, p.x, p.y);
+	
+    return float4(f, f, f, 1.0);
+}
+
+technique NoiseTechnique
 {
 	pass P0
-	{
-		VertexShader = compile VS_SHADERMODEL MainVS();
-		PixelShader = compile PS_SHADERMODEL MainPS();
-	}
+	{		
+        PixelShader = compile PS_SHADERMODEL Noise();
+    }
 };
 
 /*

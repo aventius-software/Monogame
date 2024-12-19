@@ -1,26 +1,29 @@
-﻿#if OPENGL
-    #define SV_POSITION POSITION
-    #define VS_SHADERMODEL vs_3_0
+﻿#if OPENGL    
     #define PS_SHADERMODEL ps_3_0
-#else
-    #define VS_SHADERMODEL vs_4_0_level_9_1
+#else    
     #define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-sampler spriteTexture;
+// This will be set by the sprite batch draw method texture
+sampler Texture;
 
-float4 MyPixelShaderFunction(float2 textureCoordinate : TEXCOORD0) : COLOR0
+// Just alter the texture pixel colours a bit
+float4 AlterColour(float2 textureCoordinate : TEXCOORD0) : COLOR0
 {
-    float4 colour = tex2D(spriteTexture, textureCoordinate);
-    colour.gb = colour.r;
+    // Get the colour of the pixel at the specified coordinates in the texture
+    float4 colour = tex2D(Texture, textureCoordinate);
     
+    // Just set the red of the r,g,b,a to zero (i.e. no red)
+    colour.r = 0;
+    
+    // Return our 'amended' pixel colour
     return colour;
 }
 
-technique Technique1
+technique AlterColourTechnique
 {
-    pass Pass1
+    pass P0
     {        
-        PixelShader = compile PS_SHADERMODEL MyPixelShaderFunction();
+        PixelShader = compile PS_SHADERMODEL AlterColour();
     }
 }

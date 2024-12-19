@@ -4,18 +4,21 @@
 	#define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-float transparencyLevel;
-sampler targetTexture;
+// Set this parameter
+float TransparencyLevel;
+
+// This will be the texture passed to the shader by the sprite draw function
+sampler Texture;
 
 float4 Transparency(float2 textureCoordinates : TEXCOORD0) : COLOR0
 {
-	// Sample the texture at the given texture coordinate
-    float4 pixelColour = tex2D(targetTexture, textureCoordinates);
+	// Get the pixel colour of the texture at the specified coordinates
+    float4 pixelColour = tex2D(Texture, textureCoordinates);
     
-    // Transparency ;-) Maybe add a parameter so you could control the level
-    pixelColour *= transparencyLevel;
+    // Basically divide the pixel colour by the transparency amount (0 to 1)
+    float4 newPixelColour = pixelColour * TransparencyLevel;
 	
-    return pixelColour;
+    return newPixelColour;
 }
 
 technique TransparencyTechnique
