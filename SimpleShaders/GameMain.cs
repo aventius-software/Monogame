@@ -27,6 +27,8 @@ public class GameMain : Game
 {
     private float _cycleFloatValue = 0f;
     private GraphicsDeviceManager _graphics;
+    private Vector4 _mouse;
+    private RenderTarget2D _renderTarget;
     private SpriteBatch _spriteBatch;
     private Texture2D _spriteTexture1;
     private Texture2D _spriteTexture2;
@@ -79,6 +81,8 @@ public class GameMain : Game
         _transparentSectionShader = Content.Load<Effect>("Shaders/transparent section");
         _tunnelShader = Content.Load<Effect>("Shaders/tunnel");
         _wavyShader = Content.Load<Effect>("Shaders/wavy");
+
+        _renderTarget = new RenderTarget2D(GraphicsDevice, _spriteTexture1.Width, _spriteTexture1.Height);
     }
 
     protected override void Update(GameTime gameTime)
@@ -88,12 +92,30 @@ public class GameMain : Game
         
         _cycleFloatValue += 0.005f;
         if (_cycleFloatValue > 1) _cycleFloatValue = 0;
+
+        _mouse = new Vector4(
+            Mouse.GetState().Position.ToVector2(),
+            Mouse.GetState().LeftButton == ButtonState.Pressed ? 1f : 0f,
+            Mouse.GetState().RightButton == ButtonState.Pressed ? 1f : 0f
+        );
         
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
+        //GraphicsDevice.SetRenderTarget(_renderTarget);
+        //GraphicsDevice.Clear(Color.Black);
+
+        //_noiseShader.Parameters["Resolution"].SetValue(new Vector2(2, 2));
+        //_noiseShader.Parameters["Time"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
+        //_noiseShader.Parameters["Mouse"].SetValue(_mouse);
+        
+        //GraphicsDevice.SetRenderTarget(null);
+        //_spriteBatch.Begin(effect: _noiseShader);
+        //_spriteBatch.Draw(_renderTarget, Vector2.Zero, Color.White);
+        //_spriteBatch.End();   
+
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         var position = Vector2.Zero;
@@ -138,12 +160,12 @@ public class GameMain : Game
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
-        // 7. Noise
-        //_noiseShader.Parameters["iResolution"].SetValue(new Vector2(_spriteTexture1.Width, _spriteTexture1.Height)); // viewport resolution (in pixels)
-        //_noiseShader.Parameters["iTime"].SetValue(_cycleFloatValue * 10); // shader playback time (in seconds)
-        //_noiseShader.Parameters["iMouse"].SetValue(_cycleFloatValue * 10); // mouse pixel coords. xy: current (if MLB down), zw: click
+        // 7. Draw noise
+        _noiseShader.Parameters["Resolution"].SetValue(new Vector2(2, 2));
+        _noiseShader.Parameters["Time"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
+        _noiseShader.Parameters["Mouse"].SetValue(_mouse);
         _spriteBatch.Begin(effect: _noiseShader);
-        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
+        _spriteBatch.Draw(texture: _renderTarget, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
