@@ -168,7 +168,7 @@ public class GameMain : Game
 
         // 9. Draw texture with a sine wave effect
         _sineWaveShader.Parameters["Frequency"].SetValue(18.5f);
-        _sineWaveShader.Parameters["Amplitude"].SetValue(0.15f);
+        _sineWaveShader.Parameters["Amplitude"].SetValue(0.05f);
         _sineWaveShader.Parameters["Time"].SetValue(time);        
         _spriteBatch.Begin(effect: _sineWaveShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);

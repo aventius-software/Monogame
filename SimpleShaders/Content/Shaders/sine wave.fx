@@ -10,13 +10,13 @@ sampler Texture;
 // High values will produce more waves
 float Frequency;
 
-// How 'far out' the wave will be, between 0 and 1, a value of 1 will 'wave' 
+// How 'far out' the waves will be, between 0 and 1, a value of 1 will 'wave' 
 // outwards at the full width of the texture. So somewhere smaller is a nice
-// place to start
+// place to start. Experiment with combinations of frequency...
 float Amplitude;
 
-// This doesn't have to be time, but needs to be small incrementing value
-// that can give us a change in the sin value
+// This doesn't have to be 'time', but needs to be small incrementing value
+// that can give us a change over time
 float Time;
 
 // Just alter the texture pixel colours a bit
