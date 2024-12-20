@@ -10,7 +10,6 @@ float4 Colour;
 // This is the texture passed to the shader by the sprite draw command
 sampler Texture;
 
-// Return a tinted coloured pixel
 float4 ColouredTint(float2 textureCoordinates : TEXCOORD0) : COLOR0
 {
 	// Get the colour of the pixel at the coordinates on the texture
@@ -19,6 +18,7 @@ float4 ColouredTint(float2 textureCoordinates : TEXCOORD0) : COLOR0
 	// Alter the pixel colour by the tint colour
     float4 tintedPixelColour = pixelColour * Colour;
 	
+	// Send back our new pixel colour at this position
     return tintedPixelColour;
 }
 

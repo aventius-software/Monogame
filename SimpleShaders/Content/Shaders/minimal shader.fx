@@ -4,7 +4,7 @@
     #define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-// Call the function whatever you like
+// This is just some very minimal shader, you can call the function whatever you like
 float4 MyMinimalPixelShaderFunction(float2 textureCoordinates : TEXCOORD0) : COLOR0
 {
     // Make up some new r,g,b,a values (between 0 and 1)
@@ -24,4 +24,4 @@ technique MyTechnique
         // your new pixel colour, in our case its this ;-)
         PixelShader = compile PS_SHADERMODEL MyMinimalPixelShaderFunction();
     }
-}
+};

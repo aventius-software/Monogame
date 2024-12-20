@@ -25,6 +25,7 @@ namespace SimpleShaders;
 /// </summary>
 public class GameMain : Game
 {
+    private Texture2D _backgroundTileTexture;
     private float _cycleFloatValue = 0f;
     private GraphicsDeviceManager _graphics;
     private Vector4 _mouse;
@@ -40,6 +41,7 @@ public class GameMain : Game
     private Effect _minimalShader;
     private Effect _noiseShader;
     private Effect _pixelateShader;
+    private Effect _sineWaveShader;
     private Effect _transparencyShader;
 
     public GameMain()
@@ -61,6 +63,7 @@ public class GameMain : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         // Load textures
+        _backgroundTileTexture = Content.Load<Texture2D>("Textures/background tile");
         _spriteTexture1 = Content.Load<Texture2D>("Textures/sprite 1");
         _spriteTexture2 = Content.Load<Texture2D>("Textures/sprite 2");
 
@@ -72,6 +75,7 @@ public class GameMain : Game
         _minimalShader = Content.Load<Effect>("Shaders/minimal shader");
         _noiseShader = Content.Load<Effect>("Shaders/noise");
         _pixelateShader = Content.Load<Effect>("Shaders/pixelate");
+        _sineWaveShader = Content.Load<Effect>("Shaders/sine wave");
         _transparencyShader = Content.Load<Effect>("Shaders/transparency");
 
         _renderTarget = new RenderTarget2D(GraphicsDevice, _spriteTexture1.Width, _spriteTexture1.Height);
@@ -141,6 +145,10 @@ public class GameMain : Game
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
+        // Next row of sprites... ;-)
+        position.X = 0;
+        position.Y += _spriteTexture1.Height;
+
         // 7. Draw noise
         _noiseShader.Parameters["Resolution"].SetValue(new Vector2(2, 2));
         _noiseShader.Parameters["Time"].SetValue(time);
@@ -158,16 +166,26 @@ public class GameMain : Game
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
-        // 9. Draw texture but make partly transparent
-        _transparencyShader.Parameters["TransparencyLevel"].SetValue(0.25f);
-        _spriteBatch.Begin(effect: _transparencyShader);
+        // 9. Draw texture with a sine wave effect
+        _sineWaveShader.Parameters["Frequency"].SetValue(18.5f);
+        _sineWaveShader.Parameters["Amplitude"].SetValue(0.15f);
+        _sineWaveShader.Parameters["Time"].SetValue(time);        
+        _spriteBatch.Begin(effect: _sineWaveShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
-        // Next row of sprites... ;-)
-        position.X = 0;
-        position.Y += _spriteTexture1.Height;
+        // 10. Draw texture but make partly transparent, first draw a background
+        _spriteBatch.Begin();
+        _spriteBatch.Draw(texture: _backgroundTileTexture, position: position, color: Color.White);
+        _spriteBatch.End();
+        
+        // Now draw a sprite on top of the background with transparent effect
+        _transparencyShader.Parameters["TransparencyLevel"].SetValue(0.5f);
+        _spriteBatch.Begin(effect: _transparencyShader);
+        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
+        _spriteBatch.End();
+        position.X += _spriteTexture1.Width;        
 
         base.Draw(gameTime);
     }
