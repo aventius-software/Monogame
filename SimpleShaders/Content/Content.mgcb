@@ -31,6 +31,12 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/coloured tint.fx
 
+#begin Shaders/disintegration.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/disintegration.fx
+
 #begin Shaders/greyscale.fx
 /importer:EffectImporter
 /processor:EffectProcessor
@@ -66,6 +72,12 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:Shaders/transparency.fx
+
+#begin Shaders/water ripple.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/water ripple.fx
 
 #begin Textures/background tile.png
 /importer:TextureImporter

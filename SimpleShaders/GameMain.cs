@@ -37,12 +37,14 @@ public class GameMain : Game
     private Effect _alterColourShader;
     private Effect _blendingTexturesShader;
     private Effect _colourTintShader;
+    private Effect _disintegrationShader;
     private Effect _greyscaleShader;
     private Effect _minimalShader;
     private Effect _noiseShader;
     private Effect _pixelateShader;
     private Effect _sineWaveShader;
     private Effect _transparencyShader;
+    private Effect _waterRippleShader;
 
     public GameMain()
     {
@@ -71,12 +73,14 @@ public class GameMain : Game
         _alterColourShader = Content.Load<Effect>("Shaders/alter colour");
         _blendingTexturesShader = Content.Load<Effect>("Shaders/blending textures");
         _colourTintShader = Content.Load<Effect>("Shaders/coloured tint");
+        _disintegrationShader = Content.Load<Effect>("Shaders/disintegration");
         _greyscaleShader = Content.Load<Effect>("Shaders/greyscale");
         _minimalShader = Content.Load<Effect>("Shaders/minimal shader");
         _noiseShader = Content.Load<Effect>("Shaders/noise");
         _pixelateShader = Content.Load<Effect>("Shaders/pixelate");
         _sineWaveShader = Content.Load<Effect>("Shaders/sine wave");
         _transparencyShader = Content.Load<Effect>("Shaders/transparency");
+        _waterRippleShader = Content.Load<Effect>("Shaders/water ripple");
 
         _renderTarget = new RenderTarget2D(GraphicsDevice, _spriteTexture1.Width, _spriteTexture1.Height);
     }
@@ -105,26 +109,26 @@ public class GameMain : Game
         var position = Vector2.Zero;
         float time = (float)gameTime.TotalGameTime.TotalSeconds;
 
-        // 1. Draw normal texture
+        // Draw normal texture
         _spriteBatch.Begin();
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
-        // 2. Draw texture but with altered colours
+        // Draw texture but with altered colours
         _spriteBatch.Begin(effect: _alterColourShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
-        // 3. Draw texture with a coloured tint
+        // Draw texture with a coloured tint
         _colourTintShader.Parameters["Colour"].SetValue(Color.Green.ToVector4());
         _spriteBatch.Begin(effect: _colourTintShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
-        // 4. Draw blended textures        
+        // Draw blended textures        
         _blendingTexturesShader.Parameters["BlendingAmount"].SetValue(_cycleFloatValue);
         _blendingTexturesShader.Parameters["BlendingTexture"].SetValue(_spriteTexture2);
         _spriteBatch.Begin(effect: _blendingTexturesShader);
@@ -132,15 +136,9 @@ public class GameMain : Game
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
-        // 5. Draw texture with greyscale effect
+        // Draw texture with greyscale effect
         _greyscaleShader.Parameters["GreyscaleLevel"].SetValue(0.5f);
         _spriteBatch.Begin(effect: _greyscaleShader);
-        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
-        _spriteBatch.End();
-        position.X += _spriteTexture1.Width;
-
-        // 6. Draw texture but entire texture pixels changed to same colour
-        _spriteBatch.Begin(effect: _minimalShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
@@ -149,7 +147,13 @@ public class GameMain : Game
         position.X = 0;
         position.Y += _spriteTexture1.Height;
 
-        // 7. Draw noise
+        // Draw texture but entire texture pixels changed to same colour
+        _spriteBatch.Begin(effect: _minimalShader);
+        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
+        _spriteBatch.End();
+        position.X += _spriteTexture1.Width;        
+
+        // Draw noise
         _noiseShader.Parameters["Resolution"].SetValue(new Vector2(2, 2));
         _noiseShader.Parameters["Time"].SetValue(time);
         _noiseShader.Parameters["Mouse"].SetValue(_mouse);
@@ -158,7 +162,7 @@ public class GameMain : Game
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
-        // 8. Draw texture with a pixelated effect
+        // Draw texture with a pixelated effect
         _pixelateShader.Parameters["PixelSize"].SetValue(_cycleFloatValue * 10);
         _pixelateShader.Parameters["TextureDimensions"].SetValue(new Vector2(_spriteTexture1.Width, _spriteTexture1.Height));
         _spriteBatch.Begin(effect: _pixelateShader);
@@ -166,7 +170,7 @@ public class GameMain : Game
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
-        // 9. Draw texture with a sine wave effect
+        // Draw texture with a sine wave effect
         _sineWaveShader.Parameters["Frequency"].SetValue(18.5f);
         _sineWaveShader.Parameters["Amplitude"].SetValue(0.05f);
         _sineWaveShader.Parameters["Time"].SetValue(time);        
@@ -175,7 +179,7 @@ public class GameMain : Game
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
 
-        // 10. Draw texture but make partly transparent, first draw a background
+        // Draw texture but make partly transparent, first draw a background
         _spriteBatch.Begin();
         _spriteBatch.Draw(texture: _backgroundTileTexture, position: position, color: Color.White);
         _spriteBatch.End();
@@ -185,7 +189,28 @@ public class GameMain : Game
         _spriteBatch.Begin(effect: _transparencyShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
-        position.X += _spriteTexture1.Width;        
+        position.X += _spriteTexture1.Width;
+
+        // Draw texture with a water ripple (stone dropped in pond) type effect
+        _waterRippleShader.Parameters["RippleCenter"].SetValue(new Vector2(0.5f, 0.5f));
+        _waterRippleShader.Parameters["Time"].SetValue(time * 6);
+        _waterRippleShader.Parameters["Amplitude"].SetValue(0.25f);
+        _waterRippleShader.Parameters["Frequency"].SetValue(30.0f);
+        _spriteBatch.Begin(effect: _waterRippleShader);
+        _spriteBatch.Draw(texture: _backgroundTileTexture, position: position, color: Color.White);
+        _spriteBatch.End();
+        position.X += _spriteTexture1.Width;
+
+        // Next row of sprites... ;-)
+        position.X = 0;
+        position.Y += _spriteTexture1.Height;
+
+        // Draw texture and disintegrate
+        _disintegrationShader.Parameters["DisintegrationThreshold"].SetValue(_cycleFloatValue);
+        _spriteBatch.Begin(effect: _disintegrationShader);
+        _spriteBatch.Draw(texture: _backgroundTileTexture, position: position, color: Color.White);
+        _spriteBatch.End();
+        position.X += _spriteTexture1.Width;
 
         base.Draw(gameTime);
     }
