@@ -1,6 +1,9 @@
-﻿// This is a bit more complicated, but its a good example of some cool stuff that can be done
-// if you know what you're doing with shaders and maths (which is not me ;-). This is a noise 
-// shader taken from shadertoy.com, I've modified the original code to work with Monogame shader syntax...
+﻿// Note this is not my work, its taken from https://www.shadertoy.com/view/Xd23Dh I've copied this in here even though its quite a 
+// bit more complicated as its a good example of some cool stuff that can be done if you know what you're doing with shaders and 
+// maths (which is not me ;-). 
+
+// I've modified the original code to work with Monogame shader syntax. However, the original author and copyright notice is shown 
+// below (as per license), please go and support them...
 
 // The MIT License
 // https://www.youtube.com/c/InigoQuilez

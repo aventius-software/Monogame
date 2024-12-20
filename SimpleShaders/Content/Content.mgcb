@@ -55,41 +55,11 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/pixelate.fx
 
-#begin Shaders/slide transition.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:Shaders/slide transition.fx
-
 #begin Shaders/transparency.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:Shaders/transparency.fx
-
-#begin Shaders/transparent section.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:Shaders/transparent section.fx
-
-#begin Shaders/tunnel.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:Shaders/tunnel.fx
-
-#begin Shaders/tutorial.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:Shaders/tutorial.fx
-
-#begin Shaders/wavy.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:Shaders/wavy.fx
 
 #begin Textures/background tile.png
 /importer:TextureImporter

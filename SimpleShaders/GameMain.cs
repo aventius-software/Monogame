@@ -1,12 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.Runtime.InteropServices;
 
 namespace SimpleShaders;
 
 /// <summary>
-/// Testing various simple shaders
+/// Testing various simple shaders with Monogame ;-)
 /// 
 /// For Visual Studio 2022, the HLSL tools extension was useful, see this link below
 /// https://marketplace.visualstudio.com/items?itemName=TimGJones.HLSLToolsforVisualStudio
@@ -22,6 +21,7 @@ namespace SimpleShaders;
 /// https://thebookofshaders.com/
 /// https://www.ronja-tutorials.com/
 /// https://github.com/butterw/bShaders
+/// https://gist.github.com/Piratkopia13/46c5dda51ed59cfe69b242deb0cf40ce
 /// </summary>
 public class GameMain : Game
 {
@@ -40,11 +40,7 @@ public class GameMain : Game
     private Effect _minimalShader;
     private Effect _noiseShader;
     private Effect _pixelateShader;
-    private Effect _slideTransitionShader;
     private Effect _transparencyShader;
-    private Effect _transparentSectionShader;
-    private Effect _tunnelShader;
-    private Effect _wavyShader;
 
     public GameMain()
     {
@@ -76,11 +72,7 @@ public class GameMain : Game
         _minimalShader = Content.Load<Effect>("Shaders/minimal shader");
         _noiseShader = Content.Load<Effect>("Shaders/noise");
         _pixelateShader = Content.Load<Effect>("Shaders/pixelate");
-        _slideTransitionShader = Content.Load<Effect>("Shaders/slide transition");
         _transparencyShader = Content.Load<Effect>("Shaders/transparency");
-        _transparentSectionShader = Content.Load<Effect>("Shaders/transparent section");
-        _tunnelShader = Content.Load<Effect>("Shaders/tunnel");
-        _wavyShader = Content.Load<Effect>("Shaders/wavy");
 
         _renderTarget = new RenderTarget2D(GraphicsDevice, _spriteTexture1.Width, _spriteTexture1.Height);
     }
@@ -89,7 +81,7 @@ public class GameMain : Game
     {
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
-        
+
         _cycleFloatValue += 0.005f;
         if (_cycleFloatValue > 1) _cycleFloatValue = 0;
 
@@ -98,27 +90,16 @@ public class GameMain : Game
             Mouse.GetState().LeftButton == ButtonState.Pressed ? 1f : 0f,
             Mouse.GetState().RightButton == ButtonState.Pressed ? 1f : 0f
         );
-        
+
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
-        //GraphicsDevice.SetRenderTarget(_renderTarget);
-        //GraphicsDevice.Clear(Color.Black);
-
-        //_noiseShader.Parameters["Resolution"].SetValue(new Vector2(2, 2));
-        //_noiseShader.Parameters["Time"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
-        //_noiseShader.Parameters["Mouse"].SetValue(_mouse);
-        
-        //GraphicsDevice.SetRenderTarget(null);
-        //_spriteBatch.Begin(effect: _noiseShader);
-        //_spriteBatch.Draw(_renderTarget, Vector2.Zero, Color.White);
-        //_spriteBatch.End();   
-
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         var position = Vector2.Zero;
+        float time = (float)gameTime.TotalGameTime.TotalSeconds;
 
         // 1. Draw normal texture
         _spriteBatch.Begin();
@@ -162,7 +143,7 @@ public class GameMain : Game
 
         // 7. Draw noise
         _noiseShader.Parameters["Resolution"].SetValue(new Vector2(2, 2));
-        _noiseShader.Parameters["Time"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
+        _noiseShader.Parameters["Time"].SetValue(time);
         _noiseShader.Parameters["Mouse"].SetValue(_mouse);
         _spriteBatch.Begin(effect: _noiseShader);
         _spriteBatch.Draw(texture: _renderTarget, position: position, color: Color.White);
@@ -171,7 +152,7 @@ public class GameMain : Game
 
         // 8. Draw texture with a pixelated effect
         _pixelateShader.Parameters["PixelSize"].SetValue(_cycleFloatValue * 10);
-        _pixelateShader.Parameters["TextureDimensions"].SetValue(new Vector2(_spriteTexture1.Width, _spriteTexture1.Height));        
+        _pixelateShader.Parameters["TextureDimensions"].SetValue(new Vector2(_spriteTexture1.Width, _spriteTexture1.Height));
         _spriteBatch.Begin(effect: _pixelateShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
@@ -180,12 +161,6 @@ public class GameMain : Game
         // 9. Draw texture but make partly transparent
         _transparencyShader.Parameters["TransparencyLevel"].SetValue(0.25f);
         _spriteBatch.Begin(effect: _transparencyShader);
-        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
-        _spriteBatch.End();
-        position.X += _spriteTexture1.Width;
-        
-        // 10. Draw texture but add a sine wave style wobble to the pixels
-        _spriteBatch.Begin(effect: _wavyShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
