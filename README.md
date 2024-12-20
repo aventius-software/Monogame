@@ -13,6 +13,7 @@ A Visual Studio 2022 solution with various example projects for Monogame related
 - Example of how to use the Morpeh ECS library with Monogame (uses the same code as the 2D top down car physics example, but refactoring the code to work with an ECS)
 - One way of doing an Outrun style track in Monogame
 - Simple ways to use RenderTarget2D
+- Some simple pixel shader demos
 - Getting silky smooth movement in Monogame
 - Using the TiledCS library to work with Tiled maps
 - How to use a camera with a Tiled map to move around
