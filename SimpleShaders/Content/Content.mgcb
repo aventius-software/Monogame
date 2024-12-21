@@ -37,6 +37,18 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/disintegration.fx
 
+#begin Shaders/edge glow.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/edge glow.fx
+
+#begin Shaders/grainy.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/grainy.fx
+
 #begin Shaders/greyscale.fx
 /importer:EffectImporter
 /processor:EffectProcessor
@@ -60,6 +72,12 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:Shaders/pixelate.fx
+
+#begin Shaders/psychedelic.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/psychedelic.fx
 
 #begin Shaders/sine wave.fx
 /importer:EffectImporter

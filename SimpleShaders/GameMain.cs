@@ -38,10 +38,13 @@ public class GameMain : Game
     private Effect _blendingTexturesShader;
     private Effect _colourTintShader;
     private Effect _disintegrationShader;
+    private Effect _edgeGlowShader;
+    private Effect _grainyShader;
     private Effect _greyscaleShader;
     private Effect _minimalShader;
     private Effect _noiseShader;
     private Effect _pixelateShader;
+    private Effect _psychedelicShader;
     private Effect _sineWaveShader;
     private Effect _transparencyShader;
     private Effect _waterRippleShader;
@@ -74,14 +77,18 @@ public class GameMain : Game
         _blendingTexturesShader = Content.Load<Effect>("Shaders/blending textures");
         _colourTintShader = Content.Load<Effect>("Shaders/coloured tint");
         _disintegrationShader = Content.Load<Effect>("Shaders/disintegration");
+        _edgeGlowShader = Content.Load<Effect>("Shaders/edge glow");
+        _grainyShader = Content.Load<Effect>("Shaders/grainy");
         _greyscaleShader = Content.Load<Effect>("Shaders/greyscale");
         _minimalShader = Content.Load<Effect>("Shaders/minimal shader");
         _noiseShader = Content.Load<Effect>("Shaders/noise");
         _pixelateShader = Content.Load<Effect>("Shaders/pixelate");
+        _psychedelicShader = Content.Load<Effect>("Shaders/psychedelic");
         _sineWaveShader = Content.Load<Effect>("Shaders/sine wave");
         _transparencyShader = Content.Load<Effect>("Shaders/transparency");
         _waterRippleShader = Content.Load<Effect>("Shaders/water ripple");
 
+        // Create an empty render target to use for some shaders
         _renderTarget = new RenderTarget2D(GraphicsDevice, _spriteTexture1.Width, _spriteTexture1.Height);
     }
 
@@ -151,7 +158,7 @@ public class GameMain : Game
         _spriteBatch.Begin(effect: _minimalShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
-        position.X += _spriteTexture1.Width;        
+        position.X += _spriteTexture1.Width;
 
         // Draw noise
         _noiseShader.Parameters["Resolution"].SetValue(new Vector2(2, 2));
@@ -173,7 +180,7 @@ public class GameMain : Game
         // Draw texture with a sine wave effect
         _sineWaveShader.Parameters["Frequency"].SetValue(18.5f);
         _sineWaveShader.Parameters["Amplitude"].SetValue(0.05f);
-        _sineWaveShader.Parameters["Time"].SetValue(time);        
+        _sineWaveShader.Parameters["Time"].SetValue(time);
         _spriteBatch.Begin(effect: _sineWaveShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
@@ -183,7 +190,7 @@ public class GameMain : Game
         _spriteBatch.Begin();
         _spriteBatch.Draw(texture: _backgroundTileTexture, position: position, color: Color.White);
         _spriteBatch.End();
-        
+
         // Now draw a sprite on top of the background with transparent effect
         _transparencyShader.Parameters["TransparencyLevel"].SetValue(0.5f);
         _spriteBatch.Begin(effect: _transparencyShader);
@@ -211,6 +218,33 @@ public class GameMain : Game
         _spriteBatch.Draw(texture: _backgroundTileTexture, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
+
+        // Draw a texture, but try and find any edges and add a glow to them
+        _edgeGlowShader.Parameters["GlowIntensity"].SetValue(0.75f);
+        _edgeGlowShader.Parameters["GlowThreshold"].SetValue(0.2f);
+        _edgeGlowShader.Parameters["TextureDimensions"].SetValue(new Vector2(_spriteTexture1.Width, _spriteTexture1.Height));
+        _spriteBatch.Begin(effect: _edgeGlowShader);
+        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
+        _spriteBatch.End();
+        position.X += 150;
+
+        // Draw a texture, but add an animated 'grainy' effect. You could set
+        // the 'time' to 1 if you don't want any animation of the effect
+        _grainyShader.Parameters["Time"].SetValue(time);
+        _grainyShader.Parameters["GrainIntensity"].SetValue(0.15f);
+        _edgeGlowShader.Parameters["TextureDimensions"].SetValue(new Vector2(_spriteTexture1.Width, _spriteTexture1.Height));
+        _spriteBatch.Begin(effect: _grainyShader);
+        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
+        _spriteBatch.End();
+        position.X += 150;
+
+        // Draw a texture, but with a spinning psychedelic or trippy effect
+        _psychedelicShader.Parameters["Time"].SetValue(time);
+        _psychedelicShader.Parameters["Strength"].SetValue(18.0f);
+        _spriteBatch.Begin(effect: _psychedelicShader);
+        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
+        _spriteBatch.End();
+        position.X += 150;
 
         base.Draw(gameTime);
     }
