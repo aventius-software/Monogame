@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AStarPathFindUsingRoyT.Services;
 
@@ -31,6 +32,34 @@ internal class MapService
     /// Gets or sets the active tileset to use
     /// </summary>
     public int ActiveTileset { get; set; } = 0;
+
+    /// <summary>
+    /// Returns all the tiles in the map
+    /// </summary>
+    public int[,] Tiles
+    {
+        get
+        {
+            var tileLayer = GetLayer(ActiveLayer);
+            var numberOfColumns = tileLayer.Width;
+            var numberOfRows = tileLayer.Height;            
+            var rows = new int[numberOfRows, numberOfColumns];
+
+            for (var row = 0; row < tileLayer.Height; row++) 
+            {
+                for (var col = 0; col < tileLayer.Width; col++)
+                {
+                    rows[row, col] = (int)GetTileAtPosition(row, col);
+                }
+            }
+
+            return rows;
+        }
+    }
+
+    public int TileHeight => (int)_tiledMap.TileHeight;
+
+    public int TileWidth => (int)_tiledMap.TileWidth;
 
     /// <summary>
     /// The world height (in pixels)
@@ -127,74 +156,7 @@ internal class MapService
     /// <param name="layerNumber"></param>
     /// <returns></returns>
     public TileLayer GetLayer(int layerNumber = 0) => (TileLayer)_tiledMap.Layers[layerNumber];
-
-    /// <summary>
-    /// Gets a list of rectangles for tiles that surround the specified rectangle
-    /// </summary>
-    /// <param name="tileRectangle"></param>
-    /// <returns></returns>
-    public List<Rectangle> GetSurroundingTileRectangles(Rectangle tileRectangle)
-    {
-        return GetSurroundingTileRectangles(new Vector2(tileRectangle.X, tileRectangle.Y), tileRectangle.Width, tileRectangle.Height);
-    }
-
-    /// <summary>
-    /// Gets a list of rectangles for tiles that surround the specified world position and width/height
-    /// </summary>
-    /// <param name="position"></param>
-    /// <param name="width"></param>
-    /// <param name="height"></param>
-    /// <returns></returns>
-    public List<Rectangle> GetSurroundingTileRectangles(Vector2 position, int width, int height)
-    {
-        // Create a list of rectangles
-        var tiles = new List<Rectangle>();
-        var tileLayer = GetLayer(ActiveLayer);
-        var tileWidth = (int)_tiledMap.TileWidth;
-        var tileHeight = (int)_tiledMap.TileHeight;
-
-        // Find the edge tile positions
-        var leftTile = (int)Math.Floor(position.X / tileWidth) - 1;
-        var rightTile = (int)Math.Ceiling((position.X + width) / tileWidth) + 1;
-        var topTile = (int)Math.Floor(position.Y / tileHeight) - 1;
-        var bottomTile = (int)Math.Ceiling((position.Y + height) / tileHeight) + 1;
-
-        // Restrict the surrounding tiles to the map layer dimensions
-        leftTile = (int)Math.Clamp(leftTile, 0, tileLayer.Width);
-        rightTile = (int)Math.Clamp(rightTile, 0, tileLayer.Width);
-        topTile = (int)Math.Clamp(topTile, 0, tileLayer.Height);
-        bottomTile = (int)Math.Clamp(bottomTile, 0, tileLayer.Height);
-
-        // Loop through each of the surrounding tiles
-        for (var row = topTile; row <= bottomTile; row++)
-        {
-            for (var column = leftTile; column <= rightTile; column++)
-            {
-                // Find the tile at this position
-                var tile = GetTileAtPosition(row, column);
-
-                // Only add a rectangle if there IS a tile...                
-                if (tile != 0) tiles.Add(GetRectangleAtMapPosition(row, column));
-            }
-        }
-
-        return tiles;
-    }
-
-    /// <summary>
-    /// Returns a rectangle with world coordinates for the specified map row/column
-    /// </summary>    
-    /// <param name="mapRow"></param>
-    /// <param name="mapColumn"></param>
-    /// <returns></returns>
-    private Rectangle GetRectangleAtMapPosition(int mapRow, int mapColumn)
-    {
-        var tileWidth = (int)_tiledMap.TileWidth;
-        var tileHeight = (int)_tiledMap.TileHeight;
-
-        return new Rectangle(mapColumn * tileWidth, mapRow * tileHeight, tileWidth, tileHeight);
-    }
-
+    
     /// <summary>
     /// Returns the tile id for the specified layer at the specified map row/column position
     /// </summary>    
