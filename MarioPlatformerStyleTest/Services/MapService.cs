@@ -203,16 +203,17 @@ internal class MapService
     /// <returns></returns>
     private uint GetTileAtPosition(int mapRow, int mapColumn)
     {
+        // Get the active map layer
         var tileLayer = GetLayer(ActiveLayer);
+
+        // Out of bounds?
+        if (mapColumn < 0 || mapRow < 0 || mapColumn >= tileLayer.Width || mapRow >= tileLayer.Height) return 0;
 
         // Calculate the index of the request tile in the map data
         var index = (mapRow * tileLayer.Width) + mapColumn;
 
-        // If the index is out of bounds then just return 'no tile' (i.e. 0)
-        if (index >= tileLayer.Data.Value.GlobalTileIDs.Value.Length - 1 || index < 0) return 0;
-
         // Otherwise return the tile
-        return tileLayer.Data.Value.GlobalTileIDs.Value[(mapRow * tileLayer.Width) + mapColumn];
+        return tileLayer.Data.Value.GlobalTileIDs.Value[index];
     }
 
     /// <summary>
