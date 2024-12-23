@@ -2,6 +2,7 @@
 
 A Visual Studio 2022 solution with various example projects for Monogame related stuff, such as:-
 
+- A-star (or A*) path finding on a Tiled map example using the RoyT library
 - A couple of Aether Physics 2D simple example projects
 - How to add AdMob ads in an Android Monogame game
 - An example of how to use dependency injection with Monogame
