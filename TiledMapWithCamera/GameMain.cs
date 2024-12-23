@@ -9,8 +9,8 @@ public class GameMain : Game
 {
     private Camera _camera;
     private Texture2D _character;
-    private GameWorld _gameWorld;
     private GraphicsDeviceManager _graphics;
+    private MapService _mapService;
     private Vector2 _position;
     private SpriteBatch _spriteBatch;
 
@@ -35,16 +35,14 @@ public class GameMain : Game
         _character = Content.Load<Texture2D>("circle");
 
         // Create map service and load map
-        _gameWorld = new GameWorld(_spriteBatch, Content);
-        _gameWorld.LoadTiledMap($"{Content.RootDirectory}/test map.tmx", "test tile atlas");
+        _mapService = new MapService(_spriteBatch, Content);
+        _mapService.LoadTiledMap("test map.tmx", "test tile atlas");
 
         // Create a camera
         _camera = new Camera();
 
         // Tell the camera the dimensions of the world
-        _camera.SetWorldDimensions(new Vector2(
-            _gameWorld.WorldWidth,
-            _gameWorld.WorldHeight));
+        _camera.SetWorldDimensions(new Vector2(_mapService.WorldWidth, _mapService.WorldHeight));
 
         // Set the camera origin to the middle of the viewport, also note the offset for the size of the character sprite
         _camera.SetOrigin(new Vector2(
@@ -74,9 +72,9 @@ public class GameMain : Game
 
         // Restrict movement to the world
         if (_position.X < 0) _position.X = speed;
-        if (_position.X > _gameWorld.WorldWidth - _character.Width) _position.X = _gameWorld.WorldWidth - speed - _character.Width;
+        if (_position.X > _mapService.WorldWidth - _character.Width) _position.X = _mapService.WorldWidth - speed - _character.Width;
         if (_position.Y < 0) _position.Y = speed;
-        if (_position.Y > _gameWorld.WorldHeight - _character.Height) _position.Y = _gameWorld.WorldHeight - speed - _character.Height;
+        if (_position.Y > _mapService.WorldHeight - _character.Height) _position.Y = _mapService.WorldHeight - speed - _character.Height;
 
         // Set camera to the player position, set offset so we account for the character sprite origin
         // being the top left corner of the sprite, this makes the camera constrain to the end of the
@@ -87,7 +85,7 @@ public class GameMain : Game
         // drawing restrict tile drawing to only the tiles visible at the
         // specified position within the viewport area also specified. If we
         // comment this line out, the map service will draw all map tiles
-        _gameWorld.SetViewport(
+        _mapService.SetViewport(
             _camera.Position,
             GraphicsDevice.Viewport.Width,
             GraphicsDevice.Viewport.Height);
@@ -110,7 +108,7 @@ public class GameMain : Game
             transformMatrix: _camera.TransformMatrix);
 
         // First draw the map (so it will be under the character)
-        _gameWorld.Draw(gameTime);
+        _mapService.Draw(gameTime);
 
         // Now draw character after, this way it will be on top of the map
         _spriteBatch.Draw(

@@ -61,14 +61,4 @@ internal class Camera
     {
         _worldDimensions = worldDimensions;
     }
-
-    /// <summary>
-    /// Translate a world position to screen position
-    /// </summary>
-    /// <param name="positionInTheWorld"></param>
-    /// <returns></returns>
-    public Vector2 WorldToScreen(Vector2 positionInTheWorld)
-    {
-        return Vector2.Transform(positionInTheWorld, Matrix.Invert(TransformMatrix));
-    }
 }

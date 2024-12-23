@@ -7,7 +7,7 @@ using System;
 
 namespace TiledMapWithCamera.Services;
 
-internal class GameWorld
+internal class MapService
 {
     private readonly ContentManager _contentManager;
     private int _numberOfVisibleTileColumns;
@@ -28,7 +28,7 @@ internal class GameWorld
     /// </summary>
     public int WorldWidth => (int)_tiledMap.Width * (int)_tiledMap.TileWidth;
 
-    public GameWorld(SpriteBatch spriteBatch, ContentManager contentManager)
+    public MapService(SpriteBatch spriteBatch, ContentManager contentManager)
     {
         _spriteBatch = spriteBatch;
         _contentManager = contentManager;
@@ -110,7 +110,7 @@ internal class GameWorld
     public void LoadTiledMap(string tiledMapPath, string tileAtlasName)
     {
         var loader = Loader.Default();
-        _tiledMap = loader.LoadMap(tiledMapPath);
+        _tiledMap = loader.LoadMap(_contentManager.RootDirectory + "/" + tiledMapPath);
         _tilesetTexture = _contentManager.Load<Texture2D>(tileAtlasName);
     }
 
