@@ -53,8 +53,8 @@ internal class Camera
     /// </summary>
     /// <param name="worldPosition"></param>
     /// <returns></returns>
-    public Vector2 ScreenToWorld(Vector2 worldPosition)
-    { 
+    public Vector2 WorldToScreen(Vector2 worldPosition)
+    {
         return Vector2.Transform(worldPosition, TransformMatrix);
     }
 
@@ -77,11 +77,11 @@ internal class Camera
     }
 
     /// <summary>
-    /// Translate a world position to screen position
+    /// Translate a screen position to world position
     /// </summary>
     /// <param name="positionInTheWorld"></param>
     /// <returns></returns>
-    public Vector2 WorldToScreen(Vector2 positionInTheWorld)
+    public Vector2 ScreenToWorld(Vector2 positionInTheWorld)
     {
         return Vector2.Transform(positionInTheWorld, Matrix.Invert(TransformMatrix));
     }

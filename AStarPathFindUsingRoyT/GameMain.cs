@@ -6,9 +6,7 @@ using Roy_T.AStar.Graphs;
 using Roy_T.AStar.Grids;
 using Roy_T.AStar.Paths;
 using Roy_T.AStar.Primitives;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AStarPathFindUsingRoyT;
 
@@ -66,15 +64,22 @@ public class GameMain : Game
         // Place the character at some 'world' position coordinates
         _position = new Vector2(0, 0);
 
-        // Setup RoyT A* pathfinding service   
+        // Setup RoyT A* pathfinding service, as we're not interested in the 'traversalVelocity' for this
+        // particular example, we just need some values that will work to help us find paths in our tile
+        // map. It seems that 10 metre square cells and 10m/s velocity works fine for this purpose...
         var gridSize = new GridSize(columns: _mapService.Tiles.GetLength(1), rows: _mapService.Tiles.GetLength(0));
         var cellSize = new Size(Distance.FromMeters(10), Distance.FromMeters(10));
         var traversalVelocity = Velocity.FromMetersPerSecond(10);
 
-        // Create a new grid, each cell is laterally connected (like how a rook moves over a chess board, other options are available)       
+        // Create a new grid, each cell is laterally connected (like how a rook moves over a chess
+        // board, other options are available). This is fine for our purposes on this tile map
+        // as we want the 8 degrees of movement from each tile to the next
         _grid = Grid.CreateGridWithLateralConnections(gridSize, cellSize, traversalVelocity);
 
-        // Add impassable 'tiles'
+        // Now we need to mark 'impassable' tiles for the A* service so it knows to find paths around
+        // them, otherwise its not much of a test is it. There's probably a more efficient way to
+        // do this, but for demo purposes (and since it would only be done once at the start of a map
+        // the performance isn't much of an issue ;-)
         for (var row = 0; row < _mapService.Tiles.GetLength(0); row++)
         {
             for (var col = 0; col < _mapService.Tiles.GetLength(1); col++)
@@ -98,22 +103,24 @@ public class GameMain : Game
             var mousePosition = Mouse.GetState().Position.ToVector2();
             var worldPosition = _camera.ScreenToWorld(mousePosition);
             var tileMapPosition = new Point((int)worldPosition.X / _mapService.TileWidth, (int)worldPosition.Y / _mapService.TileHeight);
-            
+
             // Set the A* details and try and find a path
             var currentAStarGridPosition = new GridPosition((int)_position.X / _mapService.TileWidth, (int)_position.Y / _mapService.TileHeight);
             var destinationAStarGridPosition = new GridPosition(tileMapPosition.X, tileMapPosition.Y);
             var path = _pathFinder.FindPath(currentAStarGridPosition, destinationAStarGridPosition, _grid);
 
             // Set actual path to traverse
-            _pathToTraverse = [.. path.Edges];            
+            _pathToTraverse = [.. path.Edges];
         }
 
+        // If there is still 'nodes' in a path to traverse, keep moving to the next 'position' in the path
         if (_pathToTraverse.Count > 0)
         {
             var nextPosition = new Vector2(_pathToTraverse[0].End.Position.X / 10f, _pathToTraverse[0].End.Position.Y / 10f);
             nextPosition.X *= _mapService.TileWidth;
             nextPosition.Y *= _mapService.TileHeight;
 
+            // If we've arrived at the next position, remove it from the path list
             if (_position == nextPosition)
             {
                 // Remove from list
@@ -127,25 +134,7 @@ public class GameMain : Game
             }
         }
 
-        // Move the player
-        //var keyboard = Keyboard.GetState();
-        //var direction = Vector2.Zero;
-        //var speed = 4;
-
-        //if (keyboard.IsKeyDown(Keys.Up)) direction.Y = -speed;
-        //if (keyboard.IsKeyDown(Keys.Down)) direction.Y = speed;
-        //if (keyboard.IsKeyDown(Keys.Left)) direction.X = -speed;
-        //if (keyboard.IsKeyDown(Keys.Right)) direction.X = speed;
-
-        //_position += direction;
-
-        // Restrict movement to the world
-        //if (_position.X < 0) _position.X = speed;
-        //if (_position.X > _gameWorld.WorldWidth - _character.Width) _position.X = _gameWorld.WorldWidth - speed - _character.Width;
-        //if (_position.Y < 0) _position.Y = speed;
-        //if (_position.Y > _gameWorld.WorldHeight - _character.Height) _position.Y = _gameWorld.WorldHeight - speed - _character.Height;
-
-        // Set camera to the player position, set offset so we account for the character sprite origin
+        // Set camera to the player/characters position, set offset so we account for the character sprite origin
         // being the top left corner of the sprite, this makes the camera constrain to the end of the
         // map 'minus' the width/height of the character. Otherwise we'd get a gap at the end of the map
         _camera.LookAt(_position, new Vector2(_characterTexture.Width, _characterTexture.Height));
@@ -163,7 +152,7 @@ public class GameMain : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        // Start drawing, notice the 'transformMatrix' which is from our camera
+        // Start drawing, note the 'transformMatrix' which is from our camera
         _spriteBatch.Begin(
             sortMode: SpriteSortMode.Immediate,
             blendState: null,

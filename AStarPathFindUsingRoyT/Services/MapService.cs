@@ -4,8 +4,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace AStarPathFindUsingRoyT.Services;
 
@@ -42,10 +40,10 @@ internal class MapService
         {
             var tileLayer = GetLayer(ActiveLayer);
             var numberOfColumns = tileLayer.Width;
-            var numberOfRows = tileLayer.Height;            
+            var numberOfRows = tileLayer.Height;
             var rows = new int[numberOfRows, numberOfColumns];
 
-            for (var row = 0; row < tileLayer.Height; row++) 
+            for (var row = 0; row < tileLayer.Height; row++)
             {
                 for (var col = 0; col < tileLayer.Width; col++)
                 {
@@ -57,8 +55,14 @@ internal class MapService
         }
     }
 
+    /// <summary>
+    /// Height in pixels of a single tile
+    /// </summary>
     public int TileHeight => (int)_tiledMap.TileHeight;
 
+    /// <summary>
+    /// Width in pixels of a single tile
+    /// </summary>
     public int TileWidth => (int)_tiledMap.TileWidth;
 
     /// <summary>
@@ -93,23 +97,22 @@ internal class MapService
 
         // We 'overdraw' the tiles so we end up drawing a tile offscreen to that a
         // tile doesn't just 'flicker' into existance at the edges of the screen
-        if (_numberOfVisibleTileRows > 0 || _numberOfVisibleTileColumns > 0)
-        {
-            var tilesToOverDraw = 2;
-            rowsToDraw += tilesToOverDraw;
-            colsToDraw += tilesToOverDraw;
-        }
+        var tilesToOverDraw = 2;
 
         // Draw the relevant tiles on screen
-        for (int row = _tileRowPositionInTheWorld; row <= _tileRowPositionInTheWorld + rowsToDraw; row++)
+        for (int column = -tilesToOverDraw; column <= colsToDraw + (2 * tilesToOverDraw); column++)
         {
-            for (int column = _tileColumnPositionInTheWorld; column <= _tileColumnPositionInTheWorld + colsToDraw; column++)
+            for (int row = -tilesToOverDraw; row <= rowsToDraw + (2 * tilesToOverDraw); row++)
             {
+                // Calculate the tile position to fetch/draw
+                var x = _tileColumnPositionInTheWorld + column;
+                var y = _tileRowPositionInTheWorld + row;
+
                 // Don't bother if the row/column position is out of bounds of the map
-                if (column < 0 || row < 0 || column >= layer.Width || row >= layer.Height) continue;
+                if (x < 0 || y < 0 || x >= layer.Width || y >= layer.Height) continue;
 
                 // Otherwise lets find out which tile in the map is at the current row/column position                
-                var tile = GetTileAtPosition(row, column);
+                var tile = GetTileAtPosition(y, x);
 
                 // If block is 0, i.e. air or nothing, then just continue...
                 if (tile == 0) continue;
@@ -120,7 +123,7 @@ internal class MapService
                 // Draw this tile
                 _spriteBatch.Draw(
                     texture: _tilesetTexture,
-                    position: new Vector2(column * tileset.TileWidth, row * tileset.TileHeight),
+                    position: new Vector2(x * tileset.TileWidth, y * tileset.TileHeight),
                     sourceRectangle: sourceRectangle,
                     color: Microsoft.Xna.Framework.Color.White);
             }
@@ -156,25 +159,26 @@ internal class MapService
     /// <param name="layerNumber"></param>
     /// <returns></returns>
     public TileLayer GetLayer(int layerNumber = 0) => (TileLayer)_tiledMap.Layers[layerNumber];
-    
+
     /// <summary>
     /// Returns the tile id for the specified layer at the specified map row/column position
     /// </summary>    
     /// <param name="mapRow"></param>
     /// <param name="mapColumn"></param>
-    /// <returns></returns>
-    private uint GetTileAtPosition(int mapRow, int mapColumn)
+    /// <returns></returns>    
+    public uint GetTileAtPosition(int mapRow, int mapColumn)
     {
+        // Get the active map layer
         var tileLayer = GetLayer(ActiveLayer);
+
+        // Out of bounds?
+        if (mapColumn < 0 || mapRow < 0 || mapColumn >= tileLayer.Width || mapRow >= tileLayer.Height) return 0;
 
         // Calculate the index of the request tile in the map data
         var index = (mapRow * tileLayer.Width) + mapColumn;
 
-        // If the index is out of bounds then just return 'no tile' (i.e. 0)
-        if (index >= tileLayer.Data.Value.GlobalTileIDs.Value.Length - 1 || index < 0) return 0;
-
         // Otherwise return the tile
-        return tileLayer.Data.Value.GlobalTileIDs.Value[(mapRow * tileLayer.Width) + mapColumn];
+        return tileLayer.Data.Value.GlobalTileIDs.Value[index];
     }
 
     /// <summary>
