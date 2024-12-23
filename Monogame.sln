@@ -43,6 +43,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleShaders", "SimpleShad
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple2DLightingWithShaders", "Simple2DLightingWithShaders\Simple2DLightingWithShaders.csproj", "{C7B5C41E-A41D-44BD-916B-FEB9F4D7ADB5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AStarPathFindUsingRoyT", "AStarPathFindUsingRoyT\AStarPathFindUsingRoyT.csproj", "{6D5C8594-0A58-4A50-9941-CFE01461C872}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -130,6 +132,10 @@ Global
 		{C7B5C41E-A41D-44BD-916B-FEB9F4D7ADB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7B5C41E-A41D-44BD-916B-FEB9F4D7ADB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7B5C41E-A41D-44BD-916B-FEB9F4D7ADB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D5C8594-0A58-4A50-9941-CFE01461C872}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D5C8594-0A58-4A50-9941-CFE01461C872}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D5C8594-0A58-4A50-9941-CFE01461C872}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D5C8594-0A58-4A50-9941-CFE01461C872}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
