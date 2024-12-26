@@ -14,13 +14,9 @@ float4 MainPixelShaderFunction(float2 textureCoordinates : TEXCOORD0) : COLOR0
     // Get the colour of the pixel at the specified coordinates in the texture
     float4 pixelColour = tex2D(Texture, textureCoordinates);
     
-    // If this pixel has no colour, ignore
-    if (!any(pixelColour))
-        return pixelColour;
-    
-    // Just set the red of the r,g,b,a to zero (i.e. no red)
-    pixelColour.r = 0;
-            
+    // Slightly offset position
+    pixelColour -= tex2D(Texture, textureCoordinates - 0.01);    
+        
     // Return our 'amended' pixel colour
     return pixelColour;
 }
@@ -30,7 +26,7 @@ technique PixelShaderTechnique
 {
     // Also can be called whatever you like
     pass P0
-    {        
+    {
         PixelShader = compile PS_SHADERMODEL MainPixelShaderFunction();
     }
-}
+};

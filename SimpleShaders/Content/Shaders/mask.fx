@@ -1,5 +1,5 @@
 ﻿// Depending on if its opengl or not, we define a different pixel shader model
-#if OPENGL    
+#if OPENGL
     #define PS_SHADERMODEL ps_3_0
 #else    
     #define PS_SHADERMODEL ps_4_0_level_9_1
@@ -11,18 +11,15 @@ sampler Texture;
 // We can name this function whatever, but we call it down below under the technique/pass section ;-)
 float4 MainPixelShaderFunction(float2 textureCoordinates : TEXCOORD0) : COLOR0
 {
-    // Get the colour of the pixel at the specified coordinates in the texture
+    // Get the pixel colour at the specified coordinates in the texture
     float4 pixelColour = tex2D(Texture, textureCoordinates);
-    
-    // If this pixel has no colour, ignore
+
+    // If existing colour, ignore and return current pixel
     if (!any(pixelColour))
         return pixelColour;
-    
-    // Just set the red of the r,g,b,a to zero (i.e. no red)
-    pixelColour.r = 0;
-            
-    // Return our 'amended' pixel colour
-    return pixelColour;
+
+    // Return white
+    return float4(1, 1, 1, 1);
 }
 
 // Can be called whatever you like
@@ -30,7 +27,7 @@ technique PixelShaderTechnique
 {
     // Also can be called whatever you like
     pass P0
-    {        
+    {
         PixelShader = compile PS_SHADERMODEL MainPixelShaderFunction();
     }
-}
+};

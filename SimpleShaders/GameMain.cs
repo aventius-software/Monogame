@@ -41,12 +41,16 @@ public class GameMain : Game
     private Effect _edgeGlowShader;
     private Effect _grainyShader;
     private Effect _greyscaleShader;
+    private Effect _invertedColoursShader;
+    private Effect _maskShader;
     private Effect _minimalShader;
     private Effect _noiseShader;
     private Effect _pixelateShader;
-    private Effect _psychedelicShader;
+    private Effect _psychedelicShader;    
+    private Effect _simpleEdgesShader;
     private Effect _sineWaveShader;
     private Effect _transparencyShader;
+    private Effect _vividColoursShader;
     private Effect _waterRippleShader;
 
     public GameMain()
@@ -80,12 +84,16 @@ public class GameMain : Game
         _edgeGlowShader = Content.Load<Effect>("Shaders/edge glow");
         _grainyShader = Content.Load<Effect>("Shaders/grainy");
         _greyscaleShader = Content.Load<Effect>("Shaders/greyscale");
+        _invertedColoursShader = Content.Load<Effect>("Shaders/inverted colours");
+        _maskShader = Content.Load<Effect>("Shaders/mask");
         _minimalShader = Content.Load<Effect>("Shaders/minimal shader");
         _noiseShader = Content.Load<Effect>("Shaders/noise");
         _pixelateShader = Content.Load<Effect>("Shaders/pixelate");
-        _psychedelicShader = Content.Load<Effect>("Shaders/psychedelic");
+        _psychedelicShader = Content.Load<Effect>("Shaders/psychedelic");        
+        _simpleEdgesShader = Content.Load<Effect>("Shaders/simple edges");
         _sineWaveShader = Content.Load<Effect>("Shaders/sine wave");
         _transparencyShader = Content.Load<Effect>("Shaders/transparency");
+        _vividColoursShader = Content.Load<Effect>("Shaders/vivid colours");
         _waterRippleShader = Content.Load<Effect>("Shaders/water ripple");
 
         // Create an empty render target to use for some shaders
@@ -149,16 +157,16 @@ public class GameMain : Game
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
-
-        // Next row of sprites... ;-)
-        position.X = 0;
-        position.Y += _spriteTexture1.Height;
-
+        
         // Draw texture but entire texture pixels changed to same colour
         _spriteBatch.Begin(effect: _minimalShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
+
+        // Next row of sprites... ;-)
+        position.X = 0;
+        position.Y += _spriteTexture1.Height;
 
         // Draw noise
         _noiseShader.Parameters["Resolution"].SetValue(new Vector2(2, 2));
@@ -207,17 +215,17 @@ public class GameMain : Game
         _spriteBatch.Draw(texture: _backgroundTileTexture, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
-
-        // Next row of sprites... ;-)
-        position.X = 0;
-        position.Y += _spriteTexture1.Height;
-
+        
         // Draw texture and disintegrate
         _disintegrationShader.Parameters["DisintegrationThreshold"].SetValue(_cycleFloatValue);
         _spriteBatch.Begin(effect: _disintegrationShader);
         _spriteBatch.Draw(texture: _backgroundTileTexture, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;
+
+        // Next row of sprites... ;-)
+        position.X = 0;
+        position.Y += _spriteTexture1.Height;
 
         // Draw a texture, but try and find any edges and add a glow to them
         _edgeGlowShader.Parameters["GlowIntensity"].SetValue(0.75f);
@@ -226,7 +234,7 @@ public class GameMain : Game
         _spriteBatch.Begin(effect: _edgeGlowShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
-        position.X += 150;
+        position.X += _spriteTexture1.Width;
 
         // Draw a texture, but add an animated 'grainy' effect. You could set
         // the 'time' to 1 if you don't want any animation of the effect
@@ -236,7 +244,7 @@ public class GameMain : Game
         _spriteBatch.Begin(effect: _grainyShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
-        position.X += 150;
+        position.X += _spriteTexture1.Width;
 
         // Draw a texture, but with a spinning psychedelic or trippy effect
         _psychedelicShader.Parameters["Time"].SetValue(time);
@@ -244,7 +252,35 @@ public class GameMain : Game
         _spriteBatch.Begin(effect: _psychedelicShader);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
-        position.X += 150;
+        position.X += _spriteTexture1.Width;
+
+        // Draw a texture, but with inverted colours     
+        _spriteBatch.Begin(effect: _invertedColoursShader);
+        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
+        _spriteBatch.End();
+        position.X += _spriteTexture1.Width;
+
+        // Draw a texture, but with masked effect
+        _spriteBatch.Begin(effect: _maskShader);
+        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
+        _spriteBatch.End();
+        position.X += _spriteTexture1.Width;        
+        
+        // Draw a texture, but with a simple edge effect
+        _spriteBatch.Begin(effect: _simpleEdgesShader);
+        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
+        _spriteBatch.End();
+        position.X += _spriteTexture1.Width;
+
+        // Next row of sprites... ;-)
+        position.X = 0;
+        position.Y += _spriteTexture1.Height;
+
+        // Draw a texture, but with more 'vivid' colours
+        _spriteBatch.Begin(effect: _vividColoursShader);
+        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
+        _spriteBatch.End();
+        position.X += _spriteTexture1.Width;
 
         base.Draw(gameTime);
     }

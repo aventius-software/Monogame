@@ -55,6 +55,18 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/greyscale.fx
 
+#begin Shaders/inverted colours.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/inverted colours.fx
+
+#begin Shaders/mask.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/mask.fx
+
 #begin Shaders/minimal shader.fx
 /importer:EffectImporter
 /processor:EffectProcessor
@@ -79,6 +91,12 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/psychedelic.fx
 
+#begin Shaders/simple edges.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/simple edges.fx
+
 #begin Shaders/sine wave.fx
 /importer:EffectImporter
 /processor:EffectProcessor
@@ -90,6 +108,12 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:Shaders/transparency.fx
+
+#begin Shaders/vivid colours.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/vivid colours.fx
 
 #begin Shaders/water ripple.fx
 /importer:EffectImporter

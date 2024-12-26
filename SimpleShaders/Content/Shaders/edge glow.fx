@@ -1,4 +1,5 @@
-﻿#if OPENGL
+﻿// Depending on if its opengl or not, we define a different pixel shader model
+#if OPENGL
     #define PS_SHADERMODEL ps_3_0
 #else    
     #define PS_SHADERMODEL ps_4_0_level_9_1
@@ -12,8 +13,8 @@ float GlowIntensity;
 float GlowThreshold;
 float2 TextureDimensions;
 
-// A basic Sobel style edge finding shader
-float4 EdgeGlow(float2 textureCoordinates : TEXCOORD0) : COLOR0
+// We can name this function whatever, but we call it down below under the technique/pass section ;-)
+float4 MainPixelShaderFunction(float2 textureCoordinates : TEXCOORD0) : COLOR0
 {
     // Define the size of a 'texel' (pixel in the texture)
     float2 texelSize = float2(1.0 / TextureDimensions.x, 1.0 / TextureDimensions.y);
@@ -34,7 +35,7 @@ float4 EdgeGlow(float2 textureCoordinates : TEXCOORD0) : COLOR0
          1, 2, 1
     );
 
-    // Sample the surrounding pixels
+    // Sample the surrounding pixels colours
     float3 sample[9];
     sample[0] = tex2D(Texture, textureCoordinates + texelSize * float2(-1, -1)).rgb;
     sample[1] = tex2D(Texture, textureCoordinates + texelSize * float2(0, -1)).rgb;
@@ -72,10 +73,12 @@ float4 EdgeGlow(float2 textureCoordinates : TEXCOORD0) : COLOR0
     return tex2D(Texture, textureCoordinates);
 }
 
-technique EdgeGlowTechnique
+// Can be called whatever you like
+technique PixelShaderTechnique
 {
-    pass Pass0
+    // Also can be called whatever you like
+    pass P0
     {
-        PixelShader = compile PS_SHADERMODEL EdgeGlow();
+        PixelShader = compile PS_SHADERMODEL MainPixelShaderFunction();
     }
 };
