@@ -12,19 +12,18 @@ internal class HillGeneratorService
 {
     private readonly Random _random = new();
 
-    public HillSegment[] GenerateHills(int numberOfHills, int segmentsPerHill, Vector2 startPosition)
+    public HillSegment[] GenerateHills(Vector2 startPosition, int numberOfHills, int segmentsPerHill = 32, int segmentWidth = 16, int maxOffsetY = 25, int maxHillSteepness = 25)
     {                
         var hillSegments = new HillSegment[segmentsPerHill * numberOfHills];
 
         var x = startPosition.X;
-        var y = startPosition.Y;
-        var step = 8;        
-        var angle = MathHelper.ToRadians(360 / segmentsPerHill);        
+        var y = startPosition.Y;             
+        var angleIncrement = MathHelper.ToRadians(360 / segmentsPerHill);        
 
         for (var hillIndex = 0; hillIndex < numberOfHills; hillIndex++)
         {
-            var randomHeight = _random.Next(-25, 25);
-            var randomDepth = _random.Next(1, 24);
+            var randomHeight = _random.Next(-maxOffsetY, maxOffsetY);
+            var randomSteepness = _random.Next(1, maxHillSteepness);
             y += randomHeight;
 
             for (var hillSegmentIndex = 0; hillSegmentIndex < segmentsPerHill; hillSegmentIndex++)
@@ -33,9 +32,9 @@ internal class HillGeneratorService
                 if (index > 0) y = hillSegments[index - 1].End.Y;
 
                 var start = new Vector2(x, y);
-                x += step;
+                x += segmentWidth;
 
-                var offsetY = (float)Math.Sin(hillSegmentIndex * angle) * randomDepth;
+                var offsetY = (float)Math.Sin(hillSegmentIndex * angleIncrement) * randomSteepness;
                 var end = new Vector2(x, y + offsetY);
 
                 hillSegments[index] = new HillSegment
