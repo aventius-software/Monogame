@@ -18,6 +18,7 @@ A Visual Studio 2022 solution with various example projects for Monogame related
 - Getting silky smooth movement in Monogame
 - Using the TiledCS library to work with Tiled maps
 - How to use a camera with a Tiled map to move around
+- A basic 'Tiny Wings' style demo using Aether Physics 2D
 - Basic 2D top down car physics using Aether Physics 2D
 
 Plus various other little examples, samples and demos. More to come...
