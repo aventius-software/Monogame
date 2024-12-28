@@ -1,9 +1,7 @@
 ﻿using IsometricLightingDemo.Services;
-using Microsoft.VisualBasic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
 
 namespace IsometricLightingDemo;
 
@@ -70,7 +68,7 @@ public class GameMain : Game
         // Move the player
         var keyboard = Keyboard.GetState();
         var direction = Vector2.Zero;
-        var speed = 1;
+        var speed = 2;
 
         if (keyboard.IsKeyDown(Keys.Up)) direction.Y = -speed;
         if (keyboard.IsKeyDown(Keys.Down)) direction.Y = speed;
@@ -91,47 +89,32 @@ public class GameMain : Game
         _camera.LookAt(_position, new Vector2(0, 0));
 
         // Highlight tile under the mouse
-        _mousePosition = Mouse.GetState().Position;
-
-        Vector2 screenCenter = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
-
-        // Get the mouse position
-        MouseState mouseState = Mouse.GetState();
-        Vector2 mousePosition = new Vector2(mouseState.X, mouseState.Y);
-
-        // Calculate the vector from the center to the mouse position
-        Vector2 direction2 = mousePosition - screenCenter;
-
-        // Calculate the angle
-        angle = (float)Math.Atan2(direction2.Y, direction2.X);
-
-
+        _mousePosition = Mouse.GetState().Position;        
         _tileOver = _isometricMapService.HighlightTile(_mousePosition + _camera.Position.ToPoint());
 
         // Set the light sources
-        var pos = _mousePosition;// + _camera.Position.ToPoint();
+        var mouseWorldPosition = _mousePosition + _camera.Position.ToPoint();
+
         _isometricMapService.SetLightSources(new IsometricLightSource[]
         {            
             new IsometricLightSource
             {
                 Colour = Color.White,
-                Position = new Vector3(0, 0, 1),
+                Position = new Vector3(mouseWorldPosition.X, mouseWorldPosition.Y, 0),
                 Strength = 1f
             }
         });
 
         base.Update(gameTime);
     }
-
-    private float angle;
-
+    
     protected override void Draw(GameTime gameTime)
     {
         // Clear screen first
         GraphicsDevice.Clear(Color.CornflowerBlue);
-        
+
         // Draw map
-        _isometricMapService.Draw(_camera.TransformMatrix, angle);
+        _isometricMapService.Draw(_camera.TransformMatrix);
         
         // Draw some debugging info
         _spriteBatch.Begin();

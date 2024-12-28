@@ -56,6 +56,12 @@
 /processorParam:TextureFormat=Color
 /build:Map/tile-block.png
 
+#begin Shaders/empty shader.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/empty shader.fx
+
 #begin Shaders/normal map lighting shader.fx
 /importer:EffectImporter
 /processor:EffectProcessor

@@ -5,31 +5,39 @@
     #define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-// Strength of the background ambient light if no light source is present, values 0.0 to 1.0
-//float BackgroundAmbientLightStrength;
-
+// You'll need to set these parameters to whatever you prefer
 float3 LightDirection;
-float3 LightColor = 1.0;
-float3 AmbientColor = 0.35;
+float3 LightColour;
+float3 AmbientColour;
 
-sampler ScreenTexture;
-sampler NormalTexture;
+// This is the texture passed by the sprite batch 'draw' method
+sampler Texture;
+
+// You'll need to supply the normal map texture as a parameter
+sampler NormalMapTexture;
 
 // We can name this function whatever, but we call it down below under the technique/pass section ;-)
 float4 MainPixelShaderFunction(float2 textureCoordinates : TEXCOORD0) : COLOR0
-{    
-    //Look up the texture value
-    float4 tex = tex2D(ScreenTexture, textureCoordinates);
+{
+    // Sample the 'original' texture pixel colour
+    float4 pixelColour = tex2D(Texture, textureCoordinates);
 
-	//Look up the normalmap value
-    float4 normal = 2 * tex2D(NormalTexture, textureCoordinates) - 1;
+    // Sample the normal map texture (note we ignore the alpha)
+    float3 normalMapPixelColour = tex2D(NormalMapTexture, textureCoordinates).rgb;
+    
+    // Transform from [0,1] to [-1,1]
+    normalMapPixelColour = normalize(normalMapPixelColour * 2.0 - 1.0);
 
-	// Compute lighting.
-    float lightAmount = saturate(dot(normal.xyz, LightDirection));
-    float4 color = tex;
-    color.rgb *= AmbientColor + (lightAmount * LightColor);
+    // Calculate the diffuse lighting
+    float3 lightDirection = normalize(LightDirection);
+    float diffuseIntensity = saturate(dot(normalMapPixelColour, lightDirection));
+    float3 diffuseColour = diffuseIntensity * LightColour;
 
-    return color * tex;
+    // Combine the lighting with the texture colour
+    float3 finalColour = pixelColour.rgb * (diffuseColour + AmbientColour);
+
+    // Send back our new pixel colour
+    return float4(finalColour, pixelColour.a);
 }
 
 // Can be called whatever you like
@@ -40,4 +48,4 @@ technique PixelShaderTechnique
     {
         PixelShader = compile PS_SHADERMODEL MainPixelShaderFunction();
     }
-}
+};

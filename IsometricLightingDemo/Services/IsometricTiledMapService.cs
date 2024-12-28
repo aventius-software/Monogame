@@ -29,6 +29,7 @@ internal class IsometricTiledMapService
 
     private RenderTarget2D _backgroundRenderTarget;
     private readonly ContentManager _contentManager;
+    private Effect _emptyShader;
     private Texture2D _lightMask;
     private Effect _lightingShader;
     private IsometricLightSource[] _lightSources;
@@ -49,36 +50,28 @@ internal class IsometricTiledMapService
         _spriteBatch = spriteBatch;
     }
 
+    private static float AngleBetween(Vector2 from, Vector2 to)
+    {
+        // Calculate the angle (radians of course) between 2 vectors
+        return (float)Math.Atan2(to.Y - from.Y, to.X - from.X);
+    }
+
     /// <summary>
     /// Draw the map
     /// </summary>
-    public void Draw(Matrix transformMatrix, float angle)
+    public void Draw(Matrix transformMatrix)
     {
         // Draw background to the 'background' render target
         _spriteBatch.GraphicsDevice.SetRenderTarget(_backgroundRenderTarget);
         _spriteBatch.GraphicsDevice.Clear(Color.Black);
-
-        //var angle = MathHelper.ToRadians(angleInDegrees);
-        Vector2 dir = new Vector2((float)Math.Sin(angle), (float)Math.Cos(angle));
-        dir.Normalize();
-        Vector3 lightDirection = new Vector3(dir.X, dir.Y, 0.05f);
-        lightDirection.Normalize();
-
-
-        _lightingShader.Parameters["LightDirection"].SetValue(lightDirection);
-        _lightingShader.Parameters["NormalTexture"].SetValue(_tilesetNormalMapTexture);        
-        _lightingShader.Parameters["LightColor"].SetValue(new Vector3(1f, 1f, 1f));
-        _lightingShader.Parameters["AmbientColor"].SetValue(new Vector3(.25f, 0.25f, 0.25f) * 0.0001f);
-
-        //Shaders.NormalMappingEffect.CurrentTechnique.Passes[0].Apply();
-
+                
         _spriteBatch.Begin(
             sortMode: SpriteSortMode.Immediate,
             blendState: null,
             samplerState: SamplerState.PointClamp,
             depthStencilState: null,
             rasterizerState: null,
-            effect: _lightingShader,
+            effect: null,
             transformMatrix: transformMatrix);
 
         for (int elevation = 0; elevation < TileMapDepth; elevation++)
@@ -103,10 +96,40 @@ internal class IsometricTiledMapService
                         colour = Color.Red;
                     }
 
+                    if (
+                        ((int)_selectedTile.X >= x - 2 && (int)_selectedTile.X <= x + 2) &&
+                        ((int)_selectedTile.Y >= y - 2 && (int)_selectedTile.Y <= y + 2) &&
+                        _selectedTile.Z == elevation
+                    )
+                    { 
+                        var from = new Vector2(_spriteBatch.GraphicsDevice.Viewport.Width / 2, _spriteBatch.GraphicsDevice.Viewport.Height / 2);
+                        //var from = new Vector2(_selectedTile.X - 1, _selectedTile.Y - 1);
+                        var to = new Vector2(_lightSources[0].Position.X, _lightSources[0].Position.Y);
+
+                        //var angle = AngleBetween(from, to) + MathHelper.ToRadians(90);
+                        var angle = MathHelper.ToRadians(45);
+                        Vector2 dir = new Vector2((float)Math.Sin(angle), (float)Math.Cos(angle));
+                        dir.Normalize();
+                        Vector3 lightDirection = new Vector3(dir.X, dir.Y, 0f);
+                        lightDirection.Normalize();
+
+
+                        _lightingShader.Parameters["LightDirection"].SetValue(lightDirection);
+                        _lightingShader.Parameters["LightColour"].SetValue(new Vector3(1f, 1f, 1f));
+                        _lightingShader.Parameters["AmbientColour"].SetValue(new Vector3(1f, 1f, 1f) * 0.25f);
+                        _lightingShader.Parameters["NormalMapTexture"].SetValue(_tilesetNormalMapTexture);
+
+                        _lightingShader.CurrentTechnique.Passes[0].Apply();
+                    }
+                    else
+                    {
+                        _emptyShader.CurrentTechnique.Passes[0].Apply();
+                    }
+
                     // Get the correct tile 'image' rectangle from the tileset 'atlas' image
                     var sourceRectangle = GetImageSourceRectangleForTile(tile);
 
-                    // Draw the map tile at this position and elevation
+                    // Draw the map tile at this position and elevation                    
                     _spriteBatch.Draw(
                         texture: _tilesetTexture,
                         position: MapToScreenCoordinates(new Point(x, y), elevation).ToVector2(),
@@ -269,7 +292,8 @@ internal class IsometricTiledMapService
         // Load our shader and a radial gradient texture which will act as a kind
         // of mask when we blend the background 'render target' and the light
         // sources 'render target' together to produce the final background
-        _lightingShader = _contentManager.Load<Effect>("Shaders/normal map lighting shader");        
+        _lightingShader = _contentManager.Load<Effect>("Shaders/normal map lighting shader");
+        _emptyShader = _contentManager.Load<Effect>("Shaders/empty shader");
         
         // Create our render targets for the screen and another for all light sources        
         _backgroundRenderTarget = new RenderTarget2D(_spriteBatch.GraphicsDevice, _spriteBatch.GraphicsDevice.Viewport.Width, _spriteBatch.GraphicsDevice.Viewport.Height);
