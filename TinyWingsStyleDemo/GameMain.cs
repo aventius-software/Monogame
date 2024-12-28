@@ -9,24 +9,31 @@ using TinyWingsStyleDemo.Services;
 
 namespace TinyWingsStyleDemo;
 
+/// <summary>
+/// A simple tiny wings style demo using Aether Physics 2D... Just press space to 'slide' or 'dive' ;-)
+/// </summary>
 public class GameMain : Game
 {
+    private const float _gravity = 9.8f;
+    private const int _hillSegmentWidth = 16;
+    private const int _maximumHillSegmentOffsetY = 25;
+    private const int _maximumHillSteepness = 25;
+    private const float _minimumCharacterVelocity = 2f;
+    private const int _numberOfHills = 30;
+    private const int _numberOfSegmentsPerHill = 32;
+    private const float _slidePower = 4f;
+
     private Camera _camera;
     private Body _characterRigidBody;
-    private float _characterMinimumRotationAngle = MathHelper.ToRadians(-25);
-    private float _characterMaximumRotationAngle = MathHelper.ToRadians(25);
     private Texture2D _characterTexture;
     private GraphicsDeviceManager _graphics;
-    private readonly float _gravity = 9.8f;
     private HillGeneratorService _hillGeneratorService;
     private HillSegment[] _hillSegments;
     private bool _isSliding;
-    private readonly float _minimumCharacterVelocity = 1f;
     private PhysicsWorld _physicsWorld;
-    private int _pixelsPerMetre = 32;
+    private readonly int _pixelsPerMetre = 32;
     private Vector2 _position;
     private ShapeDrawingService _shapeDrawingService;
-    private readonly float _slidePower = 3f;
     private SpriteBatch _spriteBatch;
 
     public GameMain()
@@ -43,23 +50,23 @@ public class GameMain : Game
         _hillGeneratorService = new HillGeneratorService();
 
         // Generate the hills       
-        var startPosition = new Vector2(0, GraphicsDevice.Viewport.Height / 2);
+        var hillStartPosition = new Vector2(0, GraphicsDevice.Viewport.Height / 2);
 
         _hillSegments = _hillGeneratorService.GenerateHills(
-            startPosition: startPosition,
-            numberOfHills: 25,
-            segmentsPerHill: 32,
-            segmentWidth: 16,
-            maxOffsetY: 25,
-            maxHillSteepness: 25);
+            startPosition: hillStartPosition,
+            numberOfHills: _numberOfHills,
+            segmentsPerHill: _numberOfSegmentsPerHill,
+            segmentWidth: _hillSegmentWidth,
+            maxOffsetY: _maximumHillSegmentOffsetY,
+            maxHillSteepness: _maximumHillSteepness);
 
         // Create a camera
         _camera = new Camera();
 
         // Tell the camera the dimensions of the world
-        var w = _hillSegments.Last().End.X - _hillSegments[0].Start.X;
-        var h = Math.Abs(_hillSegments.Max(x => x.End.Y) - _hillSegments.Min(x => x.Start.Y));
-        _camera.SetWorldDimensions(new Vector2(w, h));
+        var worldWidth = _hillSegments.Last().End.X - _hillSegments[0].Start.X;
+        var worldHeight = Math.Abs(_hillSegments.Max(segment => segment.End.Y) - _hillSegments.Min(segment => segment.Start.Y));
+        _camera.SetWorldDimensions(new Vector2(worldWidth, worldHeight));
 
         // Create the physics 'world'
         _physicsWorld = new PhysicsWorld();
@@ -68,18 +75,22 @@ public class GameMain : Game
         // that kind of feels right for motion on screen/window of 800 x 480 pixels. About 32 pixels per metre seems ok
         _physicsWorld.SetDisplayUnitToSimUnitRatio(_pixelsPerMetre);
 
-        // We want normal gravity to make things fall
+        // We want 'normal' gravity to make things fall
         _physicsWorld.Gravity = new Vector2(0, _gravity);
 
-        // Create physics edges for the hills
-        for (int i = 0; i < _hillSegments.Length; i++)
+        // Create physics 'edges' for the hills so we can 'slide' along them
+        for (int segment = 0; segment < _hillSegments.Length; segment++)
         {
-            // Create a body for our 'edge' (just a 'line' effectively)           
-            var edge = _physicsWorld.CreateBody();
+            // Create a physics body for our ground segment       
+            var groundSegmentBody = _physicsWorld.CreateBody();
 
-            // Attach a fixture and set friction to a low value (to make it slippery)
-            var fixture = edge.CreateFixture(new EdgeShape(_physicsWorld.ToSimUnits(_hillSegments[i].Start), _physicsWorld.ToSimUnits(_hillSegments[i].End)));
-            fixture.Friction = 0.01f;
+            // Set the simulation coordinates for the start and end of this ground segment
+            var startCoordinates = _physicsWorld.ToSimUnits(_hillSegments[segment].Start);
+            var endCoordinates = _physicsWorld.ToSimUnits(_hillSegments[segment].End);
+
+            // Attach an 'edge' (just a 'line' effectively) fixture and set friction to some very low value (to make it slippery)
+            var edgeFixture = groundSegmentBody.CreateFixture(new EdgeShape(startCoordinates, endCoordinates));
+            edgeFixture.Friction = 0.01f;
         }
 
         base.Initialize();
@@ -92,37 +103,18 @@ public class GameMain : Game
         // Load a texture for our character
         _characterTexture = Content.Load<Texture2D>("Textures/ball");
 
-        // Place the character at some 'world' position coordinates
-        _position = new Vector2(64, 240 - (64 + 25));
+        // Place the character at some starting 'world' position coordinates
+        _position = new Vector2(_characterTexture.Width, (GraphicsDevice.Viewport.Height / 2) - (_characterTexture.Height + _maximumHillSegmentOffsetY));
 
-        // Create a rigid body for our character
-        _characterRigidBody = _physicsWorld.CreateRoundedRectangle(
-            width: _physicsWorld.ToSimUnits(_characterTexture.Width),
-            height: _physicsWorld.ToSimUnits(_characterTexture.Height),
-            xRadius: _physicsWorld.ToSimUnits(_characterTexture.Width / 8),
-            yRadius: _physicsWorld.ToSimUnits(_characterTexture.Height / 8),
-            segments: 1,
+        // Create a rigid body for our character so it can interact with the physics simulation               
+        _characterRigidBody = _physicsWorld.CreateCircle(
+            radius: _physicsWorld.ToSimUnits(_characterTexture.Width / 2),
             density: 1,
             position: _physicsWorld.ToSimUnits(_position),
-            rotation: 0,
             bodyType: BodyType.Dynamic);
 
-        //_characterRigidBody = _physicsWorld.CreateCircle(
-        //    radius: _physicsWorld.ToSimUnits(_characterTexture.Width / 2),
-        //    density: 1,
-        //    position: _physicsWorld.ToSimUnits(_position),
-        //    bodyType: BodyType.Dynamic);
-
-        //_characterRigidBody = _physicsWorld.CreateCapsule(
-        //    height: _physicsWorld.ToSimUnits(_characterTexture.Height),
-        //    topRadius: _physicsWorld.ToSimUnits(8),
-        //    topEdges: 2,
-        //    bottomRadius: _physicsWorld.ToSimUnits(8),
-        //    bottomEdges: 2,
-        //    density: 1,
-        //    position: _physicsWorld.ToSimUnits(_position),
-        //    rotation: 0,
-        //    bodyType: BodyType.Dynamic);
+        // Fix the rotation for the physics simulation as we'll calculate it ourselves
+        _characterRigidBody.FixedRotation = true;
 
         // Set the camera origin to the middle of the viewport, also note the offset for the size of the character sprite
         _camera.SetOrigin(new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2));
@@ -138,41 +130,34 @@ public class GameMain : Game
 
         if (_isSliding)
         {
+            // If the player is 'sliding' we amplify gravity
             _physicsWorld.Gravity = new Vector2(0, _gravity * _slidePower);
         }
-        else _physicsWorld.Gravity = new Vector2(0, _gravity);
+        else
+        {
+            // Otherwise gravity is set to normal
+            _physicsWorld.Gravity = new Vector2(0, _gravity);
+        }
 
-        // Check for minimum velocity        
+        // Check for minimum velocity as we want the character to keep slowly moving forward
+        // even if they are heading up hill, otherwise they'd fall back down the hill...
         var velocity = _characterRigidBody.LinearVelocity;
-        
+
         if (velocity.X < _minimumCharacterVelocity)
         {
             // Set 'X' axis velocity to our minimum value
             _characterRigidBody.LinearVelocity = new Vector2(_minimumCharacterVelocity, velocity.Y);
         }
 
-        // Constrain our characters rotation between certain limits        
-        var rotation = _characterRigidBody.Rotation;
+        // Set the rotation angle depending on velocity, so that the character tends downwards
+        // when 'diving' and upwards when 'launching' ;-)
+        _characterRigidBody.Rotation = (float)Math.Atan2(velocity.Y, velocity.X);
 
-        // Clamp the rotation within the limits
-        if (rotation < _characterMinimumRotationAngle)
-        {
-            _characterRigidBody.Rotation = _characterMinimumRotationAngle;
-            _characterRigidBody.AngularVelocity = 0;
-        }
-        else if (rotation > _characterMaximumRotationAngle)
-        {
-            _characterRigidBody.Rotation = _characterMaximumRotationAngle;
-            _characterRigidBody.AngularVelocity = 0;
-        }
-
-        // Set camera to the player/characters position, set offset so we account for the character sprite origin
-        // being the top left corner of the sprite, this makes the camera constrain to the end of the
-        // map 'minus' the width/height of the character. Otherwise we'd get a gap at the end of the map
+        // Set camera to follow the player/characters position
         _position = _physicsWorld.ToDisplayUnits(_characterRigidBody.Position);
         _camera.LookAt(_position, Vector2.Zero);
 
-        // Next 'step' for the physics simulation
+        // Simulate (or 'step' through) the physics simulation for this frame
         _physicsWorld.Step((float)gameTime.ElapsedGameTime.TotalSeconds);
 
         base.Update(gameTime);
@@ -185,8 +170,11 @@ public class GameMain : Game
         // First draw the map (so it will be under the character)
         foreach (var segment in _hillSegments)
         {
+            // Transform the coordinates according to the camera
             var start = Vector2.Transform(segment.Start, _camera.TransformMatrix);
             var end = Vector2.Transform(segment.End, _camera.TransformMatrix);
+
+            // Draw ground line
             _shapeDrawingService.DrawLine(start, end, Color.White);
         }
 
