@@ -13,6 +13,8 @@ public class GameMain : Game
 {
     private Camera _camera;
     private Body _characterRigidBody;
+    private float _characterMinimumRotationAngle = MathHelper.ToRadians(-25);
+    private float _characterMaximumRotationAngle = MathHelper.ToRadians(25);
     private Texture2D _characterTexture;
     private GraphicsDeviceManager _graphics;
     private readonly float _gravity = 9.8f;
@@ -24,7 +26,7 @@ public class GameMain : Game
     private int _pixelsPerMetre = 32;
     private Vector2 _position;
     private ShapeDrawingService _shapeDrawingService;
-    private readonly float _slidePower = 2f;
+    private readonly float _slidePower = 3f;
     private SpriteBatch _spriteBatch;
 
     public GameMain()
@@ -77,7 +79,7 @@ public class GameMain : Game
 
             // Attach a fixture and set friction to a low value (to make it slippery)
             var fixture = edge.CreateFixture(new EdgeShape(_physicsWorld.ToSimUnits(_hillSegments[i].Start), _physicsWorld.ToSimUnits(_hillSegments[i].End)));
-            fixture.Friction = 0;
+            fixture.Friction = 0.01f;
         }
 
         base.Initialize();
@@ -88,7 +90,7 @@ public class GameMain : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         // Load a texture for our character
-        _characterTexture = Content.Load<Texture2D>("Textures/oval");
+        _characterTexture = Content.Load<Texture2D>("Textures/ball");
 
         // Place the character at some 'world' position coordinates
         _position = new Vector2(64, 240 - (64 + 25));
@@ -97,13 +99,30 @@ public class GameMain : Game
         _characterRigidBody = _physicsWorld.CreateRoundedRectangle(
             width: _physicsWorld.ToSimUnits(_characterTexture.Width),
             height: _physicsWorld.ToSimUnits(_characterTexture.Height),
-            xRadius: _physicsWorld.ToSimUnits(8),
-            yRadius: _physicsWorld.ToSimUnits(8),
+            xRadius: _physicsWorld.ToSimUnits(_characterTexture.Width / 8),
+            yRadius: _physicsWorld.ToSimUnits(_characterTexture.Height / 8),
             segments: 1,
             density: 1,
             position: _physicsWorld.ToSimUnits(_position),
             rotation: 0,
             bodyType: BodyType.Dynamic);
+
+        //_characterRigidBody = _physicsWorld.CreateCircle(
+        //    radius: _physicsWorld.ToSimUnits(_characterTexture.Width / 2),
+        //    density: 1,
+        //    position: _physicsWorld.ToSimUnits(_position),
+        //    bodyType: BodyType.Dynamic);
+
+        //_characterRigidBody = _physicsWorld.CreateCapsule(
+        //    height: _physicsWorld.ToSimUnits(_characterTexture.Height),
+        //    topRadius: _physicsWorld.ToSimUnits(8),
+        //    topEdges: 2,
+        //    bottomRadius: _physicsWorld.ToSimUnits(8),
+        //    bottomEdges: 2,
+        //    density: 1,
+        //    position: _physicsWorld.ToSimUnits(_position),
+        //    rotation: 0,
+        //    bodyType: BodyType.Dynamic);
 
         // Set the camera origin to the middle of the viewport, also note the offset for the size of the character sprite
         _camera.SetOrigin(new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2));
@@ -130,6 +149,21 @@ public class GameMain : Game
         {
             // Set 'X' axis velocity to our minimum value
             _characterRigidBody.LinearVelocity = new Vector2(_minimumCharacterVelocity, velocity.Y);
+        }
+
+        // Constrain our characters rotation between certain limits        
+        var rotation = _characterRigidBody.Rotation;
+
+        // Clamp the rotation within the limits
+        if (rotation < _characterMinimumRotationAngle)
+        {
+            _characterRigidBody.Rotation = _characterMinimumRotationAngle;
+            _characterRigidBody.AngularVelocity = 0;
+        }
+        else if (rotation > _characterMaximumRotationAngle)
+        {
+            _characterRigidBody.Rotation = _characterMaximumRotationAngle;
+            _characterRigidBody.AngularVelocity = 0;
         }
 
         // Set camera to the player/characters position, set offset so we account for the character sprite origin
