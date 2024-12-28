@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using nkast.Aether.Physics2D.Collision.Shapes;
 using nkast.Aether.Physics2D.Dynamics;
 using System;
 using System.Linq;
@@ -14,11 +15,16 @@ public class GameMain : Game
     private Body _characterRigidBody;
     private Texture2D _characterTexture;
     private GraphicsDeviceManager _graphics;
+    private readonly float _gravity = 9.8f;
     private HillGeneratorService _hillGeneratorService;
     private HillSegment[] _hillSegments;
+    private bool _isSliding;
+    private readonly float _minimumCharacterVelocity = 1f;
     private PhysicsWorld _physicsWorld;
+    private int _pixelsPerMetre = 32;
     private Vector2 _position;
     private ShapeDrawingService _shapeDrawingService;
+    private readonly float _slidePower = 2f;
     private SpriteBatch _spriteBatch;
 
     public GameMain()
@@ -35,7 +41,7 @@ public class GameMain : Game
         _hillGeneratorService = new HillGeneratorService();
 
         // Generate the hills       
-        var startPosition = new Vector2(0, 240);
+        var startPosition = new Vector2(0, GraphicsDevice.Viewport.Height / 2);
 
         _hillSegments = _hillGeneratorService.GenerateHills(
             startPosition: startPosition,
@@ -58,17 +64,20 @@ public class GameMain : Game
 
         // We'll use a pixels per metre value for the simulation (as the physics engine works in metres/kilograms/etc...)
         // that kind of feels right for motion on screen/window of 800 x 480 pixels. About 32 pixels per metre seems ok
-        _physicsWorld.SetDisplayUnitToSimUnitRatio(32);
+        _physicsWorld.SetDisplayUnitToSimUnitRatio(_pixelsPerMetre);
 
         // We want normal gravity to make things fall
-        _physicsWorld.Gravity = new Vector2(0, 9.8f);
+        _physicsWorld.Gravity = new Vector2(0, _gravity);
 
         // Create physics edges for the hills
         for (int i = 0; i < _hillSegments.Length; i++)
         {
-            var position = _hillSegments[i].Start;
+            // Create a body for our 'edge' (just a 'line' effectively)           
+            var edge = _physicsWorld.CreateBody();
 
-            _physicsWorld.CreateEdge(_physicsWorld.ToSimUnits(_hillSegments[i].Start), _physicsWorld.ToSimUnits(_hillSegments[i].End));            
+            // Attach a fixture and set friction to a low value (to make it slippery)
+            var fixture = edge.CreateFixture(new EdgeShape(_physicsWorld.ToSimUnits(_hillSegments[i].Start), _physicsWorld.ToSimUnits(_hillSegments[i].End)));
+            fixture.Friction = 0;
         }
 
         base.Initialize();
@@ -105,12 +114,31 @@ public class GameMain : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
+        // Handle 'sliding'
+        _isSliding = Keyboard.GetState().IsKeyDown(Keys.Space);
+
+        if (_isSliding)
+        {
+            _physicsWorld.Gravity = new Vector2(0, _gravity * _slidePower);
+        }
+        else _physicsWorld.Gravity = new Vector2(0, _gravity);
+
+        // Check for minimum velocity        
+        var velocity = _characterRigidBody.LinearVelocity;
+        
+        if (velocity.X < _minimumCharacterVelocity)
+        {
+            // Set 'X' axis velocity to our minimum value
+            _characterRigidBody.LinearVelocity = new Vector2(_minimumCharacterVelocity, velocity.Y);
+        }
+
         // Set camera to the player/characters position, set offset so we account for the character sprite origin
         // being the top left corner of the sprite, this makes the camera constrain to the end of the
         // map 'minus' the width/height of the character. Otherwise we'd get a gap at the end of the map
         _position = _physicsWorld.ToDisplayUnits(_characterRigidBody.Position);
         _camera.LookAt(_position, Vector2.Zero);
 
+        // Next 'step' for the physics simulation
         _physicsWorld.Step((float)gameTime.ElapsedGameTime.TotalSeconds);
 
         base.Update(gameTime);
@@ -143,7 +171,7 @@ public class GameMain : Game
             texture: _characterTexture,
             position: _physicsWorld.ToDisplayUnits(_characterRigidBody.Position),
             sourceRectangle: new Rectangle(0, 0, _characterTexture.Width, _characterTexture.Height),
-            color: Color.White,
+            color: _isSliding ? Color.Red : Color.White,
             rotation: _characterRigidBody.Rotation,
             origin: new Vector2(_characterTexture.Width / 2, _characterTexture.Height / 2),
             scale: 1f,
