@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple2DLightingWithShaders
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AStarPathFindUsingRoyT", "AStarPathFindUsingRoyT\AStarPathFindUsingRoyT.csproj", "{6D5C8594-0A58-4A50-9941-CFE01461C872}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyWingsStyleDemo", "TinyWingsStyleDemo\TinyWingsStyleDemo.csproj", "{73353631-C3F4-4089-A4AE-69D98A78FF65}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -136,6 +138,10 @@ Global
 		{6D5C8594-0A58-4A50-9941-CFE01461C872}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D5C8594-0A58-4A50-9941-CFE01461C872}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D5C8594-0A58-4A50-9941-CFE01461C872}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73353631-C3F4-4089-A4AE-69D98A78FF65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73353631-C3F4-4089-A4AE-69D98A78FF65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73353631-C3F4-4089-A4AE-69D98A78FF65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73353631-C3F4-4089-A4AE-69D98A78FF65}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
