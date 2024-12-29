@@ -102,7 +102,7 @@ public class GameMain : Game
         _normalMapShader.Parameters["LightPosition"].SetValue(_lightPosition);
         _normalMapShader.Parameters["LightColour"].SetValue(new Vector3(1f, 1f, 1f) * 0.75f);
         _normalMapShader.Parameters["AmbientColour"].SetValue(new Vector3(1f, 1f, 1f) * 0.25f);
-        _normalMapShader.Parameters["LightRadius"].SetValue(1000f);
+        _normalMapShader.Parameters["LightRadius"].SetValue(500f);
         _normalMapShader.Parameters["NormalMapTexture"].SetValue(_textureNormalMap);
 
         // Start batch (with our shader applied)
