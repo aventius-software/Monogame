@@ -36,6 +36,7 @@ public class GameMain : Game
 
     private Effect _alterColourShader;
     private Effect _blendingTexturesShader;
+    private Effect _chromaticAbberation;
     private Effect _colourTintShader;
     private Effect _disintegrationShader;
     private Effect _edgeGlowShader;
@@ -79,6 +80,7 @@ public class GameMain : Game
         // Load shaders
         _alterColourShader = Content.Load<Effect>("Shaders/alter colour");
         _blendingTexturesShader = Content.Load<Effect>("Shaders/blending textures");
+        _chromaticAbberation = Content.Load<Effect>("Shaders/chromatic abberation");
         _colourTintShader = Content.Load<Effect>("Shaders/coloured tint");
         _disintegrationShader = Content.Load<Effect>("Shaders/disintegration");
         _edgeGlowShader = Content.Load<Effect>("Shaders/edge glow");
@@ -278,6 +280,13 @@ public class GameMain : Game
 
         // Draw a texture, but with more 'vivid' colours
         _spriteBatch.Begin(effect: _vividColoursShader);
+        _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
+        _spriteBatch.End();
+        position.X += _spriteTexture1.Width;
+
+        // Draw a texture, but with chromatic abberation applied to the colours
+        _chromaticAbberation.Parameters["Amount"].SetValue(0.025f);
+        _spriteBatch.Begin(effect: _chromaticAbberation);
         _spriteBatch.Draw(texture: _spriteTexture1, position: position, color: Color.White);
         _spriteBatch.End();
         position.X += _spriteTexture1.Width;

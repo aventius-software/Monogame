@@ -29,7 +29,7 @@ float4 MainPixelShaderFunction(float2 textureCoordinates : TEXCOORD0) : COLOR0
     normalMapPixelColour = normalize(normalMapPixelColour * 2.0 - 1.0);
 
     // Calculate the diffuse lighting
-    float3 lightDirection = normalize(LightDirection);
+    float3 lightDirection = LightDirection; //normalize(LightDirection);
     float diffuseIntensity = saturate(dot(normalMapPixelColour, lightDirection));
     float3 diffuseColour = diffuseIntensity * LightColour;
 

@@ -74,13 +74,8 @@ public class GameMain : Game
         _lightingAngleInDegrees = MathHelper.ToDegrees(_lightingAngle);
 
         // Now calculate the direction vector for the light from the angle
-        var directionVector = new Vector2((float)Math.Sin(_lightingAngle), (float)Math.Cos(_lightingAngle));
-        directionVector.Normalize();
-
-        // Set the light direction, keep Z as 0 ;-)
-        _lightDirection = new Vector3(directionVector.X, directionVector.Y, 0f);
-        _lightDirection.Normalize();
-
+        _lightDirection = new Vector3((float)Math.Sin(_lightingAngle), (float)Math.Cos(_lightingAngle), 0);
+        
         base.Update(gameTime);
     }
 
