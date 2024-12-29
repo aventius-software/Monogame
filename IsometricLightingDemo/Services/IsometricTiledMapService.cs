@@ -114,9 +114,20 @@ internal class IsometricTiledMapService
                         lightDirection.Normalize();
 
 
-                        _lightingShader.Parameters["LightDirection"].SetValue(lightDirection);
+                        //_lightingShader.Parameters["LightDirection"].SetValue(lightDirection);
+                        //_lightingShader.Parameters["LightColour"].SetValue(new Vector3(1f, 1f, 1f));
+                        //_lightingShader.Parameters["AmbientColour"].SetValue(new Vector3(1f, 1f, 1f) * 0.25f);
+                        //_lightingShader.Parameters["NormalMapTexture"].SetValue(_tilesetNormalMapTexture);
+
+                        //_lightingShader.Parameters["TextureSampler"].SetValue(texture);
+                        //_lightingShader.Parameters["NormalMapSampler"].SetValue(normalMap);
+                        Vector3 lightPosition = new Vector3(1, 1, 1);
+                        float lightRadius = 30f;
+
+                        _lightingShader.Parameters["LightPosition"].SetValue(lightPosition);
                         _lightingShader.Parameters["LightColour"].SetValue(new Vector3(1f, 1f, 1f));
                         _lightingShader.Parameters["AmbientColour"].SetValue(new Vector3(1f, 1f, 1f) * 0.25f);
+                        _lightingShader.Parameters["LightRadius"].SetValue(lightRadius);
                         _lightingShader.Parameters["NormalMapTexture"].SetValue(_tilesetNormalMapTexture);
 
                         _lightingShader.CurrentTechnique.Passes[0].Apply();

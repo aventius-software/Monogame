@@ -1,19 +1,20 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
 
 namespace Simple2DLightingWithNormalMaps;
 
+/// <summary>
+/// A rough/simple 2D lighting effect using normal maps with shaders
+/// </summary>
 public class GameMain : Game
 {
     private SpriteFont _font;
     private GraphicsDeviceManager _graphics;
-    private float _lightingAngle;
-    private float _lightingAngleInDegrees;
-    private Vector3 _lightDirection;
+    private Vector3 _lightPosition;
     private Effect _normalMapShader;
-    private Vector2 _origin;
+    private Vector2 _screenOrigin;
+    private Vector2 _spriteOrigin;
     private Vector2 _positionOfTextureWithoutLighting;
     private Vector2 _positionOfTextureWithLighting;
     private SpriteBatch _spriteBatch;
@@ -38,7 +39,7 @@ public class GameMain : Game
 
         // Load a copy of our 'original' texture
         _texture = Content.Load<Texture2D>("Textures/tile-block");
-        _origin = new Vector2(_texture.Width / 2, _texture.Height / 2);
+        _spriteOrigin = new Vector2(_texture.Width / 2, _texture.Height / 2);
 
         // Load the texture for its normal map
         _textureNormalMap = Content.Load<Texture2D>("Textures/tile-block-normal-map");
@@ -50,15 +51,9 @@ public class GameMain : Game
         _font = Content.Load<SpriteFont>("Fonts/font");
 
         // Set positions
-        var screenCenter = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
-        _positionOfTextureWithoutLighting = screenCenter - new Vector2(_texture.Width, 0);
-        _positionOfTextureWithLighting = screenCenter + new Vector2(_texture.Width, 0);
-    }
-
-    public static float AngleBetween(Vector2 from, Vector2 to)
-    {
-        // Calculate the angle (radians of course) between 2 vectors
-        return (float)Math.Atan2(to.Y - from.Y, to.X - from.X);
+        _screenOrigin = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
+        _positionOfTextureWithoutLighting = _screenOrigin - new Vector2(_texture.Width, 0);
+        _positionOfTextureWithLighting = _screenOrigin;
     }
 
     protected override void Update(GameTime gameTime)
@@ -69,13 +64,10 @@ public class GameMain : Game
         // Get the mouse position
         var mousePosition = Mouse.GetState().Position.ToVector2();
 
-        // Calculate angle between the sprite with lighting and the mouse
-        _lightingAngle = AngleBetween(_positionOfTextureWithLighting, mousePosition) + MathHelper.ToRadians(90);
-        _lightingAngleInDegrees = MathHelper.ToDegrees(_lightingAngle);
+        // Place the light position at the mouse pointer
+        var lightPosition = mousePosition - _screenOrigin;
+        _lightPosition = new Vector3(lightPosition.X, -lightPosition.Y, 0);
 
-        // Now calculate the direction vector for the light from the angle
-        _lightDirection = new Vector3((float)Math.Sin(_lightingAngle), (float)Math.Cos(_lightingAngle), 0);
-        
         base.Update(gameTime);
     }
 
@@ -99,17 +91,18 @@ public class GameMain : Game
             sourceRectangle: new Rectangle(0, 0, _texture.Width, _texture.Height),
             color: Color.White,
             rotation: 0,
-            origin: _origin,
+            origin: _spriteOrigin,
             scale: 1f,
             effects: SpriteEffects.None,
             layerDepth: 0);
 
         _spriteBatch.End();
 
-        // Set the shaders parameters
-        _normalMapShader.Parameters["LightDirection"].SetValue(_lightDirection);
-        _normalMapShader.Parameters["LightColour"].SetValue(new Vector3(1f, 1f, 1f) * 1f);
+        // Set the shaders parameters        
+        _normalMapShader.Parameters["LightPosition"].SetValue(_lightPosition);
+        _normalMapShader.Parameters["LightColour"].SetValue(new Vector3(1f, 1f, 1f) * 0.75f);
         _normalMapShader.Parameters["AmbientColour"].SetValue(new Vector3(1f, 1f, 1f) * 0.25f);
+        _normalMapShader.Parameters["LightRadius"].SetValue(1000f);
         _normalMapShader.Parameters["NormalMapTexture"].SetValue(_textureNormalMap);
 
         // Start batch (with our shader applied)
@@ -123,13 +116,50 @@ public class GameMain : Game
             transformMatrix: null);
 
         // Draw the texture with the normal map shader applied
+        var offset = Vector2.Zero;
+        var spritePosition = _positionOfTextureWithLighting + offset;
+        var worldPosition = new Vector3(spritePosition - _screenOrigin, 0);
+        _normalMapShader.Parameters["WorldPosition"].SetValue(worldPosition);
+
         _spriteBatch.Draw(
             texture: _texture,
-            position: _positionOfTextureWithLighting,
+            position: spritePosition,
             sourceRectangle: new Rectangle(0, 0, _texture.Width, _texture.Height),
             color: Color.White,
             rotation: 0,
-            origin: _origin,
+            origin: _spriteOrigin,
+            scale: 1f,
+            effects: SpriteEffects.None,
+            layerDepth: 0);
+
+        offset = new Vector2(_texture.Width, 0);
+        spritePosition = _positionOfTextureWithLighting + offset;
+        worldPosition = new Vector3(spritePosition - _screenOrigin, 0);
+        _normalMapShader.Parameters["WorldPosition"].SetValue(worldPosition);
+
+        _spriteBatch.Draw(
+            texture: _texture,
+            position: spritePosition,
+            sourceRectangle: new Rectangle(0, 0, _texture.Width, _texture.Height),
+            color: Color.White,
+            rotation: 0,
+            origin: _spriteOrigin,
+            scale: 1f,
+            effects: SpriteEffects.None,
+            layerDepth: 0);
+
+        offset = new Vector2(_texture.Width / 2, _texture.Height / 4);
+        spritePosition = _positionOfTextureWithLighting + offset;
+        worldPosition = new Vector3(spritePosition - _screenOrigin, 0);
+        _normalMapShader.Parameters["WorldPosition"].SetValue(worldPosition);
+
+        _spriteBatch.Draw(
+            texture: _texture,
+            position: spritePosition,
+            sourceRectangle: new Rectangle(0, 0, _texture.Width, _texture.Height),
+            color: Color.White,
+            rotation: 0,
+            origin: _spriteOrigin,
             scale: 1f,
             effects: SpriteEffects.None,
             layerDepth: 0);
@@ -138,7 +168,7 @@ public class GameMain : Game
 
         // Draw some debugging info
         _spriteBatch.Begin();
-        _spriteBatch.DrawString(_font, $"Angle: {_lightingAngleInDegrees}", new Vector2(0, 0), Color.White);
+        _spriteBatch.DrawString(_font, $"Light Position: {_lightPosition}", new Vector2(0, 0), Color.White);
         _spriteBatch.End();
 
         base.Draw(gameTime);
