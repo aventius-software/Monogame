@@ -5,15 +5,15 @@ using Microsoft.Xna.Framework.Input;
 
 namespace IsometricLightingDemo;
 
+/// <summary>
+/// A very rough isometric normal map lighting demo, needs some work
+/// </summary>
 public class GameMain : Game
 {
-    private RenderTarget2D _backgroundRenderTarget;
     private Camera _camera;
     private SpriteFont _font;
     private readonly GraphicsDeviceManager _graphics;
     private IsometricTiledMapService _isometricMapService;
-    private Effect _lightingShader;
-    private RenderTarget2D _lightSourcesRenderTarget;
     private Point _mousePosition;
     private Vector2 _position;
     private SpriteBatch _spriteBatch;
@@ -50,14 +50,14 @@ public class GameMain : Game
         };
 
         // Load a Tiled isometric map
-        _isometricMapService.LoadTiledMap("Map/tile-block-map.tmx", "Map/tile-block", "Map/tile-block-normal-map", "Map/radial gradient 256x256");
+        _isometricMapService.LoadTiledMap("Map/tile-block-map.tmx", "Map/tile-block", "Map/tile-block-normal-map", "Shaders/normal map lighting shader");
 
         // Create a camera
         _camera = new Camera();
         _camera.SetWorldDimensions(new Vector2(_isometricMapService.WorldWidth, _isometricMapService.WorldHeight));
 
         // Place the imaginary 'character' at some valid 'map' starting position
-        _position = new Vector2(1, 1);        
+        _position = new Vector2(1, 1);
     }
 
     protected override void Update(GameTime gameTime)
@@ -89,12 +89,12 @@ public class GameMain : Game
         _camera.LookAt(_position, new Vector2(0, 0));
 
         // Highlight tile under the mouse
-        _mousePosition = Mouse.GetState().Position + _camera.Position.ToPoint();        
+        _mousePosition = Mouse.GetState().Position + _camera.Position.ToPoint();
         _tileOver = _isometricMapService.HighlightTile(_mousePosition);
-                
+
         // Set the light sources
         _isometricMapService.SetLightSources(new IsometricLightSource[]
-        {            
+        {
             new IsometricLightSource
             {
                 Colour = Color.White,
@@ -105,7 +105,7 @@ public class GameMain : Game
 
         base.Update(gameTime);
     }
-    
+
     protected override void Draw(GameTime gameTime)
     {
         // Clear screen first
@@ -124,7 +124,7 @@ public class GameMain : Game
         _isometricMapService.Draw();
 
         _spriteBatch.End();
-        
+
         // Draw some debugging info
         _spriteBatch.Begin();
         _spriteBatch.DrawString(_font, $"Mouse: {_mousePosition.X}, {_mousePosition.Y}", new Vector2(0, 0), Color.White);

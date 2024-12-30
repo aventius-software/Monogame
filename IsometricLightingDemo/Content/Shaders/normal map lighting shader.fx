@@ -8,11 +8,20 @@
     #define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-// You'll need to set these parameters to whatever you prefer
+// We need these so we can calculate the pixel position within
+// the texture and also the 'world'. Otherwise we'd apply the
+// same lighting to each 'sprite' (assuming this shader is being
+// applied to several sprites), but we want sprites to be lit
+// differently depending on their distance from a light source ;-)
 float3 WorldPosition;
+float2 TextureSize;
+
+// Background ambient colour when no light source is present
+float4 AmbientColour;
+
+// Light source details
 float3 LightPosition;
-float3 LightColour;
-float3 AmbientColour;
+float4 LightColour;
 float LightRadius;
 
 // This is the texture passed by the sprite batch 'draw' method
@@ -33,8 +42,9 @@ float4 MainPixelShaderFunction(float2 textureCoordinates : TEXCOORD0) : COLOR0
     // Transform from [0,1] to [-1,1]
     normalPixelColour = normalize((2 * normalPixelColour) - 1.0);
 
-    // A 'rough' way to calculate the world position for this pixel
-    float3 pixelWorldPosition = WorldPosition * float3(textureCoordinates.x, textureCoordinates.y, 1);
+    // Calculate pixel position in texture and world
+    float2 pixelTexturePosition = textureCoordinates * TextureSize;
+    float3 pixelWorldPosition = WorldPosition + float3(pixelTexturePosition.x, pixelTexturePosition.y, 0);
     
     // Calculate the light direction and distance
     float3 lightDirection = LightPosition - pixelWorldPosition;
@@ -49,7 +59,7 @@ float4 MainPixelShaderFunction(float2 textureCoordinates : TEXCOORD0) : COLOR0
     float3 diffuse = diffuseIntensity * LightColour;
 
     // Combine the lighting with the texture color
-    float3 finalColour = (diffuse + AmbientColour) * pixelColour.rgb;
+    float3 finalColour = (diffuse + AmbientColour.rgb) * pixelColour.rgb;
 
     return float4(finalColour, pixelColour.a);
 }

@@ -26,14 +26,10 @@ internal class IsometricTiledMapService
     public int TileMapWidth => (int)_tiledMap.Width;
     public int WorldWidth { get; private set; }
     public int WorldHeight { get; private set; }
-
-    //private RenderTarget2D _backgroundRenderTarget;
-    private readonly ContentManager _contentManager;
-    private Effect _emptyShader;
-    private Texture2D _lightMask;
+    
+    private readonly ContentManager _contentManager;    
     private Effect _lightingShader;
-    private IsometricLightSource[] _lightSources;
-    //private RenderTarget2D _lightSourcesRenderTarget;
+    private IsometricLightSource[] _lightSources;    
     private Vector3 _selectedTile;
     private readonly SpriteBatch _spriteBatch;
     private int _tileBlockHeight;
@@ -48,13 +44,7 @@ internal class IsometricTiledMapService
     {
         _contentManager = contentManager;
         _spriteBatch = spriteBatch;
-    }
-
-    private static float AngleBetween(Vector2 from, Vector2 to)
-    {
-        // Calculate the angle (radians of course) between 2 vectors
-        return (float)Math.Atan2(to.Y - from.Y, to.X - from.X);
-    }
+    }    
 
     /// <summary>
     /// Draw the map
@@ -87,15 +77,18 @@ internal class IsometricTiledMapService
                     var sourceRectangle = GetImageSourceRectangleForTile(tile);
 
                     // Apply lighting                    
-                    var screenPosition = MapToScreenCoordinates(new Point(x, y), elevation).ToVector2();
-                    var worldPosition = ScreenToMapCoordinates(new Point((int)screenPosition.X, (int)screenPosition.Y));
-                    //var worldPosition = new Vector3(mapPosition, 0);// elevation * (_tileBlockHeight / 4));
-                    _lightingShader.Parameters["WorldPosition"].SetValue(worldPosition);
-                    _lightingShader.Parameters["LightPosition"].SetValue(new Vector3(_lightSources[0].Position.X, _lightSources[0].Position.Y, 0));
-                    _lightingShader.Parameters["LightColour"].SetValue(new Vector3(1f, 1f, 1f) * 0.75f);
-                    _lightingShader.Parameters["AmbientColour"].SetValue(new Vector3(1f, 1f, 1f) * 0.25f);
-                    _lightingShader.Parameters["LightRadius"].SetValue(100f);
+                    var screenPosition = MapToScreenCoordinates(new Point(x, y), elevation).ToVector2();                    
+                    var worldPosition = new Vector3(screenPosition.X, screenPosition.Y, 0);
+
                     _lightingShader.Parameters["NormalMapTexture"].SetValue(_tilesetNormalMapTexture);
+                    _lightingShader.Parameters["TextureSize"].SetValue(new Vector2(_tilesetTexture.Width, _tilesetTexture.Height));
+                    _lightingShader.Parameters["WorldPosition"].SetValue(worldPosition);
+                    _lightingShader.Parameters["AmbientColour"].SetValue(new Vector4(0.5f, 0.5f, 0.5f, 0.5f));
+
+                    _lightingShader.Parameters["LightPosition"].SetValue(new Vector3(_lightSources[0].Position.X, _lightSources[0].Position.Y, 25));
+                    _lightingShader.Parameters["LightColour"].SetValue(new Vector4(1f, 1f, 1f, 0.5f));                    
+                    _lightingShader.Parameters["LightRadius"].SetValue(300f);
+                    
                     _lightingShader.CurrentTechnique.Passes[0].Apply();
 
                     // Draw the map tile at this position and elevation                    
@@ -177,15 +170,14 @@ internal class IsometricTiledMapService
     /// </summary>
     /// <param name="tiledMapPath"></param>
     /// <param name="tileAtlasName"></param>
-    public void LoadTiledMap(string tiledMapPath, string tileAtlasName, string tileAtlasNormalMap, string lightMask)
+    public void LoadTiledMap(string tiledMapPath, string tileAtlasName, string tileAtlasNormalMapPath, string normalMapShaderPath)
     {
         var loader = Loader.Default();
         _tiledMap = loader.LoadMap(_contentManager.RootDirectory + "/" + tiledMapPath);
         _tilesetTexture = _contentManager.Load<Texture2D>(tileAtlasName);
-        _lightMask = _contentManager.Load<Texture2D>(lightMask);
-
+        
         // Load the 'normal map' for the tileset images that we'll use for lighting
-        _tilesetNormalMapTexture = _contentManager.Load<Texture2D>(tileAtlasNormalMap);
+        _tilesetNormalMapTexture = _contentManager.Load<Texture2D>(tileAtlasNormalMapPath);
 
         // Set tile dimensions
         var tileset = _tiledMap.Tilesets[0];
@@ -217,12 +209,7 @@ internal class IsometricTiledMapService
         // Load our shader and a radial gradient texture which will act as a kind
         // of mask when we blend the background 'render target' and the light
         // sources 'render target' together to produce the final background
-        _lightingShader = _contentManager.Load<Effect>("Shaders/normal map lighting shader");
-        _emptyShader = _contentManager.Load<Effect>("Shaders/empty shader");
-        
-        // Create our render targets for the screen and another for all light sources        
-        //_backgroundRenderTarget = new RenderTarget2D(_spriteBatch.GraphicsDevice, _spriteBatch.GraphicsDevice.Viewport.Width, _spriteBatch.GraphicsDevice.Viewport.Height);
-        //_lightSourcesRenderTarget = new RenderTarget2D(_spriteBatch.GraphicsDevice, _spriteBatch.GraphicsDevice.Viewport.Width, _spriteBatch.GraphicsDevice.Viewport.Height);
+        _lightingShader = _contentManager.Load<Effect>(normalMapShaderPath);        
     }
 
     /// <summary>
