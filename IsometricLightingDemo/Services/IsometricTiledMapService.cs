@@ -27,13 +27,13 @@ internal class IsometricTiledMapService
     public int WorldWidth { get; private set; }
     public int WorldHeight { get; private set; }
 
-    private RenderTarget2D _backgroundRenderTarget;
+    //private RenderTarget2D _backgroundRenderTarget;
     private readonly ContentManager _contentManager;
     private Effect _emptyShader;
     private Texture2D _lightMask;
     private Effect _lightingShader;
     private IsometricLightSource[] _lightSources;
-    private RenderTarget2D _lightSourcesRenderTarget;
+    //private RenderTarget2D _lightSourcesRenderTarget;
     private Vector3 _selectedTile;
     private readonly SpriteBatch _spriteBatch;
     private int _tileBlockHeight;
@@ -59,21 +59,8 @@ internal class IsometricTiledMapService
     /// <summary>
     /// Draw the map
     /// </summary>
-    public void Draw(Matrix transformMatrix)
-    {
-        // Draw background to the 'background' render target
-        _spriteBatch.GraphicsDevice.SetRenderTarget(_backgroundRenderTarget);
-        _spriteBatch.GraphicsDevice.Clear(Color.Black);
-                
-        _spriteBatch.Begin(
-            sortMode: SpriteSortMode.Immediate,
-            blendState: null,
-            samplerState: SamplerState.PointClamp,
-            depthStencilState: null,
-            rasterizerState: null,
-            effect: null,
-            transformMatrix: transformMatrix);
-
+    public void Draw()
+    {        
         for (int elevation = 0; elevation < TileMapDepth; elevation++)
         {
             for (int y = 0; y < TileMapHeight; y++)
@@ -93,52 +80,23 @@ internal class IsometricTiledMapService
                     if ((int)_selectedTile.X == x && (int)_selectedTile.Y == y && _selectedTile.Z == elevation)
                     {
                         // Highlight it in red
-                        colour = Color.Red;
+                        colour = Color.Red;                                            
                     }
-
-                    if (
-                        ((int)_selectedTile.X >= x - 2 && (int)_selectedTile.X <= x + 2) &&
-                        ((int)_selectedTile.Y >= y - 2 && (int)_selectedTile.Y <= y + 2) &&
-                        _selectedTile.Z == elevation
-                    )
-                    { 
-                        var from = new Vector2(_spriteBatch.GraphicsDevice.Viewport.Width / 2, _spriteBatch.GraphicsDevice.Viewport.Height / 2);
-                        //var from = new Vector2(_selectedTile.X - 1, _selectedTile.Y - 1);
-                        var to = new Vector2(_lightSources[0].Position.X, _lightSources[0].Position.Y);
-
-                        //var angle = AngleBetween(from, to) + MathHelper.ToRadians(90);
-                        var angle = MathHelper.ToRadians(45);
-                        Vector2 dir = new Vector2((float)Math.Sin(angle), (float)Math.Cos(angle));
-                        dir.Normalize();
-                        Vector3 lightDirection = new Vector3(dir.X, dir.Y, 0f);
-                        lightDirection.Normalize();
-
-
-                        //_lightingShader.Parameters["LightDirection"].SetValue(lightDirection);
-                        //_lightingShader.Parameters["LightColour"].SetValue(new Vector3(1f, 1f, 1f));
-                        //_lightingShader.Parameters["AmbientColour"].SetValue(new Vector3(1f, 1f, 1f) * 0.25f);
-                        //_lightingShader.Parameters["NormalMapTexture"].SetValue(_tilesetNormalMapTexture);
-
-                        //_lightingShader.Parameters["TextureSampler"].SetValue(texture);
-                        //_lightingShader.Parameters["NormalMapSampler"].SetValue(normalMap);
-                        Vector3 lightPosition = new Vector3(1, 1, 1);
-                        float lightRadius = 30f;
-
-                        _lightingShader.Parameters["LightPosition"].SetValue(lightPosition);
-                        _lightingShader.Parameters["LightColour"].SetValue(new Vector3(1f, 1f, 1f));
-                        _lightingShader.Parameters["AmbientColour"].SetValue(new Vector3(1f, 1f, 1f) * 0.25f);
-                        _lightingShader.Parameters["LightRadius"].SetValue(lightRadius);
-                        _lightingShader.Parameters["NormalMapTexture"].SetValue(_tilesetNormalMapTexture);
-
-                        _lightingShader.CurrentTechnique.Passes[0].Apply();
-                    }
-                    else
-                    {
-                        _emptyShader.CurrentTechnique.Passes[0].Apply();
-                    }
-
+                    
                     // Get the correct tile 'image' rectangle from the tileset 'atlas' image
                     var sourceRectangle = GetImageSourceRectangleForTile(tile);
+
+                    // Apply lighting                    
+                    var screenPosition = MapToScreenCoordinates(new Point(x, y), elevation).ToVector2();
+                    var worldPosition = ScreenToMapCoordinates(new Point((int)screenPosition.X, (int)screenPosition.Y));
+                    //var worldPosition = new Vector3(mapPosition, 0);// elevation * (_tileBlockHeight / 4));
+                    _lightingShader.Parameters["WorldPosition"].SetValue(worldPosition);
+                    _lightingShader.Parameters["LightPosition"].SetValue(new Vector3(_lightSources[0].Position.X, _lightSources[0].Position.Y, 0));
+                    _lightingShader.Parameters["LightColour"].SetValue(new Vector3(1f, 1f, 1f) * 0.75f);
+                    _lightingShader.Parameters["AmbientColour"].SetValue(new Vector3(1f, 1f, 1f) * 0.25f);
+                    _lightingShader.Parameters["LightRadius"].SetValue(100f);
+                    _lightingShader.Parameters["NormalMapTexture"].SetValue(_tilesetNormalMapTexture);
+                    _lightingShader.CurrentTechnique.Passes[0].Apply();
 
                     // Draw the map tile at this position and elevation                    
                     _spriteBatch.Draw(
@@ -148,51 +106,7 @@ internal class IsometricTiledMapService
                         color: colour);
                 }
             }
-        }
-
-        _spriteBatch.End();
-        _spriteBatch.GraphicsDevice.SetRenderTarget(null);
-
-        // Draw light sources
-        //_spriteBatch.GraphicsDevice.SetRenderTarget(_lightSourcesRenderTarget);
-        //_spriteBatch.GraphicsDevice.Clear(Color.Black);
-        //_spriteBatch.Begin();
-
-        //foreach (var lightSource in _lightSources)
-        //{
-        //    _spriteBatch.Draw(
-        //        texture: _lightMask,
-        //        position: MapToScreenCoordinates(new Point((int)lightSource.Position.X, (int)lightSource.Position.Y), (int)lightSource.Position.Z).ToVector2(),
-        //        sourceRectangle: null,
-        //        color: Color.White,
-        //        rotation: 0,
-        //        origin: new Vector2(_lightMask.Width / 2, _lightMask.Height / 2),
-        //        scale: 1f,
-        //        effects: SpriteEffects.None,
-        //        layerDepth: 0);            
-        //}
-
-        //_spriteBatch.End();
-        //_spriteBatch.GraphicsDevice.SetRenderTarget(null);
-
-        // Pass parameters to our shader... note that the sprite batch 'draw' further down
-        // below will pass the background render target 'texture' as the first texture parameter
-        // to the shader, so we don't need to explicitly pass this parameter. We do need to pass
-        // the light sources render target 'texture' though as the 2nd parameter ;-)
-        //_lightingShader.Parameters["LightSourcesTexture"].SetValue(_lightSourcesRenderTarget);
-
-        // If you want to give some light to the whole background, set this between 0 and 1
-        // depending on the strength of the light. A value of 0 will make the background pitch
-        // black, but a value of 1 will make the background completely visible and no light
-        // sources will have any effect or be seen...
-        //_lightingShader.Parameters["BackgroundAmbientLightStrength"].SetValue(0.15f);
-
-        // Now, we draw the background render target to the screen, with our shader applied. The shader
-        // will apply the 'lighting' by mixing the light sources texture pixels colours with the background
-        // texture pixels colours and hey presto, we've got some 'fake' 2D lighting ;-)
-        _spriteBatch.Begin();
-        _spriteBatch.Draw(texture: _backgroundRenderTarget, position: Vector2.Zero, color: Color.White);
-        _spriteBatch.End();
+        }        
     }
 
     /// <summary>
@@ -307,8 +221,8 @@ internal class IsometricTiledMapService
         _emptyShader = _contentManager.Load<Effect>("Shaders/empty shader");
         
         // Create our render targets for the screen and another for all light sources        
-        _backgroundRenderTarget = new RenderTarget2D(_spriteBatch.GraphicsDevice, _spriteBatch.GraphicsDevice.Viewport.Width, _spriteBatch.GraphicsDevice.Viewport.Height);
-        _lightSourcesRenderTarget = new RenderTarget2D(_spriteBatch.GraphicsDevice, _spriteBatch.GraphicsDevice.Viewport.Width, _spriteBatch.GraphicsDevice.Viewport.Height);
+        //_backgroundRenderTarget = new RenderTarget2D(_spriteBatch.GraphicsDevice, _spriteBatch.GraphicsDevice.Viewport.Width, _spriteBatch.GraphicsDevice.Viewport.Height);
+        //_lightSourcesRenderTarget = new RenderTarget2D(_spriteBatch.GraphicsDevice, _spriteBatch.GraphicsDevice.Viewport.Width, _spriteBatch.GraphicsDevice.Viewport.Height);
     }
 
     /// <summary>

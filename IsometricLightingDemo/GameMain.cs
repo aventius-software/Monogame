@@ -89,18 +89,16 @@ public class GameMain : Game
         _camera.LookAt(_position, new Vector2(0, 0));
 
         // Highlight tile under the mouse
-        _mousePosition = Mouse.GetState().Position;        
-        _tileOver = _isometricMapService.HighlightTile(_mousePosition + _camera.Position.ToPoint());
-
+        _mousePosition = Mouse.GetState().Position + _camera.Position.ToPoint();        
+        _tileOver = _isometricMapService.HighlightTile(_mousePosition);
+                
         // Set the light sources
-        var mouseWorldPosition = _mousePosition + _camera.Position.ToPoint();
-
         _isometricMapService.SetLightSources(new IsometricLightSource[]
         {            
             new IsometricLightSource
             {
                 Colour = Color.White,
-                Position = new Vector3(mouseWorldPosition.X, mouseWorldPosition.Y, 0),
+                Position = new Vector3(_mousePosition.X, _mousePosition.Y, 0),
                 Strength = 1f
             }
         });
@@ -113,8 +111,19 @@ public class GameMain : Game
         // Clear screen first
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
+        _spriteBatch.Begin(
+            sortMode: SpriteSortMode.Immediate,
+            blendState: null,
+            samplerState: SamplerState.PointClamp,
+            depthStencilState: null,
+            rasterizerState: null,
+            effect: null,
+            transformMatrix: _camera.TransformMatrix);
+
         // Draw map
-        _isometricMapService.Draw(_camera.TransformMatrix);
+        _isometricMapService.Draw();
+
+        _spriteBatch.End();
         
         // Draw some debugging info
         _spriteBatch.Begin();
