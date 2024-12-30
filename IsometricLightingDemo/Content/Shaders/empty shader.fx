@@ -5,24 +5,14 @@
     #define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-// This will be set by the sprite batch draw method texture
+// This is the texture passed by the sprite batch 'draw' method
 sampler Texture;
 
 // We can name this function whatever, but we call it down below under the technique/pass section ;-)
 float4 MainPixelShaderFunction(float2 textureCoordinates : TEXCOORD0) : COLOR0
 {
-    // Get the colour of the pixel at the specified coordinates in the texture
-    float4 pixelColour = tex2D(Texture, textureCoordinates);
-    
-    // If this pixel has no colour, ignore
-    if (!any(pixelColour))
-        return pixelColour;
-    
-    // Just set the red of the r,g,b,a to zero (i.e. no red)
-    pixelColour.r = 0;
-            
-    // Return our 'amended' pixel colour
-    return pixelColour;
+    // Sample the 'original' texture pixel colour
+    return tex2D(Texture, textureCoordinates);
 }
 
 // Can be called whatever you like

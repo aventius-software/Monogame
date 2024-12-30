@@ -25,6 +25,12 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/blending textures.fx
 
+#begin Shaders/chromatic abberation.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/chromatic abberation.fx
+
 #begin Shaders/coloured tint.fx
 /importer:EffectImporter
 /processor:EffectProcessor
