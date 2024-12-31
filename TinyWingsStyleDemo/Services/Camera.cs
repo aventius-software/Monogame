@@ -49,13 +49,13 @@ internal class Camera
     }
 
     /// <summary>
-    /// Translates a world position to a screen position
+    /// Translate a screen position to world position
     /// </summary>
-    /// <param name="worldPosition"></param>
+    /// <param name="positionInTheWorld"></param>
     /// <returns></returns>
-    public Vector2 WorldToScreen(Vector2 worldPosition)
+    public Vector2 ScreenToWorld(Vector2 positionInTheWorld)
     {
-        return Vector2.Transform(worldPosition, TransformMatrix);
+        return Vector2.Transform(positionInTheWorld, Matrix.Invert(TransformMatrix));
     }
 
     /// <summary>
@@ -77,12 +77,21 @@ internal class Camera
     }
 
     /// <summary>
-    /// Translate a screen position to world position
+    /// Translates a world position to a screen position
     /// </summary>
-    /// <param name="positionInTheWorld"></param>
+    /// <param name="worldPosition"></param>
     /// <returns></returns>
-    public Vector2 ScreenToWorld(Vector2 positionInTheWorld)
+    public Vector2 WorldToScreen(Vector2 worldPosition)
     {
-        return Vector2.Transform(positionInTheWorld, Matrix.Invert(TransformMatrix));
+        return Vector2.Transform(worldPosition, TransformMatrix);
+    }
+
+    /// <summary>
+    /// Set the level of zoom (or scale)
+    /// </summary>
+    /// <param name="scale"></param>
+    public void Zoom(float scale)
+    {
+        _scale = new Vector2(scale, scale);
     }
 }

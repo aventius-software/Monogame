@@ -15,13 +15,13 @@ namespace TinyWingsStyleDemo;
 public class GameMain : Game
 {
     private const float _gravity = 9.8f;
-    private const int _hillSegmentWidth = 16;
-    private const int _maximumHillSegmentOffsetY = 25;
-    private const int _maximumHillSteepness = 25;
-    private const float _minimumCharacterVelocity = 2f;
+    private const int _hillSegmentWidth = 24;
+    private const int _maximumHillSegmentOffsetY = 40;
+    private const int _maximumHillSteepness = 35;
+    private const float _minimumCharacterVelocity = 2.5f;
     private const int _numberOfHills = 30;
     private const int _numberOfSegmentsPerHill = 32;
-    private const float _slidePower = 4f;
+    private const float _slidePower = 4.5f;
 
     private Camera _camera;
     private Body _characterRigidBody;
@@ -50,7 +50,7 @@ public class GameMain : Game
         _hillGeneratorService = new HillGeneratorService();
 
         // Generate the hills       
-        var hillStartPosition = new Vector2(0, GraphicsDevice.Viewport.Height / 2);
+        var hillStartPosition = new Vector2(0, GraphicsDevice.Viewport.Height);
 
         _hillSegments = _hillGeneratorService.GenerateHills(
             startPosition: hillStartPosition,
@@ -66,7 +66,10 @@ public class GameMain : Game
         // Tell the camera the dimensions of the world
         var worldWidth = _hillSegments.Last().End.X - _hillSegments[0].Start.X;
         var worldHeight = Math.Abs(_hillSegments.Max(segment => segment.End.Y) - _hillSegments.Min(segment => segment.Start.Y));
-        _camera.SetWorldDimensions(new Vector2(worldWidth, worldHeight));
+
+        // Set the camera world dimensions, make it 3 times the height so
+        // that the camera can move up and down a bit to follow the player
+        _camera.SetWorldDimensions(new Vector2(worldWidth, worldHeight * 3));
 
         // Create the physics 'world'
         _physicsWorld = new PhysicsWorld();
@@ -156,6 +159,11 @@ public class GameMain : Game
         // Set camera to follow the player/characters position
         _position = _physicsWorld.ToDisplayUnits(_characterRigidBody.Position);
         _camera.LookAt(_position, Vector2.Zero);
+
+        // 'Smoothly' zoom out a little when the player moves faster, then
+        // back in again when they move slower
+        var zoom = MathHelper.SmoothStep(1f, 2f / _characterRigidBody.LinearVelocity.Length(), 0.45f);
+        _camera.Zoom(zoom);
 
         // Simulate (or 'step' through) the physics simulation for this frame
         _physicsWorld.Step((float)gameTime.ElapsedGameTime.TotalSeconds);
