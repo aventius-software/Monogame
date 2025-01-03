@@ -29,7 +29,7 @@ public class GameMain : Game
     private GraphicsDeviceManager _graphics;
     private HillGeneratorService _hillGeneratorService;
     private HillSegment[] _hillSegments;
-    private bool _isSliding;
+    private bool _isInSwiftPose;
     private PhysicsWorld _physicsWorld;
     private readonly int _pixelsPerMetre = 32;
     private Vector2 _position;
@@ -128,17 +128,19 @@ public class GameMain : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        // Handle 'sliding'
-        _isSliding = Keyboard.GetState().IsKeyDown(Keys.Space);
+        // When the player presses space we want to go into 'swift' pose, to make
+        // ourselves fall faster and slide quicker
+        _isInSwiftPose = Keyboard.GetState().IsKeyDown(Keys.Space);
 
-        if (_isSliding)
+        if (_isInSwiftPose)
         {
-            // If the player is 'sliding' we amplify gravity
+            // If the player is in 'swift pose' we just amplify gravity and they
+            // will fall faster and slide faster ;-)
             _physicsWorld.Gravity = new Vector2(0, _gravity * _slidePower);
         }
         else
         {
-            // Otherwise gravity is set to normal
+            // Otherwise gravity is set back to normal
             _physicsWorld.Gravity = new Vector2(0, _gravity);
         }
 
@@ -175,12 +177,20 @@ public class GameMain : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        // First draw the map (so it will be under the character)
+        // First draw the map (so that it will be under the character)
         foreach (var segment in _hillSegments)
         {
             // Transform the coordinates according to the camera
             var start = Vector2.Transform(segment.Start, _camera.TransformMatrix);
             var end = Vector2.Transform(segment.End, _camera.TransformMatrix);
+
+            // Draw ground
+            _shapeDrawingService.DrawFilledQuadrilateral(
+                colour: Color.Green,
+                x1: (int)start.X, y1: (int)start.Y,
+                x2: (int)end.X, y2: (int)end.Y,
+                x3: (int)end.X, y3: GraphicsDevice.Viewport.Height,
+                x4: (int)start.X, y4: GraphicsDevice.Viewport.Height);
 
             // Draw ground line
             _shapeDrawingService.DrawLine(start, end, Color.White);
@@ -201,7 +211,7 @@ public class GameMain : Game
             texture: _characterTexture,
             position: _physicsWorld.ToDisplayUnits(_characterRigidBody.Position),
             sourceRectangle: new Rectangle(0, 0, _characterTexture.Width, _characterTexture.Height),
-            color: _isSliding ? Color.Red : Color.White,
+            color: _isInSwiftPose ? Color.Red : Color.White,
             rotation: _characterRigidBody.Rotation,
             origin: new Vector2(_characterTexture.Width / 2, _characterTexture.Height / 2),
             scale: 1f,
