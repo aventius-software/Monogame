@@ -4,9 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace TinyWingsStyleDemo.Services;
 
 /// <summary>
-/// A simple shape drawing service using BasicEffect (shader)
-/// 
-/// https://www.reddit.com/r/monogame/comments/14dgiop/drawing_primitives_without_basic_effect/?rdt=49605
+/// A simple shape drawing service using BasicEffect (shader) or optional custom shader
 /// </summary>
 internal class ShapeDrawingService
 {
