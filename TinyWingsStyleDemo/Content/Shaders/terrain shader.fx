@@ -66,10 +66,18 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     // Extract the pixel position
     float2 pixelPosition = input.PixelPosition;
 
-    // We'll use pixelPosition to create a simple terrain pattern
-    // which is this case is a simple checkerboard pattern
-    float checker = fmod(floor(pixelPosition.x / 40.0) + floor(pixelPosition.y / 40.0), 2.0);
-    output.Colour = (checker == 0.0) ? float4(0.5, 0.5, 0.5, 1) : float4(0, 0, 0, 1);
+    // We'll use pixelPosition to create a simple terrain pattern    
+    float spreadDistance = 450;
+    float radius = 395;
+    float2 position = fmod(pixelPosition, spreadDistance) / float2(radius, radius);
+
+    // Calculate the distance from the center of the object
+    float2 center = float2(0.5, 0.5);
+    float distance = length(position - center);
+
+    // Create a radial gradient pattern
+    float gradient = smoothstep(0.0, 0.5, distance);
+    output.Colour = lerp(float4(0.5, 1, 0, 1), float4(0, 0.5, 1, 1), gradient);
     
     return output;
 }
