@@ -10,7 +10,8 @@ using TinyWingsStyleDemo.Services;
 namespace TinyWingsStyleDemo;
 
 /// <summary>
-/// A simple tiny wings style demo using Aether Physics 2D... Just press space to 'slide' or 'dive' ;-)
+/// A rough and simple little tiny wings style demo using 
+/// Aether Physics 2D... Just press space to 'slide' or 'dive' ;-)
 /// </summary>
 public class GameMain : Game
 {
@@ -26,7 +27,7 @@ public class GameMain : Game
     private Camera _camera;
     private Body _characterRigidBody;
     private Texture2D _characterTexture;
-    private GraphicsDeviceManager _graphics;
+    private readonly GraphicsDeviceManager _graphics;
     private HillGeneratorService _hillGeneratorService;
     private HillSegment[] _hillSegments;
     private bool _isInSwiftPose;
@@ -35,6 +36,7 @@ public class GameMain : Game
     private Vector2 _position;
     private ShapeDrawingService _shapeDrawingService;
     private SpriteBatch _spriteBatch;
+    private Effect _terrainShader;
 
     public GameMain()
     {
@@ -106,6 +108,10 @@ public class GameMain : Game
         // Load a texture for our character
         _characterTexture = Content.Load<Texture2D>("Textures/ball");
 
+        // Load our custom terrain shader which will give the terrain a basic
+        // pattern instead of just having a flat coloured terrain
+        _terrainShader = Content.Load<Effect>("Shaders/terrain shader");
+
         // Place the character at some starting 'world' position coordinates
         _position = new Vector2(_characterTexture.Width, (GraphicsDevice.Viewport.Height / 2) - (_characterTexture.Height + _maximumHillSegmentOffsetY));
 
@@ -123,11 +129,21 @@ public class GameMain : Game
         _camera.SetOrigin(new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2));
     }
 
-    protected override void Update(GameTime gameTime)
+    private void UpdateCamera()
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-            Exit();
+        // 'Smoothly' zoom out a little when the player moves faster, then
+        // back in again when they move slower. Probably needs a bit of tweaking
+        // and improving...
+        var zoom = MathHelper.SmoothStep(1f, 2f / _characterRigidBody.LinearVelocity.Length(), 0.45f);
+        _camera.Zoom(zoom);
 
+        // Set the camera to follow the player/characters position
+        _position = _physicsWorld.ToDisplayUnits(_characterRigidBody.Position);
+        _camera.LookAt(_position, Vector2.Zero);
+    }
+
+    private void UpdatePhysics(GameTime gameTime)
+    {
         // When the player presses space we want to go into 'swift' pose, to make
         // ourselves fall faster and slide quicker
         _isInSwiftPose = Keyboard.GetState().IsKeyDown(Keys.Space);
@@ -158,45 +174,60 @@ public class GameMain : Game
         // when 'diving' and upwards when 'launching' ;-)
         _characterRigidBody.Rotation = (float)Math.Atan2(velocity.Y, velocity.X);
 
-        // Set camera to follow the player/characters position
-        _position = _physicsWorld.ToDisplayUnits(_characterRigidBody.Position);
-        _camera.LookAt(_position, Vector2.Zero);
-
-        // 'Smoothly' zoom out a little when the player moves faster, then
-        // back in again when they move slower
-        var zoom = MathHelper.SmoothStep(1f, 2f / _characterRigidBody.LinearVelocity.Length(), 0.45f);
-        _camera.Zoom(zoom);
-
         // Simulate (or 'step' through) the physics simulation for this frame
         _physicsWorld.Step((float)gameTime.ElapsedGameTime.TotalSeconds);
+    }
+
+    protected override void Update(GameTime gameTime)
+    {
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            Exit();
+
+        UpdatePhysics(gameTime);
+        UpdateCamera();
 
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
+        // Clear the screen...
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        // First draw the map (so that it will be under the character)
+        // First draw the map (so that it will be under the character), we start
+        // the shape drawing batch using current camera view matrix
+        _shapeDrawingService.BeginBatch(_camera.TransformMatrix);
+
         foreach (var segment in _hillSegments)
         {
-            // Transform the coordinates according to the camera
-            var start = Vector2.Transform(segment.Start, _camera.TransformMatrix);
-            var end = Vector2.Transform(segment.End, _camera.TransformMatrix);
+            // Get the start and end coordinates of the segment
+            var start = segment.Start;
+            var end = segment.End;
 
-            // Draw ground
+            // Set shader when drawing terrain quad
+            _shapeDrawingService.SetCustomShader(_terrainShader);
+
+            // Draw this terrain 'segment' which will be affected by our terrain shader. The
+            // shader should 'draw' some kind pattern on the terrain. If no shader is used
+            // then this will just be a simple flat coloured quad...
             _shapeDrawingService.DrawFilledQuadrilateral(
-                colour: Color.Green,
-                x1: (int)start.X, y1: (int)start.Y,
-                x2: (int)end.X, y2: (int)end.Y,
-                x3: (int)end.X, y3: GraphicsDevice.Viewport.Height,
-                x4: (int)start.X, y4: GraphicsDevice.Viewport.Height);
+                colour: new Color(0, 0, 255, 255),
+                topLeftX: (int)start.X, topLeftY: (int)start.Y,
+                topRightX: (int)end.X - 0, topRightY: (int)end.Y,
+                bottomRightX: (int)end.X - 0, bottomRightY: (int)_camera.WorldDimensions.Y * 2,
+                bottomLeftX: (int)start.X, bottomLeftY: (int)_camera.WorldDimensions.Y * 2);
+
+            // Disable our custom terrain shader
+            _shapeDrawingService.SetCustomShader(null);
 
             // Draw ground line
             _shapeDrawingService.DrawLine(start, end, Color.White);
         }
 
-        // Start drawing, note the 'transformMatrix' which is from our camera
+        // Done drawing shapes
+        _shapeDrawingService.EndBatch();
+
+        // Now draw character
         _spriteBatch.Begin(
             sortMode: SpriteSortMode.Immediate,
             blendState: null,
@@ -206,7 +237,6 @@ public class GameMain : Game
             effect: null,
             transformMatrix: _camera.TransformMatrix);
 
-        // Now draw character after, this way it will be on top of the map
         _spriteBatch.Draw(
             texture: _characterTexture,
             position: _physicsWorld.ToDisplayUnits(_characterRigidBody.Position),
@@ -218,7 +248,6 @@ public class GameMain : Game
             effects: SpriteEffects.None,
             layerDepth: 0);
 
-        // We're done...
         _spriteBatch.End();
 
         base.Draw(gameTime);

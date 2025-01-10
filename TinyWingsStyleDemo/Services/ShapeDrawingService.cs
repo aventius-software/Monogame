@@ -5,109 +5,126 @@ namespace TinyWingsStyleDemo.Services;
 
 /// <summary>
 /// A simple shape drawing service using BasicEffect (shader)
+/// 
+/// https://www.reddit.com/r/monogame/comments/14dgiop/drawing_primitives_without_basic_effect/?rdt=49605
 /// </summary>
 internal class ShapeDrawingService
 {
     private readonly BasicEffect _basicEffect;
+    private Matrix? _cameraTransformationMatrix;
+    private Effect _customShader;
     private readonly GraphicsDevice _graphicsDevice;
-    private readonly RasterizerState _rasterizerState;
 
     public ShapeDrawingService(GraphicsDevice graphicsDevice)
     {
         _graphicsDevice = graphicsDevice;
+        _graphicsDevice.RasterizerState = RasterizerState.CullNone;
 
-        // We'll use the BasicEffect 'shader' to draw stuff
+        // We'll use the BasicEffect 'shader' to draw stuff by default if no custom shader is supplied
         _basicEffect = new BasicEffect(_graphicsDevice);
-
-        // Setup the world matrix for effectively the screen as a 2D surface
-        _basicEffect.World = Matrix.CreateOrthographicOffCenter(
-            left: 0,
-            right: _graphicsDevice.Viewport.Width,
-            bottom: _graphicsDevice.Viewport.Height,
-            top: 0,
-            zNearPlane: 0,
-            zFarPlane: 1);
-
-        // The following MUST be enabled if you want to color your vertices
-        _basicEffect.VertexColorEnabled = true;
-
-        // Build rasterizer state
-        _rasterizerState = new RasterizerState();
-        _rasterizerState.CullMode = CullMode.None;
     }
 
-    private void Draw(VertexPositionColor[] vertices, PrimitiveType primitiveType, int primitiveCount)
+    /// <summary>
+    /// Start a batch ready for shape drawing
+    /// </summary>
+    /// <param name="cameraTransformationMatrix"></param>
+    /// <param name="shader"></param>
+    public void BeginBatch(Matrix? cameraTransformationMatrix = null, Effect shader = null)
     {
-        _graphicsDevice.RasterizerState = _rasterizerState;
+        // Set/save the transformation matrix
+        _cameraTransformationMatrix = cameraTransformationMatrix;
 
-        foreach (EffectPass pass in _basicEffect.CurrentTechnique.Passes)
+        // Set the shader we'll use, if a custom shader is not being used we just use BasicEffect
+        if (shader is null) UseDefaultShader();
+        else SetCustomShader(shader);
+    }
+
+    /// <summary>
+    /// Draw a filled quad
+    /// </summary>
+    /// <param name="colour"></param>
+    /// <param name="topLeftX"></param>
+    /// <param name="topLeftY"></param>
+    /// <param name="topRightX"></param>
+    /// <param name="topRightY"></param>
+    /// <param name="bottomRightX"></param>
+    /// <param name="bottomRightY"></param>
+    /// <param name="bottomLeftX"></param>
+    /// <param name="bottomLeftY"></param>
+    public void DrawFilledQuadrilateral(Color colour, int topLeftX, int topLeftY, int topRightX, int topRightY, int bottomRightX, int bottomRightY, int bottomLeftX, int bottomLeftY)
+    {
+        // Coordinates
+        var vertices = new VertexPositionColor[6];
+
+        // First triangle
+        var triangle1TopLeft = new VertexPositionColor
+        {
+            Position = new Vector3(topLeftX, topLeftY, 0f),
+            Color = colour
+        };
+
+        var triangle1TopRight = new VertexPositionColor
+        {
+            Position = new Vector3(topRightX, topRightY, 0f),
+            Color = colour
+        };
+
+        var triangle1BottomRight = new VertexPositionColor
+        {
+            Position = new Vector3(bottomRightX, bottomRightY, 0f),
+            Color = colour
+        };
+
+        // Second triangle
+        var triangle2TopLeft = new VertexPositionColor
+        {
+            Position = new Vector3(topLeftX, topLeftY, 0f),
+            Color = colour
+        };
+
+        var triangle2BottomRight = new VertexPositionColor
+        {
+            Position = new Vector3(bottomRightX, bottomRightY, 0f),
+            Color = colour
+        };
+
+        var triangle2BottomLeft = new VertexPositionColor
+        {
+            Position = new Vector3(bottomLeftX, bottomLeftY, 0f),
+            Color = colour
+        };
+
+        _graphicsDevice.RasterizerState = RasterizerState.CullNone;
+
+        // First triangle
+        vertices[0] = triangle1TopLeft;
+        vertices[1] = triangle1BottomRight;
+        vertices[2] = triangle1TopRight;
+
+        // Second triangle
+        vertices[3] = triangle2TopLeft;
+        vertices[4] = triangle2BottomLeft;
+        vertices[5] = triangle2BottomRight;
+
+        // Draw...        
+        var passes = _customShader is null ? _basicEffect.CurrentTechnique.Passes : _customShader.CurrentTechnique.Passes;
+        foreach (var pass in passes)
         {
             pass.Apply();
-
-            _graphicsDevice.DrawUserPrimitives(
-                primitiveType: primitiveType,
-                vertexData: vertices,
-                vertexOffset: 0,
-                primitiveCount: primitiveCount,
-                vertexDeclaration: VertexPositionColor.VertexDeclaration
-            );
+            _graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, vertices, 0, 2);
         }
     }
 
-    public void DrawFilledQuadrilateral(Color colour, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
-    {
-        // Coordinates
-        var vertices = new VertexPositionColor[6];
-
-        // First triangle
-        vertices[0].Position = new Vector3(x1, y1, 0f);
-        vertices[0].Color = colour;
-        vertices[1].Position = new Vector3(x2, y2, 0f);
-        vertices[1].Color = colour;
-        vertices[2].Position = new Vector3(x3, y3, 0f);
-        vertices[2].Color = colour;
-
-        // Second triangle
-        vertices[3].Position = new Vector3(x1, y1, 0f);
-        vertices[3].Color = colour;
-        vertices[4].Position = new Vector3(x3, y3, 0f);
-        vertices[4].Color = colour;
-        vertices[5].Position = new Vector3(x4, y4, 0f);
-        vertices[5].Color = colour;
-
-        // Draw...
-        Draw(vertices, PrimitiveType.TriangleList, 2);
-    }
-
-    public void DrawFilledRectangle(Color colour, int x, int y, int width, int height)
-    {
-        // Coordinates
-        var vertices = new VertexPositionColor[6];
-
-        // First triangle
-        vertices[0].Position = new Vector3(x, y, 0f);
-        vertices[0].Color = colour;
-        vertices[1].Position = new Vector3(x + width, y, 0f);
-        vertices[1].Color = colour;
-        vertices[2].Position = new Vector3(x + width, y + height, 0f);
-        vertices[2].Color = colour;
-
-        // Second triangle
-        vertices[3].Position = new Vector3(x, y, 0f);
-        vertices[3].Color = colour;
-        vertices[4].Position = new Vector3(x + width, y + height, 0f);
-        vertices[4].Color = colour;
-        vertices[5].Position = new Vector3(x, y + height, 0f);
-        vertices[5].Color = colour;
-
-        // Draw...
-        Draw(vertices, PrimitiveType.TriangleList, 2);
-    }
-
+    /// <summary>
+    /// Draw a line
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="end"></param>
+    /// <param name="colour"></param>
     public void DrawLine(Vector2 start, Vector2 end, Color colour)
     {
         // Coordinates
-        var vertices = new VertexPositionColor[6];
+        var vertices = new VertexPositionColor[2];
 
         // First triangle
         vertices[0].Position = new Vector3(start.X, start.Y, 0f);
@@ -116,6 +133,72 @@ internal class ShapeDrawingService
         vertices[1].Color = colour;
 
         // Draw...
-        Draw(vertices, PrimitiveType.LineStrip, 1);
+        var passes = _customShader is null ? _basicEffect.CurrentTechnique.Passes : _customShader.CurrentTechnique.Passes;
+        foreach (var pass in passes)
+        {
+            pass.Apply();
+            _graphicsDevice.DrawUserPrimitives(PrimitiveType.LineList, vertices, 0, 1);
+        }
+    }
+
+    /// <summary>
+    /// End shape drawing batch (resets transformation matrix and any custom shader
+    /// </summary>
+    public void EndBatch()
+    {
+        _cameraTransformationMatrix = null;
+        _customShader = null;
+    }
+
+    /// <summary>
+    /// Set a custom shader to be used, passing NULL will reset the shader
+    /// </summary>
+    /// <param name="shader"></param>
+    public void SetCustomShader(Effect shader)
+    {
+        if (shader is null) UseDefaultShader();
+        else UseCustomShader(shader);
+    }
+
+    /// <summary>
+    /// Sets up the service to use the specified shader
+    /// </summary>
+    /// <param name="shader"></param>
+    private void UseCustomShader(Effect shader)
+    {
+        _customShader = shader;
+
+        var cameraUp = Vector3.Transform(Vector3.Down, Matrix.CreateRotationZ(0));
+        var world = _cameraTransformationMatrix is null ? Matrix.Identity : (Matrix)_cameraTransformationMatrix;
+        var view = _cameraTransformationMatrix is null ? Matrix.CreateLookAt(Vector3.Forward, Vector3.Zero, cameraUp) : Matrix.Identity;
+        var projection = Matrix.CreateOrthographicOffCenter(0, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height, 0, 0, 1);
+
+        if (_cameraTransformationMatrix is null) projection *= Matrix.CreateScale(1, -1, 1);
+
+        _customShader.Parameters["World"].SetValue(world);
+        _customShader.Parameters["View"].SetValue(view);
+        _customShader.Parameters["Projection"].SetValue(projection);
+    }
+
+    /// <summary>
+    /// Sets up the service to use BasicEffect shader for drawing
+    /// </summary>
+    private void UseDefaultShader()
+    {
+        _customShader = null;
+
+        var cameraUp = Vector3.Transform(Vector3.Down, Matrix.CreateRotationZ(0));
+        var world = _cameraTransformationMatrix is null ? Matrix.Identity : (Matrix)_cameraTransformationMatrix;
+        var view = _cameraTransformationMatrix is null ? Matrix.CreateLookAt(Vector3.Forward, Vector3.Zero, cameraUp) : Matrix.Identity;
+        var projection = Matrix.CreateOrthographicOffCenter(0, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height, 0, 0, 1);
+
+        if (_cameraTransformationMatrix is null) projection *= Matrix.CreateScale(1, -1, 1);
+
+        _basicEffect.World = world;
+        _basicEffect.View = view;
+        _basicEffect.Projection = projection;
+
+        _basicEffect.TextureEnabled = false;
+        _basicEffect.VertexColorEnabled = true;
     }
 }
