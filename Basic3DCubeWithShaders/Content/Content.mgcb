@@ -25,6 +25,12 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/empty-shader.fx
 
+#begin Shaders/interesting-shader.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/interesting-shader.fx
+
 #begin Shaders/shader.fx
 /importer:EffectImporter
 /processor:EffectProcessor

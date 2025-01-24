@@ -9,7 +9,7 @@ internal class Cube
     /// Returns a set of vertices for a basic 3D cube
     /// </summary>
     /// <returns></returns>
-    public static VertexPositionColor[] BuildVertices()
+    public static VertexPositionColorTexture[] BuildVertices()
     {
         Vector3 LeftTopFront = new Vector3(-1.0f, 1.0f, 1.0f);
         Vector3 LeftBottomFront = new Vector3(-1.0f, -1.0f, 1.0f);
@@ -21,73 +21,77 @@ internal class Cube
         Vector3 RightTopBack = new Vector3(1.0f, 1.0f, -1.0f);
         Vector3 RightBottomBack = new Vector3(1.0f, -1.0f, -1.0f);
 
+        var leftTopTexture = new Vector2(0, 0);
+        var leftBottomTexture = new Vector2(0, 1);
+        var rightTopTexture = new Vector2(1, 0);
+        var rightBottomTexture = new Vector2(0, 0);
+
         return
         [
             // Front face.
-            new(LeftTopFront, Color.DarkGray),
-            new(LeftBottomFront, Color.DarkGray),
-            new(RightTopFront, Color.DarkGray),
+            new(LeftTopFront, Color.DarkGray, leftTopTexture),
+            new(LeftBottomFront, Color.DarkGray, leftBottomTexture),
+            new(RightTopFront, Color.DarkGray, rightTopTexture),
 
-            new(LeftBottomFront, Color.Gray),
-            new(RightBottomFront, Color.Gray),
-            new(RightTopFront, Color.Gray),
+            new(LeftBottomFront, Color.Gray, leftBottomTexture),
+            new(RightBottomFront, Color.Gray, rightBottomTexture),
+            new(RightTopFront, Color.Gray, rightTopTexture),
 
             // Back face.
-            new(LeftTopBack, Color.DarkGreen),
-            new(RightTopBack, Color.DarkGreen),
-            new(LeftBottomBack, Color.DarkGreen),
+            new(LeftTopBack, Color.DarkGreen, leftTopTexture),
+            new(RightTopBack, Color.DarkGreen, rightTopTexture),
+            new(LeftBottomBack, Color.DarkGreen, leftBottomTexture),
 
-            new(LeftBottomBack, Color.Green),
-            new(RightTopBack, Color.Green),
-            new(RightBottomBack, Color.Green),
+            new(LeftBottomBack, Color.Green, leftBottomTexture),
+            new(RightTopBack, Color.Green, rightTopTexture),
+            new(RightBottomBack, Color.Green, rightBottomTexture),
 
             // Top face.
-            new(LeftTopFront, Color.DarkBlue),
-            new(RightTopBack, Color.DarkBlue),
-            new(LeftTopBack, Color.DarkBlue),
+            new(LeftTopFront, Color.DarkBlue, leftTopTexture),
+            new(RightTopBack, Color.DarkBlue, rightTopTexture),
+            new(LeftTopBack, Color.DarkBlue, leftTopTexture),
 
-            new(LeftTopFront, Color.Blue),
-            new(RightTopFront, Color.Blue),
-            new(RightTopBack, Color.Blue),
+            new(LeftTopFront, Color.Blue, leftTopTexture),
+            new(RightTopFront, Color.Blue, rightTopTexture),
+            new(RightTopBack, Color.Blue, rightTopTexture),
 
             // Bottom face. 
-            new(LeftBottomFront, Color.DarkOrange),
-            new(LeftBottomBack, Color.DarkOrange),
-            new(RightBottomBack, Color.DarkOrange),
+            new(LeftBottomFront, Color.DarkOrange, leftBottomTexture),
+            new(LeftBottomBack, Color.DarkOrange, leftBottomTexture),
+            new(RightBottomBack, Color.DarkOrange, rightBottomTexture),
 
-            new(LeftBottomFront, Color.Orange),
-            new(RightBottomBack, Color.Orange),
-            new(RightBottomFront, Color.Orange),
+            new(LeftBottomFront, Color.Orange, leftBottomTexture),
+            new(RightBottomBack, Color.Orange, rightBottomTexture),
+            new(RightBottomFront, Color.Orange, rightBottomTexture),
 
             // Left face.
-            new(LeftTopFront, Color.DarkRed),
-            new(LeftBottomBack, Color.DarkRed),
-            new(LeftBottomFront, Color.DarkRed),
+            new(LeftTopFront, Color.DarkRed, leftTopTexture),
+            new(LeftBottomBack, Color.DarkRed, leftBottomTexture),
+            new(LeftBottomFront, Color.DarkRed, leftBottomTexture),
 
-            new(LeftTopBack, Color.Red),
-            new(LeftBottomBack, Color.Red),
-            new(LeftTopFront, Color.Red),
+            new(LeftTopBack, Color.Red, leftTopTexture),
+            new(LeftBottomBack, Color.Red, leftBottomTexture),
+            new(LeftTopFront, Color.Red, leftTopTexture),
 
             // Right face. 
-            new(RightTopFront, Color.DarkViolet),
-            new(RightBottomFront, Color.DarkViolet),
-            new(RightBottomBack, Color.DarkViolet),
+            new(RightTopFront, Color.DarkViolet, rightTopTexture),
+            new(RightBottomFront, Color.DarkViolet, rightBottomTexture),
+            new(RightBottomBack, Color.DarkViolet, rightBottomTexture),
 
-            new(RightTopBack, Color.Violet),
-            new(RightTopFront, Color.Violet),
-            new(RightBottomBack, Color.Violet)
+            new(RightTopBack, Color.Violet, rightTopTexture),
+            new(RightTopFront, Color.Violet, rightTopTexture),
+            new(RightBottomBack, Color.Violet, rightBottomTexture)
         ];
     }
 }
 
-/*
-internal class Cube
+internal class CubeIndexed
 {
     public VertexPositionColor[] Vertices { get; set; }
     public short[] Indices { get; set; }
     public Matrix WorldMatrix { get; set; }
 
-    public Cube(Vector3 position, Color color)
+    public CubeIndexed(Color color)
     {
         Vertices = new VertexPositionColor[]
         {
@@ -111,7 +115,6 @@ internal class Cube
             0, 3, 7, 7, 4, 0  // Bottom face
         };
 
-        WorldMatrix = Matrix.CreateTranslation(position);
+        //WorldMatrix = Matrix.CreateTranslation(position);
     }
 }
-*/

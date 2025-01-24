@@ -78,11 +78,16 @@ internal class Camera
         RecalculateWorld();
     }
 
-    public void Move(Vector3 unitsToMove) => Position += unitsToMove;
-    public void MoveDown(float unitsToMoveDown) => Position += new Vector3(0, unitsToMoveDown, 0);
-    public void MoveLeft(float unitsToMoveLeft) => Position -= new Vector3(unitsToMoveLeft, 0, 0);
-    public void MoveRight(float unitsToMoveRight) => Position += new Vector3(unitsToMoveRight, 0, 0);
-    public void MoveUp(float unitsToMoveUp) => Position -= new Vector3(0, unitsToMoveUp, 0);
+    public void LookAt(Vector3 target) => _target = target;
+    public void LookDown(float numberOfUnitsToLookDownBy) => _target += new Vector3(0, numberOfUnitsToLookDownBy, 0);
+    public void LookLeft(float numberOfUnitsToLookLeftBy) => _target -= new Vector3(numberOfUnitsToLookLeftBy, 0, 0);
+    public void LookRight(float numberOfUnitsToLookRightBy) => _target += new Vector3(numberOfUnitsToLookRightBy, 0, 0);
+    public void LookUp(float numberOfUnitsToLookUpBy) => _target -= new Vector3(0, numberOfUnitsToLookUpBy, 0);
+    public void Move(Vector3 numberOfUnitsToMoveBy) => Position += numberOfUnitsToMoveBy;
+    public void MoveDown(float numberOfUnitsToMoveDownBy) => Position += new Vector3(0, numberOfUnitsToMoveDownBy, 0);
+    public void MoveLeft(float numberOfUnitsToMoveLeftBy) => Position -= new Vector3(numberOfUnitsToMoveLeftBy, 0, 0);
+    public void MoveRight(float numberOfUnitsToMoveRightBy) => Position += new Vector3(numberOfUnitsToMoveRightBy, 0, 0);
+    public void MoveUp(float numberOfUnitsToMoveUpBy) => Position -= new Vector3(0, numberOfUnitsToMoveUpBy, 0);
 
     private void RecalculateProjection()
     {

@@ -14,14 +14,9 @@ public class GameMain : Game
 {
     private Camera _camera;
     private GraphicsDeviceManager _graphics;
-    //private SpriteBatch _spriteBatch;
-
-    //private BasicEffect basicEffect;
-    //private List<Cube> cubes = [];
-    //private Texture2D _texture;
-
     private Effect _shader;
-    private VertexBuffer _vertexBuffer;    
+    private Texture2D _texture;
+    private VertexBuffer _vertexBuffer;
 
     public GameMain()
     {
@@ -44,7 +39,11 @@ public class GameMain : Game
         InitialiseCamera();
 
         // Set the rasteriser state        
+        //GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
         GraphicsDevice.RasterizerState = RasterizerState.CullNone;
+        GraphicsDevice.BlendState = BlendState.Opaque;
+        GraphicsDevice.DepthStencilState = DepthStencilState.Default;        
+        GraphicsDevice.SamplerStates[0] = SamplerState.PointWrap;
 
         base.Initialize();
     }
@@ -52,11 +51,11 @@ public class GameMain : Game
     private void InitialiseVertexBuffer()
     {
         // Get the 3D model data for our cube
-        var cubeVertices = Cube.BuildVertices();
+        var vertices = Cube.BuildVertices();
 
         // Set the vertex buffer
-        _vertexBuffer = new VertexBuffer(_graphics.GraphicsDevice, typeof(VertexPositionColor), cubeVertices.Length, BufferUsage.None);
-        _vertexBuffer.SetData<VertexPositionColor>(cubeVertices);
+        _vertexBuffer = new VertexBuffer(_graphics.GraphicsDevice, typeof(VertexPositionColorTexture), vertices.Length, BufferUsage.None);
+        _vertexBuffer.SetData<VertexPositionColorTexture>(vertices);
 
         _graphics.GraphicsDevice.SetVertexBuffer(_vertexBuffer);
     }
@@ -65,8 +64,8 @@ public class GameMain : Game
     /// Initializes the transforms used for the 3D model.
     /// </summary>
     private void InitialiseCamera()
-    {        
-        _camera.FieldOfView = 75;
+    {
+        _camera.FieldOfView = 45;
         _camera.Rotation = new Vector3(45, 45, 45);
         _camera.Position = new Vector3(0, 0, -10);
         _camera.Target = Vector3.Zero;
@@ -75,7 +74,8 @@ public class GameMain : Game
     protected override void LoadContent()
     {
         // Load our basic custom shader
-        _shader = Content.Load<Effect>("Shaders/basic-shader");
+        _shader = Content.Load<Effect>("Shaders/interesting-shader");
+        _texture = Content.Load<Texture2D>("Textures/square");
 
         base.LoadContent();
     }
@@ -90,26 +90,26 @@ public class GameMain : Game
 
         if (keyboard.IsKeyDown(Keys.Left))
         {
-            _camera.MoveLeft(speed);            
-            //_cameraTarget.X -= speed;
+            _camera.MoveLeft(speed);
+            _camera.LookLeft(speed);
         }
 
         if (keyboard.IsKeyDown(Keys.Right))
         {
-            _camera.MoveRight(speed);            
-            //_cameraTarget.X += speed;
+            _camera.MoveRight(speed);
+            _camera.LookRight(speed);
         }
 
         if (keyboard.IsKeyDown(Keys.Up))
         {
             _camera.MoveUp(speed);
-            //_cameraTarget.Y -= speed;
+            _camera.LookUp(speed);
         }
 
         if (keyboard.IsKeyDown(Keys.Down))
         {
             _camera.MoveDown(speed);
-            //_cameraTarget.Y += speed;
+            _camera.LookDown(speed);
         }
 
         if (keyboard.IsKeyDown(Keys.OemPlus))
@@ -121,7 +121,7 @@ public class GameMain : Game
         {
             _camera.ZoomOut(speed);
         }
-        
+
         if (keyboard.IsKeyDown(Keys.Q))
         {
             _camera.RotateAnticlockwise(new Vector3(0, 0, speed));
@@ -143,6 +143,8 @@ public class GameMain : Game
         _shader.Parameters["World"].SetValue(_camera.World);
         _shader.Parameters["View"].SetValue(_camera.View);
         _shader.Parameters["Projection"].SetValue(_camera.Projection);
+        _shader.Parameters["Time"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
+        //_shader.Parameters["Texture"].SetValue(_texture);
 
         // Draw the vertex buffer        
         foreach (EffectPass pass in _shader.CurrentTechnique.Passes)
