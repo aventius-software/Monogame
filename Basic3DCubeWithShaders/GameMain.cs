@@ -51,10 +51,15 @@ public class GameMain : Game
     private void InitialiseVertexBuffer()
     {
         // Get the 3D model data for our cube
-        var vertices = Cube.BuildVertices();
+        var vertices = Cube.GenerateVertices(1);
 
         // Set the vertex buffer
-        _vertexBuffer = new VertexBuffer(_graphics.GraphicsDevice, typeof(VertexPositionColorTexture), vertices.Length, BufferUsage.None);
+        _vertexBuffer = new VertexBuffer(
+            graphicsDevice: _graphics.GraphicsDevice,
+            type: typeof(VertexPositionColorTexture),
+            vertexCount: vertices.Length, 
+            bufferUsage: BufferUsage.None);
+
         _vertexBuffer.SetData<VertexPositionColorTexture>(vertices);
 
         _graphics.GraphicsDevice.SetVertexBuffer(_vertexBuffer);
@@ -144,13 +149,17 @@ public class GameMain : Game
         _shader.Parameters["View"].SetValue(_camera.View);
         _shader.Parameters["Projection"].SetValue(_camera.Projection);
         _shader.Parameters["Time"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
-        //_shader.Parameters["Texture"].SetValue(_texture);
+        _shader.Parameters["Texture"].SetValue(_texture);
 
         // Draw the vertex buffer        
         foreach (EffectPass pass in _shader.CurrentTechnique.Passes)
         {
             pass.Apply();
-            GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleList, 0, _vertexBuffer.VertexCount / 2);
+            //GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleList, 0, _vertexBuffer.VertexCount / 2);
+            GraphicsDevice.DrawPrimitives(
+                primitiveType: PrimitiveType.TriangleList,
+                vertexStart: 0, // always 0
+                primitiveCount: _vertexBuffer.VertexCount / 2); // number of triangles
         }
 
         base.Draw(gameTime);

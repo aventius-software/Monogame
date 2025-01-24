@@ -5,6 +5,154 @@ namespace Basic3DCubeWithShaders.Shapes;
 
 internal class Cube
 {
+    public static VertexPositionColorTexture[] GenerateVertices(float size)
+    {
+        // First define the coordinates for the texture
+        var topLeftTexture = new Vector2 (0, 0);
+        var topRightTexture = new Vector2 (1, 0);
+        var bottomLeftTexture = new Vector2 (0, 1);
+        var bottomRightTexture = new Vector2 (1, 1);
+
+        // Define the corners for the front face
+        var topLeftCornerFrontFace = new Vector3(-size, -size, -size);
+        var topRightCornerFrontFace = new Vector3(size, -size, -size);
+        var bottomLeftCornerFrontFace = new Vector3(-size, size, -size);
+        var bottomRightCornerFrontFace = new Vector3(size, size, -size);
+
+        // Now the corners for the back face
+        var topLeftCornerBackFace = new Vector3(-size, -size, size);
+        var topRightCornerBackFace = new Vector3(size, -size, size);
+        var bottomLeftCornerBackFace = new Vector3(-size, size, size);
+        var bottomRightCornerBackFace = new Vector3(size, size, size);
+
+        // For the left side face, we use the existing coordinates
+        // from the front and back faces (the left side)
+        var topLeftCornerLeftFace = topLeftCornerBackFace;
+        var topRightCornerLeftFace = topLeftCornerFrontFace;
+        var bottomLeftCornerLeftFace = bottomLeftCornerBackFace;
+        var bottomRightCornerLeftFace = bottomLeftCornerFrontFace;
+
+        // For the right side face, we use the existing coordinates
+        // from the front and back faces (the right side)
+        var topLeftCornerRightFace = topRightCornerFrontFace;
+        var topRightCornerRightFace = topRightCornerBackFace;
+        var bottomLeftCornerRightFace = bottomRightCornerFrontFace;
+        var bottomRightCornerRightFace = bottomRightCornerBackFace;
+
+        // For the top side face, we use the existing coordinates
+        // from the front and back faces
+        var topLeftCornerTopFace = topLeftCornerBackFace;
+        var topRightCornerTopFace = topRightCornerBackFace;
+        var bottomLeftCornerTopFace = topLeftCornerFrontFace;
+        var bottomRightCornerTopFace = topRightCornerFrontFace;
+
+        // For the bottom side face, we use the existing coordinates
+        // from the front and back faces
+        var topLeftCornerBottomFace = bottomLeftCornerBackFace;
+        var topRightCornerBottomFace = bottomRightCornerBackFace;
+        var bottomLeftCornerBottomFace = bottomLeftCornerFrontFace;
+        var bottomRightCornerBottomFace = bottomRightCornerFrontFace;
+
+        return
+            [                
+                // Front face - Triangle 1
+                // top left corner
+                new VertexPositionColorTexture(topLeftCornerFrontFace, Color.White, topLeftTexture),
+                // top right corner
+                new VertexPositionColorTexture(topRightCornerFrontFace, Color.White, topRightTexture),
+                // bottom right corner
+                new VertexPositionColorTexture(bottomRightCornerFrontFace, Color.White, bottomRightTexture),
+
+                // Front face - Triangle 2
+                // top left corner
+                new VertexPositionColorTexture(topLeftCornerFrontFace, Color.White, topLeftTexture),
+                // bottom right corner
+                new VertexPositionColorTexture(bottomRightCornerFrontFace, Color.White, bottomRightTexture),
+                // bottom left corner
+                new VertexPositionColorTexture(bottomLeftCornerFrontFace, Color.White, bottomLeftTexture),
+
+                // Back face - Triangle 1
+                // top left corner
+                new VertexPositionColorTexture(topLeftCornerBackFace, Color.White, topLeftTexture),
+                // top right corner
+                new VertexPositionColorTexture(topRightCornerBackFace, Color.White, topRightTexture),
+                // bottom right corner
+                new VertexPositionColorTexture(bottomRightCornerBackFace, Color.White, bottomRightTexture),
+
+                // Back face - Triangle 2
+                // top left corner
+                new VertexPositionColorTexture(topLeftCornerBackFace, Color.White, topLeftTexture),
+                // bottom right corner
+                new VertexPositionColorTexture(bottomRightCornerBackFace, Color.White, bottomRightTexture),
+                // bottom left corner
+                new VertexPositionColorTexture(bottomLeftCornerBackFace, Color.White, bottomLeftTexture),
+
+                // Left face - Triangle 1
+                // top left corner
+                new VertexPositionColorTexture(topLeftCornerLeftFace, Color.White, topLeftTexture),
+                // top right corner
+                new VertexPositionColorTexture(topRightCornerLeftFace, Color.White, topRightTexture),
+                // bottom right corner
+                new VertexPositionColorTexture(bottomRightCornerLeftFace, Color.White, bottomRightTexture),
+
+                // Left face - Triangle 2
+                // top left corner
+                new VertexPositionColorTexture(topLeftCornerLeftFace, Color.White, topLeftTexture),
+                // bottom right corner
+                new VertexPositionColorTexture(bottomRightCornerLeftFace, Color.White, bottomRightTexture),
+                // bottom left corner
+                new VertexPositionColorTexture(bottomLeftCornerLeftFace, Color.White, bottomLeftTexture),
+
+                // Right face - Triangle 1
+                // top left corner
+                new VertexPositionColorTexture(topLeftCornerRightFace, Color.White, topLeftTexture),
+                // top right corner
+                new VertexPositionColorTexture(topRightCornerRightFace, Color.White, topRightTexture),
+                // bottom right corner
+                new VertexPositionColorTexture(bottomRightCornerRightFace, Color.White, bottomRightTexture),
+
+                // Right face - Triangle 2
+                // top left corner
+                new VertexPositionColorTexture(topLeftCornerRightFace, Color.White, topLeftTexture),
+                // bottom right corner
+                new VertexPositionColorTexture(bottomRightCornerRightFace, Color.White, bottomRightTexture),
+                // bottom left corner
+                new VertexPositionColorTexture(bottomLeftCornerRightFace, Color.White, bottomLeftTexture),
+
+                // Top face - Triangle 1
+                // top left corner
+                new VertexPositionColorTexture(topLeftCornerTopFace, Color.White, topLeftTexture),
+                // top right corner
+                new VertexPositionColorTexture(topRightCornerTopFace, Color.White, topRightTexture),
+                // bottom right corner
+                new VertexPositionColorTexture(bottomRightCornerTopFace, Color.White, bottomRightTexture),
+
+                // Top face - Triangle 2
+                // top left corner
+                new VertexPositionColorTexture(topLeftCornerTopFace, Color.White, topLeftTexture),
+                // bottom right corner
+                new VertexPositionColorTexture(bottomRightCornerTopFace, Color.White, bottomRightTexture),
+                // bottom left corner
+                new VertexPositionColorTexture(bottomLeftCornerTopFace, Color.White, bottomLeftTexture),
+
+                // Bottom face - Triangle 1
+                // top left corner
+                new VertexPositionColorTexture(topLeftCornerBottomFace, Color.White, topLeftTexture),
+                // top right corner
+                new VertexPositionColorTexture(topRightCornerBottomFace, Color.White, topRightTexture),
+                // bottom right corner
+                new VertexPositionColorTexture(bottomRightCornerBottomFace, Color.White, bottomRightTexture),
+
+                // Bottom face - Triangle 2
+                // top left corner
+                new VertexPositionColorTexture(topLeftCornerBottomFace, Color.White, topLeftTexture),
+                // bottom right corner
+                new VertexPositionColorTexture(bottomRightCornerBottomFace, Color.White, bottomRightTexture),
+                // bottom left corner
+                new VertexPositionColorTexture(bottomLeftCornerBottomFace, Color.White, bottomLeftTexture),
+            ];            
+    }
+
     /// <summary>
     /// Returns a set of vertices for a basic 3D cube
     /// </summary>
