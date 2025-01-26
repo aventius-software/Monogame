@@ -37,7 +37,7 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/shader.fx
 
-#begin Textures/square.png
+#begin Textures/texture-atlas.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -47,5 +47,5 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Textures/square.png
+/build:Textures/texture-atlas.png
 

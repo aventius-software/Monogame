@@ -15,7 +15,7 @@ public class GameMain : Game
     private Camera _camera;
     private GraphicsDeviceManager _graphics;
     private Effect _shader;
-    private Texture2D _texture;
+    private Texture2D _textureAtlas;
     private VertexBuffer _vertexBuffer;
 
     public GameMain()
@@ -23,6 +23,10 @@ public class GameMain : Game
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+
+        _graphics.PreferredBackBufferWidth = 1600;
+        _graphics.PreferredBackBufferHeight = 1200;
+        _graphics.ApplyChanges();
     }
 
     /// <summary>
@@ -51,7 +55,7 @@ public class GameMain : Game
     private void InitialiseVertexBuffer()
     {
         // Get the 3D model data for our cube
-        var vertices = Cube.GenerateVertices(1);
+        var vertices = Cube.GenerateVertices(4);
 
         // Set the vertex buffer
         _vertexBuffer = new VertexBuffer(
@@ -71,8 +75,8 @@ public class GameMain : Game
     private void InitialiseCamera()
     {
         _camera.FieldOfView = 45;
-        _camera.Rotation = new Vector3(45, 45, 45);
-        _camera.Position = new Vector3(0, 0, -10);
+        _camera.Rotation = new Vector3(-15, -25, 0);
+        _camera.Position = new Vector3(0, 0, 10);
         _camera.Target = Vector3.Zero;
     }
 
@@ -80,7 +84,7 @@ public class GameMain : Game
     {
         // Load our basic custom shader
         _shader = Content.Load<Effect>("Shaders/interesting-shader");
-        _texture = Content.Load<Texture2D>("Textures/square");
+        _textureAtlas = Content.Load<Texture2D>("Textures/texture-atlas");
 
         base.LoadContent();
     }
@@ -129,12 +133,22 @@ public class GameMain : Game
 
         if (keyboard.IsKeyDown(Keys.Q))
         {
-            _camera.RotateAnticlockwise(new Vector3(0, 0, speed));
+            _camera.RotateAnticlockwise(new Vector3(0, 0, speed * 4));
         }
 
         if (keyboard.IsKeyDown(Keys.E))
         {
-            _camera.RotateClockwise(new Vector3(0, 0, speed));
+            _camera.RotateClockwise(new Vector3(0, 0, speed * 4));
+        }
+
+        if (keyboard.IsKeyDown(Keys.A))
+        {
+            _camera.RotateAnticlockwise(new Vector3(speed * 4, 0, 0));
+        }
+
+        if (keyboard.IsKeyDown(Keys.D))
+        {
+            _camera.RotateClockwise(new Vector3(speed * 4, 0, 0));
         }
 
         base.Update(gameTime);
@@ -148,8 +162,8 @@ public class GameMain : Game
         _shader.Parameters["World"].SetValue(_camera.World);
         _shader.Parameters["View"].SetValue(_camera.View);
         _shader.Parameters["Projection"].SetValue(_camera.Projection);
-        _shader.Parameters["Time"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
-        _shader.Parameters["Texture"].SetValue(_texture);
+        //_shader.Parameters["Time"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
+        _shader.Parameters["Texture"].SetValue(_textureAtlas);
 
         // Draw the vertex buffer        
         foreach (EffectPass pass in _shader.CurrentTechnique.Passes)

@@ -32,9 +32,10 @@ struct VertexShaderOutput
 VertexShaderOutput MainVS(in VertexShaderInput input)
 {		
     VertexShaderOutput output = (VertexShaderOutput) 0;
-    output.Color = input.Color;
+    //output.Color = input.Color;
     output.TextureCoordinates = input.TextureCoordinates;
-	    
+    
+    /*	    
     float4x4 worldViewProjection = mul(mul(World, View), Projection);
     
     float waveHeight = sin(input.Position.x * 2.0 + Time) * 0.5;
@@ -47,6 +48,11 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
     // Pass through the normal
     output.Normal = input.Normal;
+    */
+    
+    float4x4 worldViewProjection = mul(mul(World, View), Projection);
+    output.Position = mul(input.Position, worldViewProjection);
+    output.Color = input.Color;
 
     return output;		
 }
