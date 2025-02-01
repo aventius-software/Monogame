@@ -19,24 +19,6 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/basic-shader.fx
 
-#begin Shaders/empty-shader.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:Shaders/empty-shader.fx
-
-#begin Shaders/interesting-shader.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:Shaders/interesting-shader.fx
-
-#begin Shaders/shader.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:Shaders/shader.fx
-
 #begin Textures/large-dirt-block-atlas.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -48,28 +30,4 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Textures/large-dirt-block-atlas.png
-
-#begin Textures/small-dirt-block-atlas.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Textures/small-dirt-block-atlas.png
-
-#begin Textures/texture-atlas.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Textures/texture-atlas.png
 
