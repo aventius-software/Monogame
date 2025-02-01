@@ -37,6 +37,30 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/shader.fx
 
+#begin Textures/large-dirt-block-atlas.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/large-dirt-block-atlas.png
+
+#begin Textures/small-dirt-block-atlas.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/small-dirt-block-atlas.png
+
 #begin Textures/texture-atlas.png
 /importer:TextureImporter
 /processor:TextureProcessor

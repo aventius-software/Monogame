@@ -42,11 +42,10 @@ public class GameMain : Game
         // Next we can setup the camera world, view and project matrices
         InitialiseCamera();
 
-        // Set the rasteriser state        
-        //GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
+        // Set the rasteriser state                
         GraphicsDevice.RasterizerState = RasterizerState.CullNone;
         GraphicsDevice.BlendState = BlendState.Opaque;
-        GraphicsDevice.DepthStencilState = DepthStencilState.Default;        
+        GraphicsDevice.DepthStencilState = DepthStencilState.Default;
         GraphicsDevice.SamplerStates[0] = SamplerState.PointWrap;
 
         base.Initialize();
@@ -60,11 +59,11 @@ public class GameMain : Game
         // Set the vertex buffer
         _vertexBuffer = new VertexBuffer(
             graphicsDevice: _graphics.GraphicsDevice,
-            type: typeof(VertexPositionColorTexture),
-            vertexCount: vertices.Length, 
+            type: typeof(VertexPositionTexture),
+            vertexCount: vertices.Length,
             bufferUsage: BufferUsage.None);
 
-        _vertexBuffer.SetData<VertexPositionColorTexture>(vertices);
+        _vertexBuffer.SetData<VertexPositionTexture>(vertices);
 
         _graphics.GraphicsDevice.SetVertexBuffer(_vertexBuffer);
     }
@@ -75,16 +74,27 @@ public class GameMain : Game
     private void InitialiseCamera()
     {
         _camera.FieldOfView = 45;
-        _camera.Rotation = new Vector3(-15, -25, 0);
+
+        // Lets rotate the camera a little around the axis to make it
+        // a bit more interesting
+        _camera.Rotation = new Vector3(15, -25, 0);
+
+        // Define camera position, note the positive Z position, so this
+        // means we facing the 'front' of the cube
         _camera.Position = new Vector3(0, 0, 10);
+
+        // What is the camera looking at?
         _camera.Target = Vector3.Zero;
     }
 
     protected override void LoadContent()
     {
         // Load our basic custom shader
-        _shader = Content.Load<Effect>("Shaders/interesting-shader");
-        _textureAtlas = Content.Load<Texture2D>("Textures/texture-atlas");
+        _shader = Content.Load<Effect>("Shaders/basic-shader");
+
+        // Load our texture atlas which has textures for each side
+        // of the cube
+        _textureAtlas = Content.Load<Texture2D>("Textures/large-dirt-block-atlas");
 
         base.LoadContent();
     }
@@ -162,17 +172,16 @@ public class GameMain : Game
         _shader.Parameters["World"].SetValue(_camera.World);
         _shader.Parameters["View"].SetValue(_camera.View);
         _shader.Parameters["Projection"].SetValue(_camera.Projection);
-        //_shader.Parameters["Time"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
         _shader.Parameters["Texture"].SetValue(_textureAtlas);
 
         // Draw the vertex buffer        
         foreach (EffectPass pass in _shader.CurrentTechnique.Passes)
         {
             pass.Apply();
-            //GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleList, 0, _vertexBuffer.VertexCount / 2);
+
             GraphicsDevice.DrawPrimitives(
                 primitiveType: PrimitiveType.TriangleList,
-                vertexStart: 0, // always 0
+                vertexStart: 0,
                 primitiveCount: _vertexBuffer.VertexCount / 2); // number of triangles
         }
 

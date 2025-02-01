@@ -60,19 +60,20 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float2 textureCoordinates = input.TextureCoordinates;
-    //float Frequency = 2;
-    //float Amplitude = 0.5;
-    //float2 RippleCenter = float2(0.5, 0.5);
     
-    //// Find center for the ripple
-    //float2 toCenter = textureCoordinates - RippleCenter;
-    //float distance = length(toCenter);
+    float Frequency = 2;
+    float Amplitude = 0.5;
+    float2 RippleCenter = float2(0.5, 0.5);
     
-    //// Calculate the ripple
-    //float ripple = sin(distance * Frequency - Time) * Amplitude;
+    // Find center for the ripple
+    float2 toCenter = textureCoordinates - RippleCenter;
+    float distance = length(toCenter);
     
-    //// Adjust coordinates to find pixel
-    //textureCoordinates += normalize(toCenter) * ripple;
+    // Calculate the ripple
+    float ripple = sin(distance * Frequency - Time) * Amplitude;
+    
+    // Adjust coordinates to find pixel
+    textureCoordinates += normalize(toCenter) * ripple;
     
     // Return the pixel at the adjusted coordinates
     return tex2D(Texture, textureCoordinates);
