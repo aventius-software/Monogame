@@ -1,107 +1,102 @@
-﻿using DotTiled;
-using DotTiled.Serialization;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended;
+using MonoGame.Extended.ViewportAdapters;
 
-namespace DotTiledTest
+namespace DotTiledTest;
+
+/// <summary>
+/// Simple test of the DotTiled 'Tiled' map loader. See https://dcronqvist.github.io/DotTiled/docs/quickstart.html
+/// Also uses the camera from Monogame.Extended to show movement around the map
+/// </summary>
+public class GameMain : Game
 {
-    /// <summary>
-    /// Simple test of the DotTiled 'Tiled' map loader. See https://dcronqvist.github.io/DotTiled/docs/quickstart.html
-    /// </summary>
-    public class GameMain : Game
+    private OrthographicCamera _camera;
+    private GraphicsDeviceManager _graphics;
+    private MapService _mapService;
+    private SpriteBatch _spriteBatch;
+
+    public GameMain()
     {
-        private GraphicsDeviceManager _graphics;
-        private Map _tiledMap;
-        private SpriteBatch _spriteBatch;
-        private Texture2D _tilesetTexture;
+        _graphics = new GraphicsDeviceManager(this);
+        Content.RootDirectory = "Content";
+        IsMouseVisible = true;
+    }
 
-        public GameMain()
+    protected override void Initialize()
+    {
+        base.Initialize();
+
+        var viewportAdapter = new BoxingViewportAdapter(Window, GraphicsDevice, 800, 480);
+        _camera = new OrthographicCamera(viewportAdapter);
+    }
+
+    protected override void LoadContent()
+    {
+        _spriteBatch = new SpriteBatch(GraphicsDevice);
+
+        // Initialise/load the map
+        _mapService = new MapService(_spriteBatch, Content);
+        _mapService.LoadTiledMap("test map.tmx", "test tile atlas");
+    }
+
+    protected override void Update(GameTime gameTime)
+    {
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            Exit();
+
+        const float movementSpeed = 200;
+        _camera.Move(GetMovementDirection() * movementSpeed * gameTime.GetElapsedSeconds());
+
+        base.Update(gameTime);
+    }
+
+    protected override void Draw(GameTime gameTime)
+    {
+        GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.CornflowerBlue);
+
+        // Begin drawing for sprites
+        _spriteBatch.Begin(
+            sortMode: SpriteSortMode.Immediate,
+            blendState: null,
+            samplerState: SamplerState.PointClamp,
+            depthStencilState: null,
+            rasterizerState: null,
+            effect: null,
+            transformMatrix: _camera.GetViewMatrix());
+
+        // Draw map
+        _mapService.Draw();
+
+        // Done...
+        _spriteBatch.End();
+
+        base.Draw(gameTime);
+    }
+
+    private Vector2 GetMovementDirection()
+    {
+        var movementDirection = Vector2.Zero;
+        var state = Keyboard.GetState();
+
+        if (state.IsKeyDown(Keys.Down))
         {
-            _graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
-            IsMouseVisible = true;
+            movementDirection += Vector2.UnitY;
         }
-
-        protected override void Initialize()
+        if (state.IsKeyDown(Keys.Up))
         {
-            // TODO: Add your initialization logic here
-
-            base.Initialize();
+            movementDirection -= Vector2.UnitY;
         }
-
-        protected override void LoadContent()
+        if (state.IsKeyDown(Keys.Left))
         {
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            var loader = Loader.Default();
-            _tiledMap = loader.LoadMap($"{Content.RootDirectory}/test map.tmx");
-            _tilesetTexture = Content.Load<Texture2D>("test tile atlas");
+            movementDirection -= Vector2.UnitX;
         }
-
-        protected override void Update(GameTime gameTime)
+        if (state.IsKeyDown(Keys.Right))
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            // TODO: Add your update logic here
-
-            base.Update(gameTime);
+            movementDirection += Vector2.UnitX;
         }
 
-        protected override void Draw(GameTime gameTime)
-        {
-            GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.CornflowerBlue);
-
-            // Begin drawing for sprites
-            _spriteBatch.Begin(
-                sortMode: SpriteSortMode.Immediate,
-                blendState: null,
-                samplerState: SamplerState.PointClamp,
-                depthStencilState: null,
-                rasterizerState: null,
-                effect: null,
-                transformMatrix: null);
-            
-            // Get the first layer and the tileset            
-            Tileset tileset = _tiledMap.Tilesets[0];
-            TileLayer firstLayer = (TileLayer)_tiledMap.Layers[0];
-
-            for (int y = 0; y < firstLayer.Height; y++)
-            {
-                for (int x = 0; x < firstLayer.Width; x++)
-                {
-                    uint tile = firstLayer.Data.Value.GlobalTileIDs.Value[(y * firstLayer.Width) + x];
-                    if (tile == 0) continue; // If block is 0, i.e. air, then continue
-
-                    var sourceRectangle = GetSourceRect(tileset, tile);
-                    
-                    _spriteBatch.Draw(
-                        texture: _tilesetTexture,
-                        position: new Vector2(x * tileset.TileWidth, y * tileset.TileHeight),
-                        sourceRectangle: sourceRectangle,
-                        color: Microsoft.Xna.Framework.Color.White);
-                }
-            }
-
-            _spriteBatch.End();
-
-            base.Draw(gameTime);
-        }
-
-        private static Rectangle GetSourceRect(Tileset tileset, uint gid)
-        {            
-            var tileId = (int)gid - 1;
-
-            var row = tileId / ((int)tileset.TileCount / (int)tileset.Columns);
-            var column = tileId % (int)tileset.Columns;
-
-            var tileWidth = (int)tileset.TileWidth;
-            var tileHeight = (int)tileset.TileHeight;
-            var x = tileWidth * column;
-            var y = tileHeight * row;            
-
-            return new Rectangle(x, y, tileWidth, tileHeight);                       
-        }
+        return movementDirection;
     }
 }
