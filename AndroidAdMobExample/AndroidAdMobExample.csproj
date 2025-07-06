@@ -18,12 +18,12 @@
 		<CheckEolWorkloads>false</CheckEolWorkloads>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.2.1105" />
-		<PackageReference Include="MonoGame.Framework.Android" Version="3.8.2.1105" />
-		<PackageReference Include="Xamarin.AndroidX.Lifecycle.LiveData" Version="2.8.7.1" />
-		<PackageReference Include="Xamarin.AndroidX.Lifecycle.Service" Version="2.8.7.1" />
-		<PackageReference Include="Xamarin.AndroidX.Lifecycle.ViewModelSavedState" Version="2.8.7.1" />
-		<PackageReference Include="Xamarin.GooglePlayServices.Ads.Lite" Version="123.5.0.1" />		
+		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4" />
+		<PackageReference Include="MonoGame.Framework.Android" Version="3.8.4" />
+		<PackageReference Include="Xamarin.AndroidX.Lifecycle.LiveData" Version="2.9.1" />
+		<PackageReference Include="Xamarin.AndroidX.Lifecycle.Service" Version="2.9.1" />
+		<PackageReference Include="Xamarin.AndroidX.Lifecycle.ViewModelSavedState" Version="2.9.1" />
+		<PackageReference Include="Xamarin.GooglePlayServices.Ads.Lite" Version="124.0.0.2" />		
 	</ItemGroup>
 	<Target Name="RestoreDotnetTools" BeforeTargets="Restore">
 		<Message Text="Restoring dotnet tools" Importance="High" />
