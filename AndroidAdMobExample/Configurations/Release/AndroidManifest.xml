@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- RELEASE manifest -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="AndroidAdMobExample.AndroidAdMobExample" android:versionCode="7" android:versionName="1.5">
+	<uses-feature android:glEsVersion="0x00020000" android:required="true" />
+	<application android:label="AndroidAdMobExample">
+		<!-- 
+		AdMob main configuration - since this is the RELEASE configuration, you should 
+		your own application ID and ad unit IDs. For example though, these are just
+		the test AdMob App ID and Ad Unit IDs.
+		-->
+		<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+		<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-3940256099942544~3347511713" />
+		<activity android:name="com.google.android.gms.ads.AdActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
+		<!-- AdMob main configuration - end -->
+	</application>
+	<!-- AdMob permissions - start -->
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+	<!-- AdMob permissions - end -->
+</manifest>

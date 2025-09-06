@@ -33,7 +33,17 @@ public class Activity1 : AndroidGameActivity
         _game = new Game1();
         _view = _game.Services.GetService(typeof(View)) as View;
 
-        /* Start of AdMob code - don't forget to also look at 'AndroidManifest.xml' file too! */
+        /*           
+         * Start of AdMob specific code
+         * 
+         * Don't forget to also look at the two 'AndroidManifest.xml' files. They are 
+         * in the 'Configurations' folder. The .csproj file also needs to be updated to 
+         * ensure that it loads the correct 'AndroidManifest.xml' per configuration. This 
+         * is so you can use different AdMob App Id's for testing and production. Since
+         * you could get banned from AdMob for using your production AdMob App Id while 
+         * testing, since it could generate invalid traffic.
+         *           
+         */
 
         // First create a layout to hold the ad           
         var adLayoutView = new LinearLayout(this)
@@ -67,12 +77,15 @@ public class Activity1 : AndroidGameActivity
         var mainView = new FrameLayout(this);
         mainView.AddView(_view);
         mainView.AddView(adLayoutView);
-        
+
         // Finally, instead of setting the content view to use '_view' we
         // instead now set the content to use this new view
         SetContentView(mainView);
 
-        /* End of AdMob code */
+        /* 
+         * End of AdMob specific code 
+         * 
+         */
 
         // Run game as normal
         _game.Run();

@@ -1,29 +1,38 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<!-- Updated to use .NET 8. -->
-		<TargetFramework>net8.0-android</TargetFramework>
-
-		<!-- Normal contents -->
-		<SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
+	<PropertyGroup>		
+		<TargetFramework>net9.0-android35.0</TargetFramework>
 		<OutputType>Exe</OutputType>
 		<ApplicationId>com.companyname.AndroidAdMobExample</ApplicationId>
 		<ApplicationVersion>1</ApplicationVersion>
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-
-		<!-- 
-		This line removes the warning about out of support workloads when upgrading the
-		project to use .NET 8. It should be removed when Monogame sorts out the issue
-		in the next release which will allow us to use .NET 8.
-		-->
-		<CheckEolWorkloads>false</CheckEolWorkloads>
+		<AssemblyName>AndroidAdMobExample</AssemblyName>
+		<SupportedOSPlatformVersion>24.0</SupportedOSPlatformVersion>
+	</PropertyGroup>
+	<!-- 
+	This will use the 'debug' android manifest file when 
+	the project/solution configuration is set to Debug
+	-->
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<AndroidManifest>Configurations\Debug\AndroidManifest.xml</AndroidManifest>
+	</PropertyGroup>
+	<!-- 
+	This will use the 'release' android manifest file when 
+	the project/solution configuration is set to 'Release'
+	-->
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<AndroidManifest>Configurations\Release\AndroidManifest.xml</AndroidManifest>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4" />
 		<PackageReference Include="MonoGame.Framework.Android" Version="3.8.4" />
-		<PackageReference Include="Xamarin.AndroidX.Lifecycle.LiveData" Version="2.9.1" />
-		<PackageReference Include="Xamarin.AndroidX.Lifecycle.Service" Version="2.9.1" />
-		<PackageReference Include="Xamarin.AndroidX.Lifecycle.ViewModelSavedState" Version="2.9.1" />
-		<PackageReference Include="Xamarin.GooglePlayServices.Ads.Lite" Version="124.0.0.2" />		
+		<PackageReference Include="MonoGame.Library.OpenAL" Version="1.24.3.2" />
+		<PackageReference Include="Xamarin.GooglePlayServices.Ads.Lite" Version="124.0.0.3" />
+		<!--<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4" />
+		<PackageReference Include="MonoGame.Framework.Android" Version="3.8.4" />
+		<PackageReference Include="Xamarin.AndroidX.Lifecycle.LiveData" Version="2.9.2.1" />
+		<PackageReference Include="Xamarin.AndroidX.Lifecycle.Service" Version="2.9.2.1" />
+		<PackageReference Include="Xamarin.AndroidX.Lifecycle.ViewModelSavedState" Version="2.9.2.1" />
+		<PackageReference Include="Xamarin.GooglePlayServices.Ads.Lite" Version="124.0.0.3" />-->		
 	</ItemGroup>
 	<Target Name="RestoreDotnetTools" BeforeTargets="Restore">
 		<Message Text="Restoring dotnet tools" Importance="High" />
