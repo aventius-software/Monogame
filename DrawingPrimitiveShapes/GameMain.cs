@@ -8,6 +8,7 @@ namespace DrawingPrimitiveShapes;
 /// <summary>
 /// This is one way to draw 2D shapes, by using 'BasicEffect' default shader in Monogame. See the link
 /// here https://docs.monogame.net/articles/getting_to_know/howto/graphics/HowTo_Create_a_BasicEffect.html
+/// 
 /// Alternatively you can use another method which involves creating your own 'texture' and drawing lines
 /// to get an outline, but this is tricky to draw filled shapes
 /// </summary>

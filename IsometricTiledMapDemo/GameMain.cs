@@ -5,6 +5,11 @@ using Microsoft.Xna.Framework.Input;
 
 namespace IsometricTiledMapDemo;
 
+/// <summary>
+/// A basic isometric Tiled map demo, showing how to load and display an isometric map. Also
+/// this shows how to move the map around and highlight tiles under the mouse cursor, even taking
+/// into account tile height (Z).
+/// </summary>
 public class GameMain : Game
 {
     private Camera _camera;

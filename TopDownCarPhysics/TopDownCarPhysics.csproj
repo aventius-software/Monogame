@@ -20,7 +20,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Aether.Physics2D.MG" Version="2.2.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
 		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4" />
 		<PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4" />
 	</ItemGroup>

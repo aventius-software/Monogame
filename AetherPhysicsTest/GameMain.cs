@@ -8,6 +8,9 @@ using System.Collections.Generic;
 
 namespace AetherPhysicsTest;
 
+/// <summary>
+/// Just a simple MonoGame example showing how to use the Aether.Physics2D physics engine.
+/// </summary>
 public class GameMain : Game
 {
     private Texture2D _circle;

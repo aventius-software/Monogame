@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DotTiledTest;
+namespace DotTiledTest.Services;
 
 internal struct MapTile
 {

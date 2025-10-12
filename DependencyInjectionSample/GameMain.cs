@@ -7,6 +7,11 @@ using Microsoft.Xna.Framework.Input;
 
 namespace DependencyInjectionSample;
 
+/// <summary>
+/// A simple example of using Dependency Injection in a Monogame project. This can be useful
+/// as your project grows in size and complexity, and you want to avoid having to pass around
+/// references to key services like SpriteBatch, ContentManager, GraphicsDevice etc.
+/// </summary>
 internal class GameMain : Game
 {
     private GraphicsDeviceManager _graphics;
