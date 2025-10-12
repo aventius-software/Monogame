@@ -9,6 +9,10 @@ using System.Collections.Generic;
 
 namespace AetherPhysicsDebugViewTest;
 
+/// <summary>
+/// This demo shows how to use the Aether Physics 2D engine along with the 
+/// DebugView to see debug information regarding the physics simulation.
+/// </summary>
 public class GameMain : Game
 {
     private Texture2D _circle;
@@ -29,7 +33,6 @@ public class GameMain : Game
     protected override void Initialize()
     {
         // TODO: Add your initialization logic here
-
         base.Initialize();
     }
 
@@ -58,7 +61,7 @@ public class GameMain : Game
             _physicsWorld.ToSimUnits(_graphics.PreferredBackBufferWidth),
             _physicsWorld.ToSimUnits(_graphics.PreferredBackBufferHeight));
 
-        // Now lets create some physics objects
+        // Now lets create some very basic physics objects
         var rand = new Random();
 
         for (int i = 0; i < 20; i++)
@@ -128,6 +131,7 @@ public class GameMain : Game
 
     protected override void Draw(GameTime gameTime)
     {
+        // Clear the screen
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         // Begin drawing for sprites
@@ -146,33 +150,24 @@ public class GameMain : Game
             // Get the physics body
             var body = _physicsBodies[bodyNumber];
 
-            // Is this one a square?
-            if (body.Tag.ToString() == "square")
-            {
-                _spriteBatch.Draw(
-                    texture: _square,
-                    position: _physicsWorld.ToDisplayUnits(body.Position),
-                    sourceRectangle: new Rectangle(0, 0, _square.Width, _square.Height),
-                    color: Color.White,
-                    rotation: body.Rotation,
-                    origin: new Vector2(_square.Width / 2, _square.Height / 2),
-                    scale: 1f,
-                    effects: SpriteEffects.None,
-                    layerDepth: 0);
-            }
-            else
-            {
-                _spriteBatch.Draw(
-                    texture: _circle,
-                    position: _physicsWorld.ToDisplayUnits(body.Position),
-                    sourceRectangle: new Rectangle(0, 0, _circle.Width, _circle.Height),
-                    color: Color.White,
-                    rotation: body.Rotation,
-                    origin: new Vector2(_circle.Width / 2, _circle.Height / 2),
-                    scale: 1f,
-                    effects: SpriteEffects.None,
-                    layerDepth: 0);
-            }
+            // Work out if it's a square or a circle
+            var isSquare = body.Tag.ToString() == "square";
+            var width = isSquare ? _square.Width : _circle.Width;
+            var height = isSquare ? _square.Height : _circle.Height;
+            var sourceRectangle = new Rectangle(0, 0, width, height);
+            var origin = new Vector2(width / 2, height / 2);
+
+            // Draw it
+            _spriteBatch.Draw(
+                texture: isSquare ? _square : _circle,
+                position: _physicsWorld.ToDisplayUnits(body.Position),
+                sourceRectangle: sourceRectangle,
+                color: Color.White,
+                rotation: body.Rotation,
+                origin: origin,
+                scale: 1f,
+                effects: SpriteEffects.None,
+                layerDepth: 0);
         }
 
         // Draw debug view information

@@ -3,6 +3,11 @@ using nkast.Aether.Physics2D.Dynamics;
 
 namespace AetherPhysicsDebugViewTest.Physics;
 
+/// <summary>
+/// This is just a simple wrapper around the World class to add some helper methods. Probably
+/// the most useful is the ability to convert between display units (pixels) and simulation 
+/// units (metres).
+/// </summary>
 public class PhysicsWorld : World
 {
     private float _displayUnitsPerSimUnit = 1f;
@@ -19,9 +24,9 @@ public class PhysicsWorld : World
     /// <param name="height"></param>
     public void CreateBoundry(float x, float y, float width, float height)
     {
-        var topLeft = new Vector2(0, 0);
-        var topRight = new Vector2(width, 0);
-        var bottomLeft = new Vector2(0, height);
+        var topLeft = new Vector2(x, y);
+        var topRight = new Vector2(width, y);
+        var bottomLeft = new Vector2(x, height);
         var bottomRight = new Vector2(width, height);
 
         CreateEdge(topLeft, topRight);
@@ -31,7 +36,8 @@ public class PhysicsWorld : World
     }
 
     /// <summary>
-    /// Set the ratio of simulation units (i.e. 1 metre) to pixel units
+    /// Set the ratio of simulation units (i.e. 1 metre) to pixel units. In
+    /// other words, how many pixels is 1 metre?
     /// </summary>
     /// <param name="displayUnitsPerSimUnit"></param>
     public void SetPixelsPerMetre(float displayUnitsPerSimUnit)
