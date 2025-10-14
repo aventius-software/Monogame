@@ -1,7 +1,10 @@
 ﻿using System;
 
-namespace OutrunStyleTest.Services;
+namespace OutrunStyleTest.Track;
 
+/// <summary>
+/// This will hold all the information about the track, including all the segments that make up the track.
+/// </summary>
 internal struct Track
 {
     public int SegmentHeight;

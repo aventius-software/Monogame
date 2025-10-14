@@ -2,22 +2,34 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended.ECS;
+using MonoGame.Extended.ECS.Systems;
+using MonoGame.Extended.Screens;
 using OutrunStyleTest.Screens;
-using OutrunStyleTest.Services;
-using OutrunStyleTest.Systems;
-using Scellecs.Morpeh;
+using OutrunStyleTest.Track;
+using Shared.Extensions;
+using Shared.Services;
+using System.Reflection;
 
 namespace OutrunStyleTest;
 
 /// <summary>
-/// A simple demo of an outrun style road system, code based a lot on https://github.com/ssusnic/Pseudo-3d-Racer and a
-/// few other examples I found knocking around on the web and github (see list below). So most of the credit goes to 
+/// A simple demo of an outrun style pseudo 3D road system...
+/// 
+/// A lot of the code based on this example here https://github.com/ssusnic/Pseudo-3d-Racer and a few other examples 
+/// I found knocking around on the web and github (see list below). So most of the credit goes to people creating 
 /// those projects, this is just a bit of refactoring and some small changes/tweaks for doing it using Monogame.
 /// 
 /// Use the arrow keys up/down to accelerate and brake, and left/right arrow keys to move the camera left or right. Its 
 /// a little rough around the edges and some improvements could do with being made (to my code, not the original).
 /// 
-/// Some other useful links are:-
+/// As well as this being a simple demo to show how to do a pseudo-3D road system, it also shows how to use an ECS 
+/// architecture. For this we're using the MonoGame Extended ECS library. The code is also structured using vertical 
+/// slices... so all the code for the track is in the Track folder, and all the code for the player is in the Player 
+/// folder etc. This keeps all the code for a particular feature together, making it easier to find and work on 
+/// later on.
+/// 
+/// Some useful links I found and used for pseudo 3D road drawing:-
 /// 
 /// https://www.youtube.com/watch?v=N60lBZDEwJ8&list=PLB_ibvUSN7mzUffhiay5g5GUHyJRO4DYr&index=8
 /// http://www.extentofthejam.com/pseudo/
@@ -26,83 +38,141 @@ namespace OutrunStyleTest;
 /// </summary>
 public class GameMain : Game
 {
-    private GraphicsDeviceManager _graphics;
-    private ScreenManagementService _screenManagementService;
+    private readonly GraphicsDeviceManager _graphics;
+    private readonly ScreenManager _screenManager;
 
     public GameMain()
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+
+        // Set the resolution to 1080p
+        _graphics.PreferredBackBufferWidth = 1920;
+        _graphics.PreferredBackBufferHeight = 1080;
+        _graphics.ApplyChanges();
+
+        // Add the monogame extended screen manager
+        _screenManager = new ScreenManager();
+        Components.Add(_screenManager);
     }
 
-    protected override void Initialize()
+    /// <summary>
+    /// We're using the Microsoft.Extensions.DependencyInjection library for our DI container, so
+    /// here we configure all our services and then build the service provider which will be used
+    /// </summary>
+    /// <returns></returns>
+    private ServiceProvider ConfigureServices()
     {
-        // Create service collection (not using the Monogame 'container' as it cannot do constructor
-        // injection), so instead we're using the standard Microsoft container ;-)
         var services = new ServiceCollection();
+
+        // The Monogame Extended screen manager needs the 'Game' object... I do find this a
+        // little 'ugly', but it is what it is... so we'll register it here so we can inject
+        // it later on
+        services.AddSingleton<Game>(this);
 
         // Add services we want to inject, in this example we're going to inject the SpriteBatch service
         // into some other classes eventually via constructor. So lets register SpriteBatch and also
         // the GraphicsDevice (which SpriteBatch needs) so we can do that later on whenever... Note that
-        // we're registering Singletons as we only ever should have ONE SpriteBatch in our game!
-        services.AddSingleton(GraphicsDevice);
-        services.AddSingleton<SpriteBatch>();
+        // we're registering Singletons as we only ever should have ONE SpriteBatch in our game!        
         services.AddSingleton(Content);
+        services.AddSingleton(GraphicsDevice);
 
-        // Core services
-        services.AddSingleton<TrackBuilderService>();
+        // Core game services                              
         services.AddSingleton<ShapeDrawingService>();
-        services.AddSingleton<ScreenManagementService>();
-        services.AddSingleton<ScreenCollection, GameScreens>();
+        services.AddSingleton<SpriteBatch>();
+        services.AddSingleton<TrackBuilderService>();
+        services.AddSingleton<TrackDrawingService>();
+
+        //// Setup our camera and viewport
+        //services.AddSingleton<OrthographicCamera>(options =>
+        //{
+        //    // Setup a viewport adapter to handle different screen sizes/aspect ratios
+        //    var viewportAdapter = new BoxingViewportAdapter(Window, GraphicsDevice, 1920, 1080);
+
+        //    // See https://www.monogameextended.net/docs/features/camera/orthographic-camera/
+        //    return new OrthographicCamera(viewportAdapter);
+        //});
+
+        // Add our ECS world        
+        services.AddSingleton<WorldBuilder>();
+
+        // Register ALL our ECS systems in this assembly using our extension method
+        services.AddAllImplementationsAsSelf<ISystem>(ServiceLifetime.Singleton, Assembly.GetExecutingAssembly());
+        //services.AddAllImplementationsAsSelf<ISystem>(ServiceLifetime.Singleton, Assembly.GetAssembly(typeof(PhysicsSystem)));
+
+        // Add screens
         services.AddSingleton<GamePlayScreen>();
 
-        // Add our ECS world
-        services.AddSingleton<World>(options =>
-        {
-            return World.Create();
-        });
-
-        // Our ECS systems        
-        services.AddSingleton<PlayerControlSystem>();
-        services.AddSingleton<TrackUpdateSystem>();
-        services.AddSingleton<TrackRenderSystem>();
-        services.AddSingleton<CameraSystem>();
-
-        // Build the service provider
-        var serviceProvider = services.BuildServiceProvider();
-
-        // We don't need to get the SpriteBatch like we did before, or anything else.. we only need to get the
-        // screen management service that this class requires. The SpriteBatch will be created by the container
-        // since the screen management service needs it to be injected via its constructor... the joys
-        // of DI ;-)
-        _screenManagementService = serviceProvider.GetService<ScreenManagementService>();
-        _screenManagementService.ChangeScreen<GamePlayScreen>();
-
-        base.Initialize();
+        return services.BuildServiceProvider();
     }
 
-    protected override void LoadContent()
+    protected override void Initialize()
     {
-        // TODO: use this.Content to load your game content here
+        // Create service collection... note that we're not using the Monogame 'container' as it cannot do constructor
+        // injection, so instead we're using the standard Microsoft container, although others could be used if preferred
+        var serviceProvider = ConfigureServices();
+
+        // Initialize the screen manager with the service provider so it can resolve screens
+        base.Initialize();
+
+        // Now, we can use the screen manager to load the first game screen ;-)
+        _screenManager.LoadScreen(serviceProvider.GetService<GamePlayScreen>());
     }
+
+    //protected void xInitialize()
+    //{
+    //    // Create service collection (not using the Monogame 'container' as it cannot do constructor
+    //    // injection), so instead we're using the standard Microsoft container ;-)
+    //    var services = new ServiceCollection();
+
+    //    // Add services we want to inject, in this example we're going to inject the SpriteBatch service
+    //    // into some other classes eventually via constructor. So lets register SpriteBatch and also
+    //    // the GraphicsDevice (which SpriteBatch needs) so we can do that later on whenever... Note that
+    //    // we're registering Singletons as we only ever should have ONE SpriteBatch in our game!
+    //    services.AddSingleton(GraphicsDevice);
+    //    services.AddSingleton<SpriteBatch>();
+    //    services.AddSingleton(Content);
+
+    //    // Core services
+    //    services.AddSingleton<TrackBuilderService>();
+    //    services.AddSingleton<ShapeDrawingService>();
+    //    services.AddSingleton<ScreenManagementService>();
+    //    services.AddSingleton<ScreenCollection, GameScreens>();
+    //    services.AddSingleton<GamePlayScreen>();
+
+    //    // Add our ECS world
+    //    services.AddSingleton<World>(options =>
+    //    {
+    //        return World.Create();
+    //    });
+
+    //    // Our ECS systems
+    //    services.AddAllImplementationsAsSelf
+    //    services.AddSingleton<PlayerControlSystem>();
+    //    services.AddSingleton<TrackUpdateSystem>();
+    //    services.AddSingleton<TrackRenderSystem>();
+    //    services.AddSingleton<CameraSystem>();
+
+    //    // Build the service provider
+    //    var serviceProvider = services.BuildServiceProvider();
+
+    //    // We don't need to get the SpriteBatch like we did before, or anything else.. we only need to get the
+    //    // screen management service that this class requires. The SpriteBatch will be created by the container
+    //    // since the screen management service needs it to be injected via its constructor... the joys
+    //    // of DI ;-)
+    //    _screenManagementService = serviceProvider.GetService<ScreenManagementService>();
+    //    _screenManagementService.ChangeScreen<GamePlayScreen>();
+
+    //    base.Initialize();
+    //}
 
     protected override void Update(GameTime gameTime)
     {
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        // All update logic is now handled by the screen management service
-        _screenManagementService.Update(gameTime);
-
+        // All update logic is now handled by the screen management service        
         base.Update(gameTime);
-    }
-
-    protected override void Draw(GameTime gameTime)
-    {
-        // All draw functionality is now handled by the screen management service
-        _screenManagementService.Draw(gameTime);
-
-        base.Draw(gameTime);
     }
 }
