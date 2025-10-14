@@ -84,22 +84,11 @@ public class GameMain : Game
         services.AddSingleton<TrackBuilderService>();
         services.AddSingleton<TrackDrawingService>();
 
-        //// Setup our camera and viewport
-        //services.AddSingleton<OrthographicCamera>(options =>
-        //{
-        //    // Setup a viewport adapter to handle different screen sizes/aspect ratios
-        //    var viewportAdapter = new BoxingViewportAdapter(Window, GraphicsDevice, 1920, 1080);
-
-        //    // See https://www.monogameextended.net/docs/features/camera/orthographic-camera/
-        //    return new OrthographicCamera(viewportAdapter);
-        //});
-
         // Add our ECS world        
         services.AddSingleton<WorldBuilder>();
 
         // Register ALL our ECS systems in this assembly using our extension method
         services.AddAllImplementationsAsSelf<ISystem>(ServiceLifetime.Singleton, Assembly.GetExecutingAssembly());
-        //services.AddAllImplementationsAsSelf<ISystem>(ServiceLifetime.Singleton, Assembly.GetAssembly(typeof(PhysicsSystem)));
 
         // Add screens
         services.AddSingleton<GamePlayScreen>();
@@ -119,53 +108,6 @@ public class GameMain : Game
         // Now, we can use the screen manager to load the first game screen ;-)
         _screenManager.LoadScreen(serviceProvider.GetService<GamePlayScreen>());
     }
-
-    //protected void xInitialize()
-    //{
-    //    // Create service collection (not using the Monogame 'container' as it cannot do constructor
-    //    // injection), so instead we're using the standard Microsoft container ;-)
-    //    var services = new ServiceCollection();
-
-    //    // Add services we want to inject, in this example we're going to inject the SpriteBatch service
-    //    // into some other classes eventually via constructor. So lets register SpriteBatch and also
-    //    // the GraphicsDevice (which SpriteBatch needs) so we can do that later on whenever... Note that
-    //    // we're registering Singletons as we only ever should have ONE SpriteBatch in our game!
-    //    services.AddSingleton(GraphicsDevice);
-    //    services.AddSingleton<SpriteBatch>();
-    //    services.AddSingleton(Content);
-
-    //    // Core services
-    //    services.AddSingleton<TrackBuilderService>();
-    //    services.AddSingleton<ShapeDrawingService>();
-    //    services.AddSingleton<ScreenManagementService>();
-    //    services.AddSingleton<ScreenCollection, GameScreens>();
-    //    services.AddSingleton<GamePlayScreen>();
-
-    //    // Add our ECS world
-    //    services.AddSingleton<World>(options =>
-    //    {
-    //        return World.Create();
-    //    });
-
-    //    // Our ECS systems
-    //    services.AddAllImplementationsAsSelf
-    //    services.AddSingleton<PlayerControlSystem>();
-    //    services.AddSingleton<TrackUpdateSystem>();
-    //    services.AddSingleton<TrackRenderSystem>();
-    //    services.AddSingleton<CameraSystem>();
-
-    //    // Build the service provider
-    //    var serviceProvider = services.BuildServiceProvider();
-
-    //    // We don't need to get the SpriteBatch like we did before, or anything else.. we only need to get the
-    //    // screen management service that this class requires. The SpriteBatch will be created by the container
-    //    // since the screen management service needs it to be injected via its constructor... the joys
-    //    // of DI ;-)
-    //    _screenManagementService = serviceProvider.GetService<ScreenManagementService>();
-    //    _screenManagementService.ChangeScreen<GamePlayScreen>();
-
-    //    base.Initialize();
-    //}
 
     protected override void Update(GameTime gameTime)
     {
