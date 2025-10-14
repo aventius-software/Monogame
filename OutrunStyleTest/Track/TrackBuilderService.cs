@@ -3,8 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OutrunStyleTest.Services;
+namespace OutrunStyleTest.Track;
 
+/// <summary>
+/// Which type of turn/curve a segment is.
+/// </summary>
 internal enum TrackTurnType
 {
     EaseInLeftTurn, EaseOutLeftTurn,
@@ -15,6 +18,9 @@ internal enum TrackTurnType
     Straight
 }
 
+/// <summary>
+/// Which type of hill a segment is.
+/// </summary>
 internal enum TrackHillType
 {
     EaseInUphill, EaseOutUphill,
@@ -25,6 +31,10 @@ internal enum TrackHillType
     Flat
 }
 
+/// <summary>
+/// This is a helper service to build tracks. It allows you to add different sections fairly easily. It's
+/// not the most sophisticated track builder in the world, but it does the job for this demo.
+/// </summary>
 internal class TrackBuilderService
 {
     public Color GrassColourDark = Color.DarkGreen;
@@ -94,7 +104,7 @@ internal class TrackBuilderService
     {
         return new Track
         {
-            SegmentHeight = SegmentHeight,            
+            SegmentHeight = SegmentHeight,
             Segments = [.. _trackSegments]
         };
     }
@@ -291,7 +301,7 @@ internal class TrackBuilderService
             // Add a segment to the track
             _trackSegments.Add(new TrackSegment
             {
-                Index = segmentIndex,                
+                Index = segmentIndex,
                 SegmentStripIndex = segmentStripIndex,
                 GrassColour = segmentStripIsAnEvenNumber ? GrassColourLight : GrassColourDark,
                 RoadColour = segmentStripIsAnEvenNumber ? RoadColourLight : RoadColourDark,

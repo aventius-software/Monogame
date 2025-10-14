@@ -1,8 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace OutrunStyleTest.Services;
+namespace OutrunStyleTest.Track;
 
-public struct ZMap
+internal struct ZMap
 {
     public float Scale;
     public Vector3 ScreenCoordinates;

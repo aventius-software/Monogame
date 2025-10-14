@@ -1,74 +1,92 @@
 ﻿using Microsoft.Xna.Framework;
-using OutrunStyleTest.Components;
-using OutrunStyleTest.Services;
-using OutrunStyleTest.Systems;
-using Scellecs.Morpeh;
+using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.ECS;
+using MonoGame.Extended.Screens;
+using OutrunStyleTest.Camera;
+using OutrunStyleTest.Player;
+using OutrunStyleTest.Track;
 
 namespace OutrunStyleTest.Screens;
 
-internal class GamePlayScreen : IScreen
+/// <summary>
+/// This is the main gameplay screen where all the action happens and the ECS world is created and updated.
+/// </summary>
+internal class GamePlayScreen : GameScreen
 {
-    private readonly CameraSystem _cameraSystem;
-    private readonly World _ecsWorld;
+    private readonly CameraInitialisationSystem _cameraInitialisationSystem;
+    private readonly CameraUpdateSystem _cameraUpdateSystem;
+    private readonly GraphicsDevice _graphicsDevice;
     private readonly PlayerControlSystem _playerControlSystem;
-    private SystemsGroup _renderSystemsGroup;
+    private readonly PlayerInitialisationSystem _playerInitialisationSystem;
+    private readonly PlayerMovementSystem _playerMovementSystem;
+    private readonly TrackInitialisationSystem _trackInitialisationSystem;
     private readonly TrackRenderSystem _trackRenderSystem;
-    private readonly TrackUpdateSystem _trackSystem;
-    private SystemsGroup _updateSystemsGroup;
+    private readonly TrackUpdateSystem _trackUpdateSystem;
+    private readonly WorldBuilder _worldBuilder;
 
-    public GamePlayScreen(World ecsWorld, CameraSystem cameraSystem, PlayerControlSystem playerControlSystem, TrackUpdateSystem trackSystem, TrackRenderSystem trackRenderSystem)
+    private World _world;
+
+    public GamePlayScreen(
+        CameraInitialisationSystem cameraInitialisationSystem,
+        CameraUpdateSystem cameraUpdateSystem,
+        Game game,
+        GraphicsDevice graphicsDevice,
+        PlayerControlSystem playerControlSystem,
+        PlayerInitialisationSystem playerInitialisationSystem,
+        PlayerMovementSystem playerMovementSystem,
+        TrackInitialisationSystem trackInitialisationSystem,
+        TrackRenderSystem trackRenderSystem,
+        TrackUpdateSystem trackUpdateSystem,
+        WorldBuilder worldBuilder) : base(game)
     {
-        _ecsWorld = ecsWorld;
-        _cameraSystem = cameraSystem;
+        _cameraInitialisationSystem = cameraInitialisationSystem;
+        _cameraUpdateSystem = cameraUpdateSystem;
+        _graphicsDevice = graphicsDevice;
         _playerControlSystem = playerControlSystem;
-        _trackSystem = trackSystem;
+        _playerInitialisationSystem = playerInitialisationSystem;
+        _playerMovementSystem = playerMovementSystem;
+        _trackInitialisationSystem = trackInitialisationSystem;
         _trackRenderSystem = trackRenderSystem;
+        _trackUpdateSystem = trackUpdateSystem;
+        _worldBuilder = worldBuilder;
     }
 
-    public void Draw(GameTime gameTime)
+    public override void Draw(GameTime gameTime)
     {
-        // Update all the 'draw/render' systems
-        _renderSystemsGroup.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+        // Clear the screen
+        _graphicsDevice.Clear(Color.CornflowerBlue);
+
+        // Draw the world
+        _world.Draw(gameTime);
     }
 
-    public void Initialise()
+    public override void LoadContent()
     {
-        // Add all our update systems - note that the order matters!
-        _updateSystemsGroup = _ecsWorld.CreateSystemsGroup();        
-        _updateSystemsGroup.AddSystem(_playerControlSystem);
-        _updateSystemsGroup.AddSystem(_cameraSystem);
-        _updateSystemsGroup.AddSystem(_trackSystem);
+        // Add systems to the ESC world
+        _world = _worldBuilder
 
-        // Add render systems
-        _renderSystemsGroup = _ecsWorld.CreateSystemsGroup();
-        _renderSystemsGroup.AddSystem(_trackRenderSystem);
+            // Add initialisation systems first
+            .AddSystem(_cameraInitialisationSystem)
+            .AddSystem(_trackInitialisationSystem)
+            .AddSystem(_playerInitialisationSystem)
 
-        // Create entities and add their relevant components
-        var track = _ecsWorld.CreateEntity();
-        track.AddComponent<TrackComponent>();
+            // Then add all our update systems - note that the order matters!
+            .AddSystem(_playerControlSystem)
+            .AddSystem(_playerMovementSystem)
+            .AddSystem(_cameraUpdateSystem)
+            .AddSystem(_trackUpdateSystem)
 
-        var player = _ecsWorld.CreateEntity();
-        player.AddComponent<PlayerComponent>();
+            // After that, we add any drawing/rendering systems
+            .AddSystem(_trackRenderSystem)
 
-        var camera = _ecsWorld.CreateEntity();
-        camera.AddComponent<CameraComponent>();
+            // Then finally, build the ECS world ;-)
+            .Build();
 
-        // Now we can initialise the groups
-        _updateSystemsGroup.Initialize();
-        _renderSystemsGroup.Initialize();
+        base.LoadContent();
     }
 
-    public void LoadContent()
+    public override void Update(GameTime gameTime)
     {
-    }
-
-    public void UnloadContent()
-    {
-    }
-
-    public void Update(GameTime gameTime)
-    {
-        // Update all the 'update' systems        
-        _updateSystemsGroup.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+        _world.Update(gameTime);
     }
 }

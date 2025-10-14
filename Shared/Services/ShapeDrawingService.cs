@@ -1,12 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace OutrunStyleTest.Services;
+namespace Shared.Services;
 
 /// <summary>
 /// A simple shape drawing service using BasicEffect (shader)
 /// </summary>
-internal class ShapeDrawingService
+public class ShapeDrawingService
 {
     private readonly BasicEffect _basicEffect;
     private readonly GraphicsDevice _graphicsDevice;

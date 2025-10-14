@@ -53,6 +53,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple2DLightingWithNormalM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Basic3DCubeWithShaders", "Basic3DCubeWithShaders\Basic3DCubeWithShaders.csproj", "{F2DDEB94-3D25-417D-88A9-AFCE731A6B69}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{6EE853B2-CFEA-4260-B3F5-E16F769B8609}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -160,6 +162,10 @@ Global
 		{F2DDEB94-3D25-417D-88A9-AFCE731A6B69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2DDEB94-3D25-417D-88A9-AFCE731A6B69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2DDEB94-3D25-417D-88A9-AFCE731A6B69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EE853B2-CFEA-4260-B3F5-E16F769B8609}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EE853B2-CFEA-4260-B3F5-E16F769B8609}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EE853B2-CFEA-4260-B3F5-E16F769B8609}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EE853B2-CFEA-4260-B3F5-E16F769B8609}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
