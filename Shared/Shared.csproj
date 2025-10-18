@@ -3,8 +3,9 @@
 		<TargetFramework>net8.0</TargetFramework>
 	</PropertyGroup>
 	<ItemGroup>
+		<PackageReference Include="Aether.Physics2D.MG" Version="2.2.0" />
 		<PackageReference Include="DotTiled" Version="0.3.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
 		<PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*">
 			<PrivateAssets>All</PrivateAssets>
 		</PackageReference>

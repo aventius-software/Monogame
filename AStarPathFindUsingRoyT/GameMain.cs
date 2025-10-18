@@ -2,20 +2,26 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended;
+using MonoGame.Extended.ViewportAdapters;
 using Roy_T.AStar.Graphs;
 using Roy_T.AStar.Grids;
 using Roy_T.AStar.Paths;
 using Roy_T.AStar.Primitives;
+using Shared.Services;
 using System.Collections.Generic;
+using Size = Roy_T.AStar.Primitives.Size;
 
 namespace AStarPathFindUsingRoyT;
 
 /// <summary>
-/// Just a simple test of the RoyT A-star pathfinding library with a Tiled map. See https://github.com/roy-t/AStar
+/// Just a simple test of the RoyT A-star pathfinding library with a Tiled 
+/// map. Link to the repo for this https://github.com/roy-t/AStar
 /// </summary>
 public class GameMain : Game
 {
-    private Camera _camera;
+    //private Camera _oldCamera;
+    private OrthographicCamera _camera;
     private Texture2D _characterTexture;
     private GraphicsDeviceManager _graphics;
     private Grid _grid;
@@ -34,8 +40,10 @@ public class GameMain : Game
 
     protected override void Initialize()
     {
-        // TODO: Add your initialization logic here
-
+        // Create camera
+        var viewportAdapter = new BoxingViewportAdapter(Window, GraphicsDevice, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+        _camera = new OrthographicCamera(viewportAdapter);
+        
         base.Initialize();
     }
 
@@ -51,15 +59,15 @@ public class GameMain : Game
         _mapService.LoadTiledMap("Maps/test map.tmx", "Maps/test tile atlas");
 
         // Create a camera
-        _camera = new Camera();
+        //_oldCamera = new Camera();
 
-        // Tell the camera the dimensions of the world
-        _camera.SetWorldDimensions(new Vector2(_mapService.WorldWidth, _mapService.WorldHeight));
+        // Tell the camera the dimensions of the world        
+        //_oldCamera.SetWorldDimensions(new Vector2(_mapService.WorldWidth, _mapService.WorldHeight));
 
         // Set the camera origin to the middle of the viewport, also note the offset for the size of the character sprite
-        _camera.SetOrigin(new Vector2(
-            GraphicsDevice.Viewport.Width / 2 - _characterTexture.Width / 2,
-            GraphicsDevice.Viewport.Height / 2 - _characterTexture.Height / 2));
+        //_oldCamera.SetOrigin(new Vector2(
+        //    GraphicsDevice.Viewport.Width / 2 - _characterTexture.Width / 2,
+        //    GraphicsDevice.Viewport.Height / 2 - _characterTexture.Height / 2));        
 
         // Place the character at some 'world' position coordinates
         _position = new Vector2(0, 0);
@@ -67,7 +75,7 @@ public class GameMain : Game
         // Setup RoyT A* pathfinding service, as we're not interested in the 'traversalVelocity' for this
         // particular example, we just need some values that will work to help us find paths in our tile
         // map. It seems that 10 metre square cells and 10m/s velocity works fine for this purpose...
-        var gridSize = new GridSize(columns: _mapService.Tiles.GetLength(1), rows: _mapService.Tiles.GetLength(0));
+        var gridSize = new GridSize(columns: _mapService.MapWidth, rows: _mapService.MapHeight);
         var cellSize = new Size(Distance.FromMeters(10), Distance.FromMeters(10));
         var traversalVelocity = Velocity.FromMetersPerSecond(10);
 
@@ -80,11 +88,11 @@ public class GameMain : Game
         // them, otherwise its not much of a test is it. There's probably a more efficient way to
         // do this, but for demo purposes (and since it would only be done once at the start of a map
         // the performance isn't much of an issue ;-)
-        for (var row = 0; row < _mapService.Tiles.GetLength(0); row++)
+        for (var row = 0; row < _mapService.MapHeight; row++)
         {
-            for (var col = 0; col < _mapService.Tiles.GetLength(1); col++)
+            for (var col = 0; col < _mapService.MapWidth; col++)
             {
-                if (_mapService.Tiles[row, col] > 1) _grid.DisconnectNode(new GridPosition(col, row));
+                if (_mapService.TileAtPosition(row, col) > 1) _grid.DisconnectNode(new GridPosition(col, row));
             }
         }
 
@@ -101,7 +109,7 @@ public class GameMain : Game
         {
             // Get the screen mouse position
             var mousePosition = Mouse.GetState().Position.ToVector2();
-            var worldPosition = _camera.ScreenToWorld(mousePosition);
+            var worldPosition = _camera.ScreenToWorld(mousePosition);// _oldCamera.ScreenToWorld(mousePosition);
             var tileMapPosition = new Point((int)worldPosition.X / _mapService.TileWidth, (int)worldPosition.Y / _mapService.TileHeight);
 
             // Set the A* details and try and find a path
@@ -137,13 +145,15 @@ public class GameMain : Game
         // Set camera to the player/characters position, set offset so we account for the character sprite origin
         // being the top left corner of the sprite, this makes the camera constrain to the end of the
         // map 'minus' the width/height of the character. Otherwise we'd get a gap at the end of the map
-        _camera.LookAt(_position, new Vector2(_characterTexture.Width, _characterTexture.Height));
+        _camera.LookAt(_position);
+        //_oldCamera.LookAt(_position, new Vector2(_characterTexture.Width, _characterTexture.Height));
 
         // (Optionally) tell map where the player is, this helps the world map
         // drawing restrict tile drawing to only the tiles visible at the
         // specified position within the viewport area also specified. If we
         // comment this line out, the map service will draw all map tiles
-        _mapService.SetViewport(_camera.Position, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+        //_mapService.SetViewport(_oldCamera.Position, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+        //_mapService.SetViewport(_camera.Position, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
         base.Update(gameTime);
     }
@@ -160,7 +170,7 @@ public class GameMain : Game
             depthStencilState: null,
             rasterizerState: null,
             effect: null,
-            transformMatrix: _camera.TransformMatrix);
+            transformMatrix: _camera.GetViewMatrix());
 
         // First draw the map (so it will be under the character)
         _mapService.Draw();
