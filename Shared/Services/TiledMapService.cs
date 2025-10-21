@@ -21,7 +21,7 @@ public struct MapTile
 /// <summary>
 /// A basic tile map management and rendering service for use with 'Tiled' maps
 /// </summary>
-public class MapService
+public class TiledMapService
 {
     private readonly ContentManager _contentManager;
 
@@ -74,7 +74,7 @@ public class MapService
     /// </summary>
     public int WorldWidth => (int)_tiledMap.Width * (int)_tiledMap.TileWidth;
 
-    public MapService(SpriteBatch spriteBatch, ContentManager contentManager)
+    public TiledMapService(SpriteBatch spriteBatch, ContentManager contentManager)
     {
         _spriteBatch = spriteBatch;
         _contentManager = contentManager;

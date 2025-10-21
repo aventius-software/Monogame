@@ -25,7 +25,7 @@ public class GameMain : Game
     private Texture2D _characterTexture;
     private GraphicsDeviceManager _graphics;
     private Grid _grid;
-    private MapService _mapService;
+    private TiledMapService _mapService;
     private List<IEdge> _pathToTraverse = [];
     private PathFinder _pathFinder;
     private Vector2 _position;
@@ -55,7 +55,7 @@ public class GameMain : Game
         _characterTexture = Content.Load<Texture2D>("Textures/circle");
 
         // Load map
-        _mapService = new MapService(_spriteBatch, Content);
+        _mapService = new TiledMapService(_spriteBatch, Content);
         _mapService.LoadTiledMap("Maps/test map.tmx", "Maps/test tile atlas");
 
         // Create a camera

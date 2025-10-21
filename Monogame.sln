@@ -57,6 +57,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonogameExtendedTiledMapDemo", "MonogameExtendedTiledMapDemo\MonogameExtendedTiledMapDemo.csproj", "{29678EB5-03F2-41F5-817A-FE2E57A0BAA5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlatformerWithTiledMapDemo", "PlatformerWithTiledMapDemo\PlatformerWithTiledMapDemo.csproj", "{96E52423-5C75-40BD-8A0E-9D66358A31A2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -172,6 +174,10 @@ Global
 		{29678EB5-03F2-41F5-817A-FE2E57A0BAA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29678EB5-03F2-41F5-817A-FE2E57A0BAA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29678EB5-03F2-41F5-817A-FE2E57A0BAA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96E52423-5C75-40BD-8A0E-9D66358A31A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96E52423-5C75-40BD-8A0E-9D66358A31A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96E52423-5C75-40BD-8A0E-9D66358A31A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96E52423-5C75-40BD-8A0E-9D66358A31A2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
