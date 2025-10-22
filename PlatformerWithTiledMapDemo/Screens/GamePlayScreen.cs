@@ -6,12 +6,14 @@ using PlatformerWithTiledMapDemo.Camera;
 using PlatformerWithTiledMapDemo.Map;
 using PlatformerWithTiledMapDemo.Player;
 using PlatformerWithTiledMapDemo.Shared;
+using Shared.Services;
 
 namespace PlatformerWithTiledMapDemo.Screens;
 
 internal class GamePlayScreen : GameScreen
 {
     private readonly CameraSystem _cameraSystem;
+    private readonly CustomRenderTarget _customRenderTarget;
     private readonly GraphicsDevice _graphicsDevice;
     private readonly MapInitialisationSystem _mapInitialisationSystem;
     private readonly MapRenderingSystem _mapRenderingSystem;
@@ -26,6 +28,7 @@ internal class GamePlayScreen : GameScreen
 
     public GamePlayScreen(
         CameraSystem cameraSystem,
+        CustomRenderTarget customRenderTarget,
         Game game,
         GraphicsDevice graphicsDevice,
         MapInitialisationSystem mapInitialisationSystem,
@@ -38,6 +41,7 @@ internal class GamePlayScreen : GameScreen
         WorldBuilder ecsWorldBuilder) : base(game)
     {
         _cameraSystem = cameraSystem;
+        _customRenderTarget = customRenderTarget;
         _graphicsDevice = graphicsDevice;
         _mapInitialisationSystem = mapInitialisationSystem;
         _mapRenderingSystem = mapRenderingSystem;
@@ -52,7 +56,10 @@ internal class GamePlayScreen : GameScreen
     public override void Draw(GameTime gameTime)
     {
         _graphicsDevice.Clear(Color.CornflowerBlue);
+
+        //_customRenderTarget.Begin();
         _world.Draw(gameTime);
+        //_customRenderTarget.Draw();
     }
 
     public override void LoadContent()
@@ -76,6 +83,8 @@ internal class GamePlayScreen : GameScreen
 
             // Build the ECS world ;-)
             .Build();
+
+        //_customRenderTarget.InitialiseRenderDestination(1320, 1240, Color.CornflowerBlue);
 
         base.LoadContent();
     }

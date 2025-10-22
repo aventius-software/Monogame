@@ -28,9 +28,14 @@ internal class PlayerSpawnSystem : EntitySystem
     public override void Initialize(IComponentMapperService mapperService)
     {
         // Load the sprite sheet
-        var texture = _contentManager.Load<Texture2D>("Player/p1_spritesheet");
-        var textureAtlas = Texture2DAtlas.Create("PlayerAtlas", texture, 72, 96);
-        var spriteSheet = new SpriteSheet("PlayerSpriteSheet", textureAtlas);
+        var texture = _contentManager.Load<Texture2D>("Player/adventurer-Sheet");
+        var textureAtlas = Texture2DAtlas.Create("PlayerAtlas", texture, 
+            regionWidth: 50, 
+            regionHeight: 37, 
+            margin: 0, 
+            spacing: 0);        
+
+        var spriteSheet = new SpriteSheet("PlayerSpriteSheet", textureAtlas);        
 
         // Define the animations
         TimeSpan duration = TimeSpan.FromSeconds(0.1);
@@ -42,11 +47,28 @@ internal class PlayerSpawnSystem : EntitySystem
                 .AddFrame(1, duration);
         });
 
+        spriteSheet.DefineAnimation(nameof(PlayerAnimationState.Walking), builder =>
+        {
+            builder.IsLooping(true)
+                .AddFrame(0, duration);                
+        });
+
+        spriteSheet.DefineAnimation(nameof(PlayerAnimationState.Jumping), builder =>
+        {
+            builder.IsLooping(true)
+                .AddFrame(0, duration)
+                .AddFrame(1, duration);
+        });
+
         // Create the player entity
         var entity = CreateEntity();
         entity.Attach(new AnimatedSprite(spriteSheet, nameof(PlayerAnimationState.Idle)));
+        entity.Attach(new CharacterComponent());
         entity.Attach(new Transform2(new Vector2(0, 0)));
-        entity.Attach(new PhysicsComponent());
+        entity.Attach(new PhysicsComponent
+        {
+            CollisionBoxOffsetBounds = new RectangleF(16, 7, 16, 30)
+        });
         entity.Attach(new PlayerComponent());
     }
 }

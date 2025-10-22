@@ -10,8 +10,7 @@ internal class CameraSystem : EntityProcessingSystem
 {
     private readonly OrthographicCamera _camera;
 
-    public CameraSystem(OrthographicCamera camera) 
-        : base(Aspect.All(typeof(CameraComponent)))
+    public CameraSystem(OrthographicCamera camera) : base(Aspect.All(typeof(CameraComponent)))
     {
         _camera = camera;
     }
@@ -20,6 +19,8 @@ internal class CameraSystem : EntityProcessingSystem
     {
         var cameraEntity = CreateEntity();
         cameraEntity.Attach(new CameraComponent());
+        //_camera.Zoom = 4f;
+        //_camera.Position = new Vector2(-400, -400);
     }
 
     public override void Process(GameTime gameTime, int entityId)

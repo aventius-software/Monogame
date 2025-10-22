@@ -11,6 +11,7 @@ using MonoGame.Extended.ViewportAdapters;
 using PlatformerWithTiledMapDemo.Map;
 using PlatformerWithTiledMapDemo.Screens;
 using Shared.Extensions;
+using Shared.Services;
 using System.Reflection;
 
 namespace PlatformerWithTiledMapDemo;
@@ -67,12 +68,12 @@ public class GameMain : Game
         // https://www.monogameextended.net/docs/features/camera/orthographic-camera/
         services.AddSingleton<OrthographicCamera>(options =>
         {
-            // Setup a viewport adapter to handle different screen sizes/aspect ratios
-            var viewportAdapter = new BoxingViewportAdapter(
-                Window,
-                GraphicsDevice,
-                GraphicsDevice.Viewport.Width,
-                GraphicsDevice.Viewport.Height);
+        // Setup a viewport adapter to handle different screen sizes/aspect ratios
+        var viewportAdapter = new BoxingViewportAdapter(
+            Window,
+            GraphicsDevice,
+            320, 240);// GraphicsDevice.Viewport.Width,
+                //GraphicsDevice.Viewport.Height);
 
             return new OrthographicCamera(viewportAdapter);
         });
@@ -86,6 +87,10 @@ public class GameMain : Game
         // Add our map service to handle loading/rendering of Tiled maps, which
         // uses the TiledMapRenderer internally to do its job
         services.AddSingleton<MapService>();
+
+        // We'll add our custom render target service so we can use a virtual resolution
+        // and scale to different screen sizes more easily
+        services.AddSingleton<CustomRenderTarget>();
 
         // Add our ECS world        
         services.AddSingleton<WorldBuilder>();

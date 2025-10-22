@@ -3,7 +3,7 @@
 internal enum PlayerAnimationState
 {
     Idle,
-    Running,
+    Walking,
     Jumping,
     Falling
 }

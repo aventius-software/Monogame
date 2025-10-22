@@ -33,21 +33,21 @@ internal class PlayerControlSystem : EntityProcessingSystem
             if (keyboardState.IsKeyDown(Keys.Up))
             {
                 physicsComponent.Velocity.Y -= 500;
-                playerComponent.State = PlayerState.Jumping;
+                playerComponent.State = CharacterState.Jumping;
             }
         }
 
         if (keyboardState.IsKeyDown(Keys.Right))
         {
             physicsComponent.Velocity.X += 150;
-            playerComponent.State = PlayerState.Walking;
+            playerComponent.State = CharacterState.Walking;
             playerComponent.Facing = FacingState.Right;
         }
 
         if (keyboardState.IsKeyDown(Keys.Left))
         {
             physicsComponent.Velocity.X -= 150;
-            playerComponent.State = PlayerState.Walking;
+            playerComponent.State = CharacterState.Walking;
             playerComponent.Facing = FacingState.Left;
         }
 

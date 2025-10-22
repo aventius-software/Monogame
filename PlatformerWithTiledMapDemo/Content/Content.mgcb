@@ -14,17 +14,17 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin Map/level1.tmx
-/importer:TiledMapImporter
-/processor:TiledMapProcessor
-/build:Map/level1.tmx
-
-#begin Map/tileset.tsx
+#begin Map/level_1_tileset.tsx
 /importer:TiledMapTilesetImporter
 /processor:TiledMapTilesetProcessor
-/build:Map/tileset.tsx
+/build:Map/level_1_tileset.tsx
 
-#begin Player/p1_spritesheet.png
+#begin Map/level_1.tmx
+/importer:TiledMapImporter
+/processor:TiledMapProcessor
+/build:Map/level_1.tmx
+
+#begin Player/adventurer-Sheet.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -34,5 +34,5 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Player/p1_spritesheet.png
+/build:Player/adventurer-Sheet.png
 

@@ -5,5 +5,5 @@ namespace PlatformerWithTiledMapDemo.Player;
 internal class PlayerComponent
 {
     public FacingState Facing = FacingState.Right;
-    public PlayerState State = PlayerState.Idle;
+    public CharacterState State = CharacterState.Idle;    
 }
