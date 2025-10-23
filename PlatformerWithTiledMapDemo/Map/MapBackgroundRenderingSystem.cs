@@ -4,12 +4,12 @@ using MonoGame.Extended.ECS.Systems;
 
 namespace PlatformerWithTiledMapDemo.Map;
 
-internal class MapRenderingSystem : DrawSystem
+internal class MapBackgroundRenderingSystem : DrawSystem
 {
     private readonly OrthographicCamera _camera;
     private readonly MapService _mapService;
 
-    public MapRenderingSystem(MapService mapService, OrthographicCamera camera)
+    public MapBackgroundRenderingSystem(MapService mapService, OrthographicCamera camera)
     {
         _camera = camera;
         _mapService = mapService;
@@ -17,6 +17,8 @@ internal class MapRenderingSystem : DrawSystem
 
     public override void Draw(GameTime gameTime)
     {
-        _mapService.MapRenderer.Draw(_camera.GetViewMatrix());
+        _mapService.MapRenderer.Draw(
+            layerIndex: 0,
+            viewMatrix: _camera.GetViewMatrix(new Vector2(0.5f, 0.5f)));
     }    
 }

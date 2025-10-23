@@ -5,17 +5,19 @@ using MonoGame.Extended.Tiled;
 using MonoGame.Extended.Tiled.Renderers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PlatformerWithTiledMapDemo.Map;
 
 internal class MapService
 {
-    private readonly ContentManager _contentManager;
-    private readonly TiledMapRenderer _mapRenderer;
-
+    public string CollisionLayerName { get; set; } = "Collisions";
     public TiledMap Map { get; protected set; }
     public TiledMapRenderer MapRenderer => _mapRenderer;
 
+    private readonly ContentManager _contentManager;
+    private readonly TiledMapRenderer _mapRenderer;
+        
     public MapService(TiledMapRenderer mapRenderer, ContentManager contentManager)
     {
         _mapRenderer = mapRenderer;
@@ -39,7 +41,7 @@ internal class MapService
     /// </summary>
     /// <param name="position"></param>
     /// <param name="width"></param>
-    /// <param name="height"></param>
+    /// <param name="height"></param>    
     /// <returns></returns>
     public List<RectangleF> GetSurroundingTiles(Vector2 position, float width, float height)
     {
@@ -52,7 +54,7 @@ internal class MapService
         // Loop through each of the surrounding tiles        
         var tiles = new List<RectangleF>();
 
-        foreach (var layer in Map.TileLayers)
+        foreach (var layer in Map.TileLayers.Where(x => x.Name == CollisionLayerName))
         {
             // Find the edge tile positions
             int leftTile = (int)Math.Floor((float)bounds.Left / Map.TileWidth);

@@ -6,7 +6,6 @@ using PlatformerWithTiledMapDemo.Camera;
 using PlatformerWithTiledMapDemo.Map;
 using PlatformerWithTiledMapDemo.Player;
 using PlatformerWithTiledMapDemo.Shared;
-using Shared.Services;
 
 namespace PlatformerWithTiledMapDemo.Screens;
 
@@ -15,8 +14,10 @@ internal class GamePlayScreen : GameScreen
     private readonly CameraSystem _cameraSystem;
     private readonly DebugSystem _debugSystem;
     private readonly GraphicsDevice _graphicsDevice;
+    private readonly MapBackgroundRenderingSystem _mapBackgroundRenderingSystem;
+    private readonly MapForegroundRenderingSystem _mapForegroundRenderingSystem;
     private readonly MapInitialisationSystem _mapInitialisationSystem;
-    private readonly MapRenderingSystem _mapRenderingSystem;
+    private readonly MapPlatformRenderingSystem _mapPlatformRenderingSystem;
     private readonly PlatformPhysicsSystem _platformPhysicsSystem;
     private readonly PlayerAnimationSystem _playerAnimationSystem;
     private readonly PlayerControlSystem _playerControlSystem;
@@ -31,8 +32,10 @@ internal class GamePlayScreen : GameScreen
         DebugSystem debugSystem,
         Game game,
         GraphicsDevice graphicsDevice,
+        MapBackgroundRenderingSystem mapBackgroundRenderingSystem,
+        MapForegroundRenderingSystem mapForegroundRenderingSystem,
         MapInitialisationSystem mapInitialisationSystem,
-        MapRenderingSystem mapRenderingSystem,
+        MapPlatformRenderingSystem mapPlatformRenderingSystem,
         PlatformPhysicsSystem platformPhysicsSystem,
         PlayerAnimationSystem playerAnimationSystem,
         PlayerControlSystem playerControlSystem,
@@ -43,8 +46,10 @@ internal class GamePlayScreen : GameScreen
         _cameraSystem = cameraSystem;
         _debugSystem = debugSystem;
         _graphicsDevice = graphicsDevice;
+        _mapBackgroundRenderingSystem = mapBackgroundRenderingSystem;
+        _mapForegroundRenderingSystem = mapForegroundRenderingSystem;
         _mapInitialisationSystem = mapInitialisationSystem;
-        _mapRenderingSystem = mapRenderingSystem;
+        _mapPlatformRenderingSystem = mapPlatformRenderingSystem;
         _platformPhysicsSystem = platformPhysicsSystem;
         _playerAnimationSystem = playerAnimationSystem;
         _playerControlSystem = playerControlSystem;
@@ -75,8 +80,14 @@ internal class GamePlayScreen : GameScreen
             .AddSystem(_cameraSystem)
 
             // Drawing systems (in order)
-            .AddSystem(_mapRenderingSystem)
+            .AddSystem(_mapBackgroundRenderingSystem)
+            .AddSystem(_mapPlatformRenderingSystem)
+            .AddSystem(_mapForegroundRenderingSystem)
+
+            // Sprites are drawn on top of the map
             .AddSystem(_spriteRenderingSystem)
+
+            // Other systems...
             .AddSystem(_debugSystem)
 
             // Build the ECS world ;-)

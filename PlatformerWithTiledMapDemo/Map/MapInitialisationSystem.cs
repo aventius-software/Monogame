@@ -14,6 +14,7 @@ internal class MapInitialisationSystem : EntitySystem
     public override void Initialize(IComponentMapperService mapperService)
     {
         // Load the Tiled map
-        _mapService.LoadMap("Map/level_1");        
+        _mapService.LoadMap("Map/level_1");
+        _mapService.CollisionLayerName = "Platforms";
     }    
 }
