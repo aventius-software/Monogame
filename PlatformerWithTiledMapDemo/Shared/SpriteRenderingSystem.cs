@@ -44,7 +44,7 @@ internal class SpriteRenderingSystem : EntityDrawSystem
 
             if (sprite is AnimatedSprite animatedSprite)
                 animatedSprite.Update(gameTime);
-
+            
             _spriteBatch.Draw(sprite, transform);
         }
 

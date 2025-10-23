@@ -22,9 +22,9 @@ internal class PlayerControlSystem : EntityProcessingSystem
     }
 
     public override void Process(GameTime gameTime, int entityId)
-    {
-        var playerComponent = _playerMapper.Get(entityId);
+    {        
         var physicsComponent = _physicsMapper.Get(entityId);
+        var playerComponent = _playerMapper.Get(entityId);
 
         var keyboardState = Keyboard.GetState();
 
@@ -32,26 +32,26 @@ internal class PlayerControlSystem : EntityProcessingSystem
         {
             if (keyboardState.IsKeyDown(Keys.Up))
             {
-                physicsComponent.Velocity.Y -= 500;
+                physicsComponent.Velocity.Y -= physicsComponent.JumpStrength;
                 playerComponent.State = CharacterState.Jumping;
             }
         }
 
         if (keyboardState.IsKeyDown(Keys.Right))
         {
-            physicsComponent.Velocity.X += 150;
+            physicsComponent.Velocity.X += physicsComponent.MoveSpeed;
             playerComponent.State = CharacterState.Walking;
             playerComponent.Facing = FacingState.Right;
         }
 
         if (keyboardState.IsKeyDown(Keys.Left))
         {
-            physicsComponent.Velocity.X -= 150;
+            physicsComponent.Velocity.X -= physicsComponent.MoveSpeed;
             playerComponent.State = CharacterState.Walking;
             playerComponent.Facing = FacingState.Left;
         }
 
         // Apply some friction to the player's horizontal movement
-        physicsComponent.Velocity.X *= 0.75f;
+        physicsComponent.Velocity.X *= physicsComponent.GroundFriction;
     }
 }

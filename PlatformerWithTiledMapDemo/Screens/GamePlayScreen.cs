@@ -13,7 +13,7 @@ namespace PlatformerWithTiledMapDemo.Screens;
 internal class GamePlayScreen : GameScreen
 {
     private readonly CameraSystem _cameraSystem;
-    private readonly CustomRenderTarget _customRenderTarget;
+    private readonly DebugSystem _debugSystem;
     private readonly GraphicsDevice _graphicsDevice;
     private readonly MapInitialisationSystem _mapInitialisationSystem;
     private readonly MapRenderingSystem _mapRenderingSystem;
@@ -28,7 +28,7 @@ internal class GamePlayScreen : GameScreen
 
     public GamePlayScreen(
         CameraSystem cameraSystem,
-        CustomRenderTarget customRenderTarget,
+        DebugSystem debugSystem,
         Game game,
         GraphicsDevice graphicsDevice,
         MapInitialisationSystem mapInitialisationSystem,
@@ -38,10 +38,10 @@ internal class GamePlayScreen : GameScreen
         PlayerControlSystem playerControlSystem,
         PlayerSpawnSystem playerSpawnSystem,
         SpriteRenderingSystem spriteRenderingSystem,
-        WorldBuilder ecsWorldBuilder) : base(game)
+        WorldBuilder worldBuilder) : base(game)
     {
         _cameraSystem = cameraSystem;
-        _customRenderTarget = customRenderTarget;
+        _debugSystem = debugSystem;
         _graphicsDevice = graphicsDevice;
         _mapInitialisationSystem = mapInitialisationSystem;
         _mapRenderingSystem = mapRenderingSystem;
@@ -50,41 +50,37 @@ internal class GamePlayScreen : GameScreen
         _playerControlSystem = playerControlSystem;
         _playerSpawnSystem = playerSpawnSystem;
         _spriteRenderingSystem = spriteRenderingSystem;
-        _worldBuilder = ecsWorldBuilder;
+        _worldBuilder = worldBuilder;
     }
 
     public override void Draw(GameTime gameTime)
     {
-        _graphicsDevice.Clear(Color.CornflowerBlue);
-
-        //_customRenderTarget.Begin();
+        _graphicsDevice.Clear(Color.Black);
         _world.Draw(gameTime);
-        //_customRenderTarget.Draw();
     }
 
     public override void LoadContent()
     {
-        // Add systems to the world
+        // Add systems to the ECS world
         _world = _worldBuilder
 
             // Add initialisation systems first
             .AddSystem(_mapInitialisationSystem)
             .AddSystem(_playerSpawnSystem)
 
-            // Update systems
-            .AddSystem(_platformPhysicsSystem)
+            // Update systems            
             .AddSystem(_playerControlSystem)
             .AddSystem(_playerAnimationSystem)
+            .AddSystem(_platformPhysicsSystem)
             .AddSystem(_cameraSystem)
 
             // Drawing systems (in order)
             .AddSystem(_mapRenderingSystem)
             .AddSystem(_spriteRenderingSystem)
+            .AddSystem(_debugSystem)
 
             // Build the ECS world ;-)
-            .Build();
-
-        //_customRenderTarget.InitialiseRenderDestination(1320, 1240, Color.CornflowerBlue);
+            .Build();        
 
         base.LoadContent();
     }

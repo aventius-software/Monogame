@@ -41,11 +41,11 @@ internal class MapService
     /// <param name="width"></param>
     /// <param name="height"></param>
     /// <returns></returns>
-    public List<RectangleF> GetSurroundingTiles(Vector2 position, int width, int height)
+    public List<RectangleF> GetSurroundingTiles(Vector2 position, float width, float height)
     {
         var bounds = new RectangleF(
-            (float)Math.Round(position.X),
-            (float)Math.Round(position.Y),
+            position.X,
+            position.Y,
             width,
             height);
 
