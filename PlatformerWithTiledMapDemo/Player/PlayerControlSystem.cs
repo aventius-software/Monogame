@@ -46,15 +46,19 @@ internal class PlayerControlSystem : EntityProcessingSystem
         // Handle left/right movement input
         if (keyboardState.IsKeyDown(Keys.Left))
         {
-            physicsComponent.Velocity.X -= physicsComponent.RunAcceleration;
-            playerComponent.State = CharacterState.Walking;
+            physicsComponent.Velocity.X -= physicsComponent.RunAcceleration;            
             playerComponent.Facing = FacingState.Left;
+
+            if (physicsComponent.IsOnGround)
+                playerComponent.State = CharacterState.Walking;
         }
         else if (keyboardState.IsKeyDown(Keys.Right))
         {
-            physicsComponent.Velocity.X += physicsComponent.RunAcceleration;
-            playerComponent.State = CharacterState.Walking;
+            physicsComponent.Velocity.X += physicsComponent.RunAcceleration;            
             playerComponent.Facing = FacingState.Right;
+
+            if (physicsComponent.IsOnGround)
+                playerComponent.State = CharacterState.Walking;
         }
 
         // Clamp horizontal velocity to max running speed

@@ -33,7 +33,9 @@ internal class PlayerAnimationSystem : EntityProcessingSystem
             case CharacterState.Jumping:
                 if (sprite.CurrentAnimation != nameof(PlayerAnimationState.Jumping))
                     sprite.SetAnimation(nameof(PlayerAnimationState.Jumping));
-                
+
+                sprite.Effect = player.Facing == FacingState.Right ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+
                 break;
 
             case CharacterState.Walking:

@@ -29,13 +29,13 @@ internal class PlayerSpawnSystem : EntitySystem
     {
         // Load the sprite sheet
         var texture = _contentManager.Load<Texture2D>("Player/adventurer-Sheet");
-        var textureAtlas = Texture2DAtlas.Create("PlayerAtlas", texture, 
-            regionWidth: 50, 
-            regionHeight: 37, 
-            margin: 0, 
-            spacing: 0);        
+        var textureAtlas = Texture2DAtlas.Create("PlayerAtlas", texture,
+            regionWidth: 50,
+            regionHeight: 37,
+            margin: 0,
+            spacing: 0);
 
-        var spriteSheet = new SpriteSheet("PlayerSpriteSheet", textureAtlas);        
+        var spriteSheet = new SpriteSheet("PlayerSpriteSheet", textureAtlas);
 
         // Define the animations
         TimeSpan duration = TimeSpan.FromSeconds(0.1);
@@ -44,20 +44,35 @@ internal class PlayerSpawnSystem : EntitySystem
         {
             builder.IsLooping(true)
                 .AddFrame(0, duration)
-                .AddFrame(1, duration);
+                .AddFrame(1, duration)
+                .AddFrame(2, duration)
+                .AddFrame(3, duration);
         });
 
         spriteSheet.DefineAnimation(nameof(PlayerAnimationState.Walking), builder =>
         {
             builder.IsLooping(true)
-                .AddFrame(0, duration);                
+                .AddFrame(8, duration)
+                .AddFrame(9, duration)
+                .AddFrame(10, duration)
+                .AddFrame(11, duration)
+                .AddFrame(12, duration)
+                .AddFrame(13, duration);
         });
 
         spriteSheet.DefineAnimation(nameof(PlayerAnimationState.Jumping), builder =>
         {
             builder.IsLooping(true)
-                .AddFrame(0, duration)
-                .AddFrame(1, duration);
+                .AddFrame(14, duration)
+                .AddFrame(15, duration)
+                .AddFrame(16, duration)
+                .AddFrame(17, duration)
+                .AddFrame(18, duration)
+                .AddFrame(19, duration)
+                .AddFrame(20, duration)
+                .AddFrame(21, duration)
+                .AddFrame(22, duration)
+                .AddFrame(23, duration);
         });
 
         // Create the player entity
@@ -65,10 +80,7 @@ internal class PlayerSpawnSystem : EntitySystem
         entity.Attach(new AnimatedSprite(spriteSheet, nameof(PlayerAnimationState.Idle)));
         entity.Attach(new CharacterComponent());
         entity.Attach(new Transform2(new Vector2(0, 0)));
-        entity.Attach(new PhysicsComponent
-        {
-            CollisionBoxOffsetBounds = new RectangleF(16, 7, 16, 30)
-        });
+        entity.Attach(new PhysicsComponent { CollisionBoxOffsetBounds = new RectangleF(16, 7, 16, 30) });
         entity.Attach(new PlayerComponent());
     }
 }

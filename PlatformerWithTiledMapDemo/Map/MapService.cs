@@ -9,6 +9,15 @@ using System.Linq;
 
 namespace PlatformerWithTiledMapDemo.Map;
 
+/// <summary>
+/// This service handles loading and querying the Tiled map and is kind of a
+/// wrapper around MonoGame.Extended's Tiled map support. Why do this? Well, wrapping 
+/// it like this means we can:
+/// 
+/// - easily change the implementation later if we want to
+/// - allows us to add our own helper methods such as the position clamping
+/// - lets us inject this as a service wherever we need it via dependency injection
+/// </summary>
 internal class MapService
 {
     public string CollisionLayerName { get; set; } = "Collisions";
@@ -17,7 +26,7 @@ internal class MapService
 
     private readonly ContentManager _contentManager;
     private readonly TiledMapRenderer _mapRenderer;
-        
+
     public MapService(TiledMapRenderer mapRenderer, ContentManager contentManager)
     {
         _mapRenderer = mapRenderer;
@@ -26,7 +35,8 @@ internal class MapService
 
     /// <summary>
     /// Clamp the given position to be within the map boundaries, taking into account
-    /// the viewport size so we don't show area outside the map edges. 
+    /// the viewport size so we don't show area outside the map edges. This is useful
+    /// for camera positioning so the camera doesn't show area outside the map.
     /// 
     /// This function COULD be made more efficient by caching the min/max values instead of
     /// calculating them each time, but for simplicity in this demo we'll just calculate
@@ -62,14 +72,15 @@ internal class MapService
     /// <param name="mapRow"></param>
     /// <param name="mapColumn"></param>
     /// <returns></returns>
-    private RectangleF GetRectangleAtMapPosition(int mapRow, int mapColumn, int tileWidth, int tileHeight)
+    private static RectangleF GetRectangleAtMapPosition(int mapRow, int mapColumn, int tileWidth, int tileHeight)
     {
         return new RectangleF(mapColumn * tileWidth, mapRow * tileHeight, tileWidth, tileHeight);
     }
 
     /// <summary>
     /// Get a list of the surrounding tiles at the specified position for the 
-    /// specified width and height
+    /// specified width and height. It only returns tiles that exist in the collision
+    /// layer
     /// </summary>
     /// <param name="position"></param>
     /// <param name="width"></param>
@@ -86,6 +97,7 @@ internal class MapService
         // Loop through each of the surrounding tiles        
         var tiles = new List<RectangleF>();
 
+        // For each tile layer that matches the collision layer name
         foreach (var layer in Map.TileLayers.Where(x => x.Name == CollisionLayerName))
         {
             // Find the edge tile positions
@@ -123,6 +135,10 @@ internal class MapService
         return tiles;
     }
 
+    /// <summary>
+    /// Load the specified Tiled map content
+    /// </summary>
+    /// <param name="mapName"></param>
     public void LoadMap(string mapName)
     {
         Map = _contentManager.Load<TiledMap>(mapName);
