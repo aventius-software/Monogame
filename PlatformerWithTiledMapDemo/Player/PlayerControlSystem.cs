@@ -22,14 +22,20 @@ internal class PlayerControlSystem : EntityProcessingSystem
     }
 
     public override void Process(GameTime gameTime, int entityId)
-    {        
+    {
+        // Get the components we need to work with
         var physicsComponent = _physicsMapper.Get(entityId);
         var playerComponent = _playerMapper.Get(entityId);
 
+        // Get the current keyboard state
         var keyboardState = Keyboard.GetState();
 
         if (physicsComponent.IsOnGround)
         {
+            // If we're on the ground we always first reset to idle state
+            playerComponent.State = CharacterState.Idle;
+
+            // Is the player trying to jump?
             if (keyboardState.IsKeyDown(Keys.Up))
             {
                 physicsComponent.Velocity.Y -= physicsComponent.JumpStrength;
@@ -37,19 +43,22 @@ internal class PlayerControlSystem : EntityProcessingSystem
             }
         }
 
-        if (keyboardState.IsKeyDown(Keys.Right))
+        // Handle left/right movement input
+        if (keyboardState.IsKeyDown(Keys.Left))
         {
-            physicsComponent.Velocity.X += physicsComponent.MoveSpeed;
+            physicsComponent.Velocity.X -= physicsComponent.RunAcceleration;
+            playerComponent.State = CharacterState.Walking;
+            playerComponent.Facing = FacingState.Left;
+        }
+        else if (keyboardState.IsKeyDown(Keys.Right))
+        {
+            physicsComponent.Velocity.X += physicsComponent.RunAcceleration;
             playerComponent.State = CharacterState.Walking;
             playerComponent.Facing = FacingState.Right;
         }
 
-        if (keyboardState.IsKeyDown(Keys.Left))
-        {
-            physicsComponent.Velocity.X -= physicsComponent.MoveSpeed;
-            playerComponent.State = CharacterState.Walking;
-            playerComponent.Facing = FacingState.Left;
-        }
+        // Clamp horizontal velocity to max running speed
+        physicsComponent.Velocity.X = MathHelper.Clamp(physicsComponent.Velocity.X, -physicsComponent.MaximumRunningSpeed, physicsComponent.MaximumRunningSpeed);
 
         // Apply some friction to the player's horizontal movement
         physicsComponent.Velocity.X *= physicsComponent.GroundFriction;

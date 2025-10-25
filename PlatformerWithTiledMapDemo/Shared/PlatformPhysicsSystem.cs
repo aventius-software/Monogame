@@ -54,7 +54,7 @@ internal class PlatformPhysicsSystem : EntityUpdateSystem
             // Apply gravity to the entity's vertical velocity and move it's
             // position based on its velocity (this will move the entity in
             // both the X and Y axis)
-            physicsComponent.Velocity.Y += physicsComponent.Gravity;
+            physicsComponent.Velocity.Y += physicsComponent.Gravity * deltaTime;
             transformComponent.Position += physicsComponent.Velocity * deltaTime;
 
             // Get the entity's bounding rectangle for collision detection

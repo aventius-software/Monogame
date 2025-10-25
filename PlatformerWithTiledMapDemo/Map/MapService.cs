@@ -25,6 +25,38 @@ internal class MapService
     }
 
     /// <summary>
+    /// Clamp the given position to be within the map boundaries, taking into account
+    /// the viewport size so we don't show area outside the map edges. 
+    /// 
+    /// This function COULD be made more efficient by caching the min/max values instead of
+    /// calculating them each time, but for simplicity in this demo we'll just calculate
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="viewPort"></param>
+    /// <returns></returns>
+    public Vector2 ClampPositionToMapBoundry(Vector2 position, RectangleF viewPort)
+    {
+        // The minimum X and Y values are half the viewport size, because the camera
+        // is centered on its position. So the minimum position we can have is half the
+        // viewport size, otherwise the camera would show area outside the map bounds to
+        // the left and top
+        var minX = viewPort.Width / 2f;
+        var minY = viewPort.Height / 2f;
+
+        // Similarly, the maximum X and Y values are the map size minus half the viewport size
+        // again because the camera is centered on its position. This will stop the camera from
+        // showing area outside the map bounds to the right and bottom
+        var maxX = Map.WidthInPixels - minX;
+        var maxY = Map.HeightInPixels - minY;
+
+        // Now we can use these values to restrict camera position to inside the map only
+        var clampedX = MathHelper.Clamp(position.X, minX, maxX);
+        var clampedY = MathHelper.Clamp(position.Y, minY, maxY);
+
+        return new Vector2(clampedX, clampedY);
+    }
+
+    /// <summary>
     /// Returns a rectangle with world coordinates for the specified map row/column
     /// </summary>    
     /// <param name="mapRow"></param>

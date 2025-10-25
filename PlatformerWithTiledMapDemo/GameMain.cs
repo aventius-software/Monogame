@@ -12,13 +12,31 @@ using PlatformerWithTiledMapDemo.Map;
 using PlatformerWithTiledMapDemo.Screens;
 using Shared.Extensions;
 using Shared.Services;
+using System;
 using System.Reflection;
 
 namespace PlatformerWithTiledMapDemo;
 
 /// <summary>
 /// Demo game showing how to use Tiled maps in a platformer game. Uses MonoGame and MonoGame.Extended
-/// and game art from Kenney.nl (www.kenney.nl). See https://opengameart.org/content/platformer-art-deluxe
+/// and game art from...
+/// 
+/// Features:
+/// - Tiled map loading and rendering
+/// - Parallax scrolling backgrounds
+/// - Basic platformer movement and physics
+/// - Camera following the player
+/// - Simple ECS architecture for game entities and systems
+/// 
+/// Todo:
+/// - Add more game mechanics (e.g., enemies, collectibles)
+/// - Improve level design
+/// - Level transitions
+/// - Implement a main menu and game over screen
+/// - Add UI elements (e.g., score, health)
+/// - Add sound and music
+/// - Polish graphics and animations
+/// - Moving objects/platforms
 /// </summary>
 public class GameMain : Game
 {
@@ -34,6 +52,11 @@ public class GameMain : Game
         // Set the preferred back buffer size (window size)
         _graphics.PreferredBackBufferWidth = 1920;
         _graphics.PreferredBackBufferHeight = 1080;
+
+        UseFixedFramerate(60);
+        //UseVariableFramerate();
+
+        // Apply changes
         _graphics.ApplyChanges();
 
         // Setup the Monogame Extended screen manager component
@@ -68,12 +91,14 @@ public class GameMain : Game
         // https://www.monogameextended.net/docs/features/camera/orthographic-camera/
         services.AddSingleton<OrthographicCamera>(options =>
         {
-        // Setup a viewport adapter to handle different screen sizes/aspect ratios
-        var viewportAdapter = new BoxingViewportAdapter(
-            Window,
-            GraphicsDevice,
-            320, 240);// GraphicsDevice.Viewport.Width,
-                //GraphicsDevice.Viewport.Height);
+            // Setup a viewport adapter to handle different screen sizes/aspect ratios
+            var viewportAdapter = new BoxingViewportAdapter(
+                Window,
+                GraphicsDevice,
+                320, 240);
+            //640, 480);
+            //GraphicsDevice.Viewport.Width,
+            //GraphicsDevice.Viewport.Height);
 
             return new OrthographicCamera(viewportAdapter);
         });
@@ -126,5 +151,29 @@ public class GameMain : Game
 
         // All update logic is now handled by the screen management service        
         base.Update(gameTime);
+    }
+
+    private void UseFixedFramerate(int targetFps)
+    {
+        // For a fixed framerate we need to enable the fixed timestep
+        IsFixedTimeStep = true;
+        InactiveSleepTime = TimeSpan.Zero; // Helps in some configurations
+
+        // No vsync
+        _graphics.SynchronizeWithVerticalRetrace = false;
+
+        // If we want a different target fps from the default (which in Monogame is 60), then
+        // we need to set the target 'time elapsed' we want for the specified target fps
+        TargetElapsedTime = TimeSpan.FromTicks((long)(TimeSpan.TicksPerSecond / targetFps));
+    }
+
+    private void UseVariableFramerate()
+    {
+        // Disable the fixed timestep
+        IsFixedTimeStep = false;
+        InactiveSleepTime = TimeSpan.Zero; // Helps in some configurations
+
+        // No vsync
+        _graphics.SynchronizeWithVerticalRetrace = false;
     }
 }
