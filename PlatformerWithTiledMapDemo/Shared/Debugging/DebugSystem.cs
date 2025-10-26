@@ -3,9 +3,10 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.ECS;
 using MonoGame.Extended.ECS.Systems;
+using PlatformerWithTiledMapDemo.Shared.Physics;
 using System.Linq;
 
-namespace PlatformerWithTiledMapDemo.Shared;
+namespace PlatformerWithTiledMapDemo.Shared.Debugging;
 
 internal class DebugSystem : EntityDrawSystem
 {

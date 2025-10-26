@@ -19,7 +19,12 @@ namespace PlatformerWithTiledMapDemo;
 
 /// <summary>
 /// Demo game showing how to use Tiled maps in a platformer game. Uses MonoGame and MonoGame.Extended
-/// and game art from...
+/// 
+/// Game art used:
+/// - rvros https://rvros.itch.io/ 
+///     using https://rvros.itch.io/animated-pixel-hero
+/// - trixie https://trixelized.itch.io/ 
+///     using https://trixelized.itch.io/starstring-fields under MIT license https://opensource.org/license/mit
 /// 
 /// Features:
 /// - Tiled map loading and rendering
@@ -37,6 +42,7 @@ namespace PlatformerWithTiledMapDemo;
 /// - Add sound and music
 /// - Polish graphics and animations
 /// - Moving objects/platforms
+/// - Gravity/jump multiplier
 /// </summary>
 public class GameMain : Game
 {
@@ -53,6 +59,7 @@ public class GameMain : Game
         _graphics.PreferredBackBufferWidth = 1920;
         _graphics.PreferredBackBufferHeight = 1080;
 
+        // Try these 2 different frame timing configurations...
         UseFixedFramerate(60);
         //UseVariableFramerate();
 
@@ -95,15 +102,12 @@ public class GameMain : Game
             var viewportAdapter = new BoxingViewportAdapter(
                 Window,
                 GraphicsDevice,
-                320, 240);
-            //640, 480);
-            //GraphicsDevice.Viewport.Width,
-            //GraphicsDevice.Viewport.Height);
+                320, 240);            
 
             return new OrthographicCamera(viewportAdapter);
         });
 
-        // Register the Tiled map renderer so it can be injected later on
+        // Register the Monogame Extended Tiled map renderer so it can be injected later on
         services.AddSingleton<TiledMapRenderer>(options =>
         {
             return new TiledMapRenderer(GraphicsDevice);
@@ -120,9 +124,9 @@ public class GameMain : Game
         // Add our ECS world        
         services.AddSingleton<WorldBuilder>();
 
-        // Register all our ECS systems (in this assembly). This extension method
-        // will register all implementations of ISystem found in the assembly. The
-        // code for this is in the Shared project in the Extensions folder.
+        // Register all our ECS systems (in this assembly). This little extension method
+        // will register all implementations of ISystem found in the assembly specified. Otherwise
+        // we'd need to manually register ALL our ECS systems individually/manually...
         services.AddAllImplementationsAsSelf<ISystem>(ServiceLifetime.Singleton, Assembly.GetExecutingAssembly());
 
         // Add screens

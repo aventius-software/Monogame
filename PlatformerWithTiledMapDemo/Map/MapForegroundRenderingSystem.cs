@@ -24,9 +24,9 @@ internal class MapForegroundRenderingSystem : DrawSystem
         // use PointClamp to avoid blurry pixels when the camera zooms in.
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-        // Draw the any foreground platforms layer (layer index 2)
+        // Draw the any foreground platforms layer
         _mapService.MapRenderer.Draw(
-            layerIndex: 2,
+            layer: _mapService.Map.GetLayer("Foreground"),
             viewMatrix: _camera.GetViewMatrix());
 
         // End the sprite batch

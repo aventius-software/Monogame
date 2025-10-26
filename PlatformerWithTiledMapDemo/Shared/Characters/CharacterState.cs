@@ -1,4 +1,4 @@
-﻿namespace PlatformerWithTiledMapDemo.Shared;
+﻿namespace PlatformerWithTiledMapDemo.Shared.Characters;
 
 internal enum CharacterState
 {

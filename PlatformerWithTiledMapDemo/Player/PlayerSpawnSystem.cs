@@ -5,13 +5,18 @@ using MonoGame.Extended;
 using MonoGame.Extended.ECS;
 using MonoGame.Extended.ECS.Systems;
 using MonoGame.Extended.Graphics;
-using PlatformerWithTiledMapDemo.Shared;
+using PlatformerWithTiledMapDemo.Shared.Characters;
+using PlatformerWithTiledMapDemo.Shared.Physics;
 using System;
 
 namespace PlatformerWithTiledMapDemo.Player;
 
 internal class PlayerSpawnSystem : EntitySystem
 {
+    private const int _frameWidth = 50, _frameHeight = 37;
+    private const int _hitboxWidth = 20, _hitboxHeight = 23;
+    private const int _hitboxOffsetX = 14, _hitboxOffsetY = 14;
+
     private readonly ContentManager _contentManager;
 
     public PlayerSpawnSystem(ContentManager contentManager) : base(Aspect.All(typeof(PlayerComponent)))
@@ -30,8 +35,8 @@ internal class PlayerSpawnSystem : EntitySystem
         // Load the sprite sheet
         var texture = _contentManager.Load<Texture2D>("Player/adventurer-Sheet");
         var textureAtlas = Texture2DAtlas.Create("PlayerAtlas", texture,
-            regionWidth: 50,
-            regionHeight: 37,
+            regionWidth: _frameWidth,
+            regionHeight: _frameHeight,
             margin: 0,
             spacing: 0);
 
@@ -40,7 +45,7 @@ internal class PlayerSpawnSystem : EntitySystem
         // Define the animations
         TimeSpan duration = TimeSpan.FromSeconds(0.1);
 
-        spriteSheet.DefineAnimation(nameof(PlayerAnimationState.Idle), builder =>
+        spriteSheet.DefineAnimation(nameof(CharacterAnimationState.Idle), builder =>
         {
             builder.IsLooping(true)
                 .AddFrame(0, duration)
@@ -49,7 +54,7 @@ internal class PlayerSpawnSystem : EntitySystem
                 .AddFrame(3, duration);
         });
 
-        spriteSheet.DefineAnimation(nameof(PlayerAnimationState.Running), builder =>
+        spriteSheet.DefineAnimation(nameof(CharacterAnimationState.Running), builder =>
         {
             builder.IsLooping(true)
                 .AddFrame(8, duration)
@@ -60,7 +65,7 @@ internal class PlayerSpawnSystem : EntitySystem
                 .AddFrame(13, duration);
         });
 
-        spriteSheet.DefineAnimation(nameof(PlayerAnimationState.Jumping), builder =>
+        spriteSheet.DefineAnimation(nameof(CharacterAnimationState.Jumping), builder =>
         {
             builder.IsLooping(true)
                 .AddFrame(14, duration)
@@ -74,13 +79,13 @@ internal class PlayerSpawnSystem : EntitySystem
                 .AddFrame(22, duration)
                 .AddFrame(23, duration);
         });
-
+        
         // Create the player entity
         var entity = CreateEntity();
-        entity.Attach(new AnimatedSprite(spriteSheet, nameof(PlayerAnimationState.Idle)));
+        entity.Attach(new AnimatedSprite(spriteSheet, nameof(CharacterAnimationState.Idle)));
         entity.Attach(new CharacterComponent());
         entity.Attach(new Transform2(new Vector2(0, 0)));
-        entity.Attach(new PhysicsComponent { CollisionBoxOffsetBounds = new RectangleF(16, 7, 16, 30) });
+        entity.Attach(new PhysicsComponent { CollisionBoxOffsetBounds = new RectangleF(_hitboxOffsetX, _hitboxOffsetY, _hitboxWidth, _hitboxHeight) });
         entity.Attach(new PlayerComponent());
     }
 }

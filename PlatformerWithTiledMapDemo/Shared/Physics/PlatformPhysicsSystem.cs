@@ -7,7 +7,7 @@ using PlatformerWithTiledMapDemo.Map;
 using Shared.Extensions;
 using System;
 
-namespace PlatformerWithTiledMapDemo.Shared;
+namespace PlatformerWithTiledMapDemo.Shared.Physics;
 
 internal class PlatformPhysicsSystem : EntityUpdateSystem
 {

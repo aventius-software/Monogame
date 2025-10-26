@@ -26,7 +26,7 @@ internal class MapPlatformRenderingSystem : DrawSystem
 
         // Draw the platforms layer (layer index 1)
         _mapService.MapRenderer.Draw(
-            layerIndex: 1,
+            layer: _mapService.Map.GetLayer("Platforms"),
             viewMatrix: _camera.GetViewMatrix());
 
         // End the sprite batch

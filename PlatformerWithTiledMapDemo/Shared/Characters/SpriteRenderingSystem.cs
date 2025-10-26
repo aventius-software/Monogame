@@ -5,12 +5,12 @@ using MonoGame.Extended.ECS;
 using MonoGame.Extended.ECS.Systems;
 using MonoGame.Extended.Graphics;
 
-namespace PlatformerWithTiledMapDemo.Shared;
+namespace PlatformerWithTiledMapDemo.Shared.Characters;
 
 internal class SpriteRenderingSystem : EntityDrawSystem
 {
     private readonly OrthographicCamera _camera;
-    private readonly SpriteBatch _spriteBatch;    
+    private readonly SpriteBatch _spriteBatch;
 
     private ComponentMapper<AnimatedSprite> _animatedSpriteMapper;
     private ComponentMapper<Sprite> _spriteMapper;
@@ -42,9 +42,6 @@ internal class SpriteRenderingSystem : EntityDrawSystem
 
             var transform = _transformMapper.Get(entity);
 
-            if (sprite is AnimatedSprite animatedSprite)
-                animatedSprite.Update(gameTime);
-            
             _spriteBatch.Draw(sprite, transform);
         }
 

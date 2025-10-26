@@ -5,13 +5,15 @@ using MonoGame.Extended.Screens;
 using PlatformerWithTiledMapDemo.Camera;
 using PlatformerWithTiledMapDemo.Map;
 using PlatformerWithTiledMapDemo.Player;
-using PlatformerWithTiledMapDemo.Shared;
+using PlatformerWithTiledMapDemo.Shared.Characters;
+using PlatformerWithTiledMapDemo.Shared.Debugging;
+using PlatformerWithTiledMapDemo.Shared.Physics;
 
 namespace PlatformerWithTiledMapDemo.Screens;
 
 internal class GamePlayScreen : GameScreen
 {
-    private readonly CameraSystem _cameraSystem;
+    private readonly CameraSystem _cameraSystem;    
     private readonly DebugSystem _debugSystem;
     private readonly GraphicsDevice _graphicsDevice;
     private readonly MapBackgroundRenderingSystem _mapBackgroundRenderingSystem;
@@ -19,9 +21,10 @@ internal class GamePlayScreen : GameScreen
     private readonly MapInitialisationSystem _mapInitialisationSystem;
     private readonly MapPlatformRenderingSystem _mapPlatformRenderingSystem;
     private readonly PlatformPhysicsSystem _platformPhysicsSystem;
-    private readonly PlayerAnimationSystem _playerAnimationSystem;
+    //private readonly PlayerAnimationSystem _playerAnimationSystem;
     private readonly PlayerControlSystem _playerControlSystem;
     private readonly PlayerSpawnSystem _playerSpawnSystem;
+    private readonly SpriteAnimationSystem _spriteAnimationSystem;
     private readonly SpriteRenderingSystem _spriteRenderingSystem;
     private readonly WorldBuilder _worldBuilder;
 
@@ -37,9 +40,10 @@ internal class GamePlayScreen : GameScreen
         MapInitialisationSystem mapInitialisationSystem,
         MapPlatformRenderingSystem mapPlatformRenderingSystem,
         PlatformPhysicsSystem platformPhysicsSystem,
-        PlayerAnimationSystem playerAnimationSystem,
+        //PlayerAnimationSystem playerAnimationSystem,
         PlayerControlSystem playerControlSystem,
         PlayerSpawnSystem playerSpawnSystem,
+        SpriteAnimationSystem spriteAnimationSystem,
         SpriteRenderingSystem spriteRenderingSystem,
         WorldBuilder worldBuilder) : base(game)
     {
@@ -51,9 +55,10 @@ internal class GamePlayScreen : GameScreen
         _mapInitialisationSystem = mapInitialisationSystem;
         _mapPlatformRenderingSystem = mapPlatformRenderingSystem;
         _platformPhysicsSystem = platformPhysicsSystem;
-        _playerAnimationSystem = playerAnimationSystem;
+        //_playerAnimationSystem = playerAnimationSystem;
         _playerControlSystem = playerControlSystem;
         _playerSpawnSystem = playerSpawnSystem;
+        _spriteAnimationSystem = spriteAnimationSystem;
         _spriteRenderingSystem = spriteRenderingSystem;
         _worldBuilder = worldBuilder;
     }
@@ -75,7 +80,8 @@ internal class GamePlayScreen : GameScreen
 
             // Update systems            
             .AddSystem(_playerControlSystem)
-            .AddSystem(_playerAnimationSystem)
+            //.AddSystem(_playerAnimationSystem)
+            .AddSystem(_spriteAnimationSystem)
             .AddSystem(_platformPhysicsSystem)
             .AddSystem(_cameraSystem)
 

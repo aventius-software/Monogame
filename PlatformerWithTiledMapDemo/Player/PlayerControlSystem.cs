@@ -2,30 +2,31 @@
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended.ECS;
 using MonoGame.Extended.ECS.Systems;
-using PlatformerWithTiledMapDemo.Shared;
+using PlatformerWithTiledMapDemo.Shared.Characters;
+using PlatformerWithTiledMapDemo.Shared.Physics;
 
 namespace PlatformerWithTiledMapDemo.Player;
 
 internal class PlayerControlSystem : EntityProcessingSystem
 {
-    private ComponentMapper<PhysicsComponent> _physicsMapper;
-    private ComponentMapper<PlayerComponent> _playerMapper;
+    private ComponentMapper<CharacterComponent> _characterMapper;
+    private ComponentMapper<PhysicsComponent> _physicsMapper;    
 
-    public PlayerControlSystem() : base(Aspect.All(typeof(PlayerComponent), typeof(PhysicsComponent)))
+    public PlayerControlSystem() : base(Aspect.All(typeof(PlayerComponent), typeof(CharacterComponent), typeof(PhysicsComponent)))
     {
     }
 
     public override void Initialize(IComponentMapperService mapperService)
     {
-        _physicsMapper = mapperService.GetMapper<PhysicsComponent>();
-        _playerMapper = mapperService.GetMapper<PlayerComponent>();
+        _characterMapper = mapperService.GetMapper<CharacterComponent>();
+        _physicsMapper = mapperService.GetMapper<PhysicsComponent>();        
     }
 
     public override void Process(GameTime gameTime, int entityId)
     {
         // Get the components we need to work with
-        var physicsComponent = _physicsMapper.Get(entityId);
-        var playerComponent = _playerMapper.Get(entityId);
+        var characterComponent = _characterMapper.Get(entityId);
+        var physicsComponent = _physicsMapper.Get(entityId);        
 
         // Get the current keyboard state
         var keyboardState = Keyboard.GetState();
@@ -34,30 +35,30 @@ internal class PlayerControlSystem : EntityProcessingSystem
         // player is moving left or right (and they're on the ground), then we'll
         // update their state accordingly
         if (physicsComponent.IsOnGround)
-            playerComponent.State = CharacterState.Idle;
+            characterComponent.State = CharacterState.Idle;
 
         // Now, we handle left/right movement input
         if (keyboardState.IsKeyDown(Keys.Left))
         {
             // Turn left and accelerate up to our 'running' velocity
-            playerComponent.Facing = FacingState.Left;
+            characterComponent.Facing = FacingState.Left;
             physicsComponent.Velocity.X -= physicsComponent.RunAcceleration;
 
             // If the player is on the ground and they're moving left
             // or right then they must be running
             if (physicsComponent.IsOnGround)
-                playerComponent.State = CharacterState.Running;
+                characterComponent.State = CharacterState.Running;
         }
         else if (keyboardState.IsKeyDown(Keys.Right))
         {
             // Turn right and accelerate up to our 'running' velocity
-            playerComponent.Facing = FacingState.Right;
+            characterComponent.Facing = FacingState.Right;
             physicsComponent.Velocity.X += physicsComponent.RunAcceleration;
 
             // If the player is on the ground and they're moving left
             // or right then they must be running
             if (physicsComponent.IsOnGround)
-                playerComponent.State = CharacterState.Running;
+                characterComponent.State = CharacterState.Running;
         }
 
         // Finally, after checking for left/right movement, we can test for
@@ -73,7 +74,7 @@ internal class PlayerControlSystem : EntityProcessingSystem
             if (keyboardState.IsKeyDown(Keys.Up))
             {
                 physicsComponent.Velocity.Y -= physicsComponent.JumpStrength;
-                playerComponent.State = CharacterState.Jumping;
+                characterComponent.State = CharacterState.Jumping;
             }
         }
 

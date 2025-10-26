@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using MonoGame.Extended;
 
-namespace PlatformerWithTiledMapDemo.Shared;
+namespace PlatformerWithTiledMapDemo.Shared.Physics;
 
 internal class PhysicsComponent
 {
