@@ -49,7 +49,7 @@ internal class PlayerSpawnSystem : EntitySystem
                 .AddFrame(3, duration);
         });
 
-        spriteSheet.DefineAnimation(nameof(PlayerAnimationState.Walking), builder =>
+        spriteSheet.DefineAnimation(nameof(PlayerAnimationState.Running), builder =>
         {
             builder.IsLooping(true)
                 .AddFrame(8, duration)

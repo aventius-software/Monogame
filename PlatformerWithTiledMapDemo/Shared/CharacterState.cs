@@ -2,9 +2,8 @@
 
 internal enum CharacterState
 {
-    Idle,
-    Running,
+    Idle,    
     Jumping,
     Falling,
-    Walking
+    Running
 }

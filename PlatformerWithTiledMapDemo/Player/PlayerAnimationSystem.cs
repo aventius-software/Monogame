@@ -28,21 +28,23 @@ internal class PlayerAnimationSystem : EntityProcessingSystem
         var player = _playerMapper.Get(entityId);
         var sprite = _spriteMapper.Get(entityId);
 
+        sprite.Effect = player.Facing == FacingState.Right ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+
         switch (player.State)
         {
             case CharacterState.Jumping:
                 if (sprite.CurrentAnimation != nameof(PlayerAnimationState.Jumping))
                     sprite.SetAnimation(nameof(PlayerAnimationState.Jumping));
 
-                sprite.Effect = player.Facing == FacingState.Right ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+                //sprite.Effect = player.Facing == FacingState.Right ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
                 break;
 
-            case CharacterState.Walking:
-                if (sprite.CurrentAnimation != nameof(PlayerAnimationState.Walking))
-                    sprite.SetAnimation(nameof(PlayerAnimationState.Walking));
+            case CharacterState.Running:
+                if (sprite.CurrentAnimation != nameof(PlayerAnimationState.Running))
+                    sprite.SetAnimation(nameof(PlayerAnimationState.Running));
 
-                sprite.Effect = player.Facing == FacingState.Right ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+                //sprite.Effect = player.Facing == FacingState.Right ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
                 
                 break;
             
@@ -76,7 +78,7 @@ internal class PlayerAnimationSystem : EntityProcessingSystem
             //        sprite.SetAnimation("cool");
             //    break;
             default:
-                sprite.SetAnimation("idle");
+                sprite.SetAnimation(nameof(PlayerAnimationState.Idle));
                 break;
         }
     }
