@@ -10,8 +10,8 @@ public class CustomRenderTarget
     private readonly SpriteBatch _spriteBatch;
 
     private Color? _clearScreenColour;
-    private Rectangle _destinationRectangle;    
-    private RenderTarget2D _renderTarget;    
+    private Rectangle _destinationRectangle;
+    private RenderTarget2D _renderTarget;
 
     public CustomRenderTarget(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
     {
@@ -19,6 +19,12 @@ public class CustomRenderTarget
         _spriteBatch = spriteBatch;
     }
 
+    /// <summary>
+    /// Initialise our render target, call this in your initialise method
+    /// </summary>
+    /// <param name="virtualScreenWidth"></param>
+    /// <param name="virtualScreenHeight"></param>
+    /// <param name="clearScreenColour"></param>
     public void InitialiseRenderDestination(int virtualScreenWidth, int virtualScreenHeight, Color? clearScreenColour = null)
     {
         // Create our 'virtual' render target
@@ -43,6 +49,10 @@ public class CustomRenderTarget
         _destinationRectangle = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
     }
 
+    /// <summary>
+    /// This should be called before any other drawing, so that all subsequent draw
+    /// calls will be drawn to the render target instead of the screen
+    /// </summary>
     public void Begin()
     {
         // Set the render target
@@ -52,13 +62,19 @@ public class CustomRenderTarget
         if (_clearScreenColour is not null) _graphicsDevice.Clear((Color)_clearScreenColour);
     }
 
-    public void Draw()
+
+    /// <summary>
+    /// This should be called last in the main 'draw' method, it will draw
+    /// the render target to the screen
+    /// </summary>
+    /// <param name="samplerState">Optional sampler state - defaults to PointClamp if not specified</param>
+    public void Draw(SamplerState samplerState = null)
     {
         // Done using render target to draw
         _graphicsDevice.SetRenderTarget(null);
 
         // Draw the render target to the 'real' screen now
-        _spriteBatch.Begin();
+        _spriteBatch.Begin(samplerState: samplerState ?? SamplerState.PointClamp);
         _spriteBatch.Draw(_renderTarget, _destinationRectangle, Color.White);
         _spriteBatch.End();
     }

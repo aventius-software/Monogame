@@ -14,6 +14,7 @@ using Shared.Extensions;
 using Shared.Services;
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace PlatformerWithTiledMapDemo;
 
@@ -46,6 +47,9 @@ namespace PlatformerWithTiledMapDemo;
 /// </summary>
 public class GameMain : Game
 {
+    private const int _virtualResolutionWidth = 320;
+    private const int _virtualResolutionHeight = 240;
+
     private readonly GraphicsDeviceManager _graphics;
     private readonly ScreenManager _screenManager;
 
@@ -60,8 +64,8 @@ public class GameMain : Game
         _graphics.PreferredBackBufferHeight = 1080;
 
         // Try these 2 different frame timing configurations...
-        UseFixedFramerate(60);
-        //UseVariableFramerate();
+        //UseFixedFramerate(59);
+        UseVariableFramerate();
 
         // Apply changes
         _graphics.ApplyChanges();
@@ -102,7 +106,8 @@ public class GameMain : Game
             var viewportAdapter = new BoxingViewportAdapter(
                 Window,
                 GraphicsDevice,
-                320, 240);            
+                _virtualResolutionWidth,
+                _virtualResolutionHeight);            
 
             return new OrthographicCamera(viewportAdapter);
         });
@@ -119,7 +124,13 @@ public class GameMain : Game
 
         // We'll add our custom render target service so we can use a virtual resolution
         // and scale to different screen sizes more easily
-        services.AddSingleton<CustomRenderTarget>();
+        services.AddSingleton<CustomRenderTarget>(options =>
+        {
+            var service = new CustomRenderTarget(GraphicsDevice, options.GetService<SpriteBatch>());
+            service.InitialiseRenderDestination(_virtualResolutionWidth, _virtualResolutionHeight, Color.Black);
+
+            return service;
+        });
 
         // Add our ECS world        
         services.AddSingleton<WorldBuilder>();
@@ -164,7 +175,7 @@ public class GameMain : Game
         InactiveSleepTime = TimeSpan.Zero; // Helps in some configurations
 
         // No vsync
-        _graphics.SynchronizeWithVerticalRetrace = false;
+        _graphics.SynchronizeWithVerticalRetrace = true;
 
         // If we want a different target fps from the default (which in Monogame is 60), then
         // we need to set the target 'time elapsed' we want for the specified target fps

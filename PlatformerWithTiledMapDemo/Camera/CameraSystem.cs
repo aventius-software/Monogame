@@ -5,6 +5,7 @@ using MonoGame.Extended.ECS.Systems;
 using MonoGame.Extended.Graphics;
 using PlatformerWithTiledMapDemo.Map;
 using PlatformerWithTiledMapDemo.Player;
+using System;
 using System.Linq;
 
 namespace PlatformerWithTiledMapDemo.Camera;
@@ -55,7 +56,11 @@ internal class CameraSystem : EntityProcessingSystem
         // Clamp the camera position to be within the map boundaries
         var clampedPosition = _mapService.ClampPositionToMapBoundry((Vector2)_positionToTrack, _camera.BoundingRectangle);
 
+        // Lastly, we need to round the position of the camera otherwise the tiled
+        // map tiles could get drawn with gaps due to float
+        var roundedPosition = new Vector2((float)Math.Round(clampedPosition.X), (float)Math.Round(clampedPosition.Y));
+
         // Update the camera to look at the new position
-        _camera.LookAt(clampedPosition);
+        _camera.LookAt(roundedPosition);
     }
 }

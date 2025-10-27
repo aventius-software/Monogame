@@ -8,20 +8,21 @@ using PlatformerWithTiledMapDemo.Player;
 using PlatformerWithTiledMapDemo.Shared.Characters;
 using PlatformerWithTiledMapDemo.Shared.Debugging;
 using PlatformerWithTiledMapDemo.Shared.Physics;
+using Shared.Services;
 
 namespace PlatformerWithTiledMapDemo.Screens;
 
 internal class GamePlayScreen : GameScreen
 {
-    private readonly CameraSystem _cameraSystem;    
+    private readonly CameraSystem _cameraSystem;
+    private readonly CustomRenderTarget _customRenderTarget; 
     private readonly DebugSystem _debugSystem;
     private readonly GraphicsDevice _graphicsDevice;
     private readonly MapBackgroundRenderingSystem _mapBackgroundRenderingSystem;
     private readonly MapForegroundRenderingSystem _mapForegroundRenderingSystem;
     private readonly MapInitialisationSystem _mapInitialisationSystem;
     private readonly MapPlatformRenderingSystem _mapPlatformRenderingSystem;
-    private readonly PlatformPhysicsSystem _platformPhysicsSystem;
-    //private readonly PlayerAnimationSystem _playerAnimationSystem;
+    private readonly PlatformPhysicsSystem _platformPhysicsSystem;    
     private readonly PlayerControlSystem _playerControlSystem;
     private readonly PlayerSpawnSystem _playerSpawnSystem;
     private readonly SpriteAnimationSystem _spriteAnimationSystem;
@@ -32,6 +33,7 @@ internal class GamePlayScreen : GameScreen
 
     public GamePlayScreen(
         CameraSystem cameraSystem,
+        CustomRenderTarget customRenderTarget,
         DebugSystem debugSystem,
         Game game,
         GraphicsDevice graphicsDevice,
@@ -39,8 +41,7 @@ internal class GamePlayScreen : GameScreen
         MapForegroundRenderingSystem mapForegroundRenderingSystem,
         MapInitialisationSystem mapInitialisationSystem,
         MapPlatformRenderingSystem mapPlatformRenderingSystem,
-        PlatformPhysicsSystem platformPhysicsSystem,
-        //PlayerAnimationSystem playerAnimationSystem,
+        PlatformPhysicsSystem platformPhysicsSystem,        
         PlayerControlSystem playerControlSystem,
         PlayerSpawnSystem playerSpawnSystem,
         SpriteAnimationSystem spriteAnimationSystem,
@@ -48,14 +49,14 @@ internal class GamePlayScreen : GameScreen
         WorldBuilder worldBuilder) : base(game)
     {
         _cameraSystem = cameraSystem;
+        _customRenderTarget = customRenderTarget;
         _debugSystem = debugSystem;
         _graphicsDevice = graphicsDevice;
         _mapBackgroundRenderingSystem = mapBackgroundRenderingSystem;
         _mapForegroundRenderingSystem = mapForegroundRenderingSystem;
         _mapInitialisationSystem = mapInitialisationSystem;
         _mapPlatformRenderingSystem = mapPlatformRenderingSystem;
-        _platformPhysicsSystem = platformPhysicsSystem;
-        //_playerAnimationSystem = playerAnimationSystem;
+        _platformPhysicsSystem = platformPhysicsSystem;        
         _playerControlSystem = playerControlSystem;
         _playerSpawnSystem = playerSpawnSystem;
         _spriteAnimationSystem = spriteAnimationSystem;
@@ -65,8 +66,9 @@ internal class GamePlayScreen : GameScreen
 
     public override void Draw(GameTime gameTime)
     {
-        _graphicsDevice.Clear(Color.Black);
+        _customRenderTarget.Begin();
         _world.Draw(gameTime);
+        _customRenderTarget.Draw();
     }
 
     public override void LoadContent()
