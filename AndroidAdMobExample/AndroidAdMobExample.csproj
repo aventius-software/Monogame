@@ -23,8 +23,8 @@
 		<AndroidManifest>Configurations\Release\AndroidManifest.xml</AndroidManifest>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4" />
-		<PackageReference Include="MonoGame.Framework.Android" Version="3.8.4" />
+		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4.1" />
+		<PackageReference Include="MonoGame.Framework.Android" Version="3.8.4.1" />
 		<PackageReference Include="MonoGame.Library.OpenAL" Version="1.24.3.2" />
 		<PackageReference Include="Xamarin.GooglePlayServices.Ads.Lite" Version="124.0.0.3" />		
 	</ItemGroup>
