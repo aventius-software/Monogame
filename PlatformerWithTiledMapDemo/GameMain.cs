@@ -19,7 +19,7 @@ using System.Runtime.CompilerServices;
 namespace PlatformerWithTiledMapDemo;
 
 /// <summary>
-/// Demo game showing how to use Tiled maps in a platformer game. Uses MonoGame and MonoGame.Extended
+/// Demo showing how to use Tiled maps in a platformer game. Uses MonoGame and MonoGame.Extended
 /// 
 /// Game art used:
 /// - rvros https://rvros.itch.io/ 
@@ -47,8 +47,10 @@ namespace PlatformerWithTiledMapDemo;
 /// </summary>
 public class GameMain : Game
 {
-    private const int _virtualResolutionWidth = 320;
-    private const int _virtualResolutionHeight = 240;
+    // Since we're using 16 bit pixel style graphics we'll use kind
+    // 16 bit style 'virtual' resolution which we'll scale later to
+    // whatever screen size
+    private const int _virtualResolutionWidth = 320, _virtualResolutionHeight = 240;
 
     private readonly GraphicsDeviceManager _graphics;
     private readonly ScreenManager _screenManager;
@@ -63,21 +65,23 @@ public class GameMain : Game
         _graphics.PreferredBackBufferWidth = 1920;
         _graphics.PreferredBackBufferHeight = 1080;
 
-        // Try these 2 different frame timing configurations...
+        // Try these 2 different frame timing configurations. You may need
+        // to alter your graphics card settings to get best 'smoothness' if
+        // your settings are overriding game settings (e.g. forcing vsync on)
         //UseFixedFramerate(59);
         UseVariableFramerate();
 
         // Apply changes
         _graphics.ApplyChanges();
 
-        // Setup the Monogame Extended screen manager component
+        // Setup the Monogame Extended screen manager
         _screenManager = new ScreenManager();
         Components.Add(_screenManager);
     }
 
     /// <summary>
     /// We'll use Microsoft.Extensions.DependencyInjection to register services so
-    /// we can inject them via constructor injection later on
+    /// we can inject services into other classes via constructor injection later on
     /// </summary>
     /// <returns></returns>
     private ServiceProvider ConfigureServices()
@@ -107,7 +111,7 @@ public class GameMain : Game
                 Window,
                 GraphicsDevice,
                 _virtualResolutionWidth,
-                _virtualResolutionHeight);            
+                _virtualResolutionHeight);
 
             return new OrthographicCamera(viewportAdapter);
         });
@@ -122,8 +126,8 @@ public class GameMain : Game
         // uses the TiledMapRenderer internally to do its job
         services.AddSingleton<MapService>();
 
-        // We'll add our custom render target service so we can use a virtual resolution
-        // and scale to different screen sizes more easily
+        // We'll add our custom render target service so we can use our virtual resolution
+        // but scale correctly to all different screen sizes easily        
         services.AddSingleton<CustomRenderTarget>(options =>
         {
             var service = new CustomRenderTarget(GraphicsDevice, options.GetService<SpriteBatch>());
@@ -168,6 +172,10 @@ public class GameMain : Game
         base.Update(gameTime);
     }
 
+    /// <summary>
+    /// Sets the graphics configuration to work with a fixed specified framerate
+    /// </summary>
+    /// <param name="targetFps"></param>
     private void UseFixedFramerate(int targetFps)
     {
         // For a fixed framerate we need to enable the fixed timestep
@@ -182,6 +190,10 @@ public class GameMain : Game
         TargetElapsedTime = TimeSpan.FromTicks((long)(TimeSpan.TicksPerSecond / targetFps));
     }
 
+    /// <summary>
+    /// Disables fixed framerate and uses VRR, which if you monitor supports it will
+    /// give you lovely smooth motion, but if it doesn't then you'll get screen tearing!
+    /// </summary>
     private void UseVariableFramerate()
     {
         // Disable the fixed timestep

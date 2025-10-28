@@ -22,7 +22,7 @@ internal class SpriteAnimationSystem : EntityUpdateSystem
     }
 
     public override void Update(GameTime gameTime)
-    {        
+    {
         foreach (var entityId in ActiveEntities)
         {
             var character = _characterMapper.Get(entityId);
@@ -49,35 +49,12 @@ internal class SpriteAnimationSystem : EntityUpdateSystem
                         sprite.SetAnimation(nameof(CharacterAnimationState.Idle));
                     break;
 
-                //case EntityState.Kicking:
-                //    if (sprite.CurrentAnimation != "kick")
-                //        sprite.SetAnimation("kick").OnAnimationEvent += (s, e) =>
-                //        {
-                //            if (e == AnimationEventTrigger.AnimationCompleted)
-                //            {
-                //                player.State = State.Idle;
-                //            }
-                //        };
-                //    break;
-                //case EntityState.Punching:
-                //    if (sprite.CurrentAnimation != "punch")
-                //        sprite.SetAnimation("punch").OnAnimationEvent += (s, e) =>
-                //        {
-                //            if (e == AnimationEventTrigger.AnimationCompleted)
-                //            {
-                //                player.State = State.Idle;
-                //            }
-                //        };
-                //    break;
-                //case EntityState.Cool:
-                //    if (sprite.CurrentAnimation != "cool")
-                //        sprite.SetAnimation("cool");
-                //    break;
                 default:
                     sprite.SetAnimation(nameof(CharacterAnimationState.Idle));
                     break;
             }
 
+            // Update animations
             sprite.Update(gameTime);
         }
     }

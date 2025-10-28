@@ -28,7 +28,7 @@ internal class DebugSystem : EntityDrawSystem
         var physicsComponent = _physicsMapper.Get(entityId);
 
         _spriteBatch.Begin();
-        
+
         _spriteBatch.DrawString(
             spriteFont: _font,
             text: $"Is on the ground: {physicsComponent.IsOnGround}",
@@ -36,7 +36,7 @@ internal class DebugSystem : EntityDrawSystem
             color: Color.White,
             rotation: 0f,
             origin: Vector2.Zero,
-            scale: 2f,
+            scale: 0.75f,
             effects: SpriteEffects.None,
             layerDepth: 0);
 
@@ -47,7 +47,7 @@ internal class DebugSystem : EntityDrawSystem
             color: Color.White,
             rotation: 0f,
             origin: Vector2.Zero,
-            scale: 2f,
+            scale: 0.75f,
             effects: SpriteEffects.None,
             layerDepth: 0);
 

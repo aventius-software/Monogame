@@ -1,6 +1,4 @@
-﻿using MonoGame.Extended.Tiled;
-
-namespace PlatformerWithTiledMapDemo.Map;
+﻿namespace PlatformerWithTiledMapDemo.Map;
 
 internal class MapComponent
 {    

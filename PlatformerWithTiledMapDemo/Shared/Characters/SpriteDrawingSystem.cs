@@ -7,7 +7,7 @@ using MonoGame.Extended.Graphics;
 
 namespace PlatformerWithTiledMapDemo.Shared.Characters;
 
-internal class SpriteRenderingSystem : EntityDrawSystem
+internal class SpriteDrawingSystem : EntityDrawSystem
 {
     private readonly OrthographicCamera _camera;
     private readonly SpriteBatch _spriteBatch;
@@ -16,7 +16,7 @@ internal class SpriteRenderingSystem : EntityDrawSystem
     private ComponentMapper<Sprite> _spriteMapper;
     private ComponentMapper<Transform2> _transformMapper;
 
-    public SpriteRenderingSystem(SpriteBatch spriteBatch, OrthographicCamera camera)
+    public SpriteDrawingSystem(SpriteBatch spriteBatch, OrthographicCamera camera)
         : base(Aspect.All(typeof(Transform2)).One(typeof(AnimatedSprite), typeof(Sprite)))
     {
         _spriteBatch = spriteBatch;

@@ -32,14 +32,17 @@ internal class PlayerSpawnSystem : EntitySystem
     /// <param name="mapperService"></param>
     public override void Initialize(IComponentMapperService mapperService)
     {
-        // Load the sprite sheet
+        // Load the sprite texture
         var texture = _contentManager.Load<Texture2D>("Player/adventurer-Sheet");
+
+        // Create a texture atlas using the image
         var textureAtlas = Texture2DAtlas.Create("PlayerAtlas", texture,
             regionWidth: _frameWidth,
             regionHeight: _frameHeight,
             margin: 0,
             spacing: 0);
 
+        // Now create a sprite sheet from the atlas
         var spriteSheet = new SpriteSheet("PlayerSpriteSheet", textureAtlas);
 
         // Define the animations
@@ -79,7 +82,7 @@ internal class PlayerSpawnSystem : EntitySystem
                 .AddFrame(22, duration)
                 .AddFrame(23, duration);
         });
-        
+
         // Create the player entity
         var entity = CreateEntity();
         entity.Attach(new AnimatedSprite(spriteSheet, nameof(CharacterAnimationState.Idle)));

@@ -16,17 +16,14 @@ internal class GamePlayScreen : GameScreen
 {
     private readonly CameraSystem _cameraSystem;
     private readonly CustomRenderTarget _customRenderTarget; 
-    private readonly DebugSystem _debugSystem;
-    private readonly GraphicsDevice _graphicsDevice;
-    private readonly MapBackgroundRenderingSystem _mapBackgroundRenderingSystem;
-    private readonly MapForegroundRenderingSystem _mapForegroundRenderingSystem;
-    private readonly MapInitialisationSystem _mapInitialisationSystem;
-    private readonly MapPlatformRenderingSystem _mapPlatformRenderingSystem;
+    private readonly DebugSystem _debugSystem;    
+    private readonly MapDrawingSystem _mapDrawingSystem;    
+    private readonly MapInitialisationSystem _mapInitialisationSystem;    
     private readonly PlatformPhysicsSystem _platformPhysicsSystem;    
     private readonly PlayerControlSystem _playerControlSystem;
     private readonly PlayerSpawnSystem _playerSpawnSystem;
     private readonly SpriteAnimationSystem _spriteAnimationSystem;
-    private readonly SpriteRenderingSystem _spriteRenderingSystem;
+    private readonly SpriteDrawingSystem _spriteDrawingSystem;
     private readonly WorldBuilder _worldBuilder;
 
     private World _world;
@@ -35,39 +32,38 @@ internal class GamePlayScreen : GameScreen
         CameraSystem cameraSystem,
         CustomRenderTarget customRenderTarget,
         DebugSystem debugSystem,
-        Game game,
-        GraphicsDevice graphicsDevice,
-        MapBackgroundRenderingSystem mapBackgroundRenderingSystem,
-        MapForegroundRenderingSystem mapForegroundRenderingSystem,
-        MapInitialisationSystem mapInitialisationSystem,
-        MapPlatformRenderingSystem mapPlatformRenderingSystem,
+        Game game,        
+        MapDrawingSystem mapDrawingSystem,        
+        MapInitialisationSystem mapInitialisationSystem,        
         PlatformPhysicsSystem platformPhysicsSystem,        
         PlayerControlSystem playerControlSystem,
         PlayerSpawnSystem playerSpawnSystem,
         SpriteAnimationSystem spriteAnimationSystem,
-        SpriteRenderingSystem spriteRenderingSystem,
+        SpriteDrawingSystem spriteDrawingSystem,
         WorldBuilder worldBuilder) : base(game)
     {
         _cameraSystem = cameraSystem;
         _customRenderTarget = customRenderTarget;
-        _debugSystem = debugSystem;
-        _graphicsDevice = graphicsDevice;
-        _mapBackgroundRenderingSystem = mapBackgroundRenderingSystem;
-        _mapForegroundRenderingSystem = mapForegroundRenderingSystem;
-        _mapInitialisationSystem = mapInitialisationSystem;
-        _mapPlatformRenderingSystem = mapPlatformRenderingSystem;
+        _debugSystem = debugSystem;        
+        _mapDrawingSystem = mapDrawingSystem;        
+        _mapInitialisationSystem = mapInitialisationSystem;        
         _platformPhysicsSystem = platformPhysicsSystem;        
         _playerControlSystem = playerControlSystem;
         _playerSpawnSystem = playerSpawnSystem;
         _spriteAnimationSystem = spriteAnimationSystem;
-        _spriteRenderingSystem = spriteRenderingSystem;
+        _spriteDrawingSystem = spriteDrawingSystem;
         _worldBuilder = worldBuilder;
     }
 
     public override void Draw(GameTime gameTime)
     {
+        // Tell the system we want to render to the custom render target
         _customRenderTarget.Begin();
+
+        // Now draw everything as normal
         _world.Draw(gameTime);
+
+        // Finally, draw the render target to the screen
         _customRenderTarget.Draw();
     }
 
@@ -81,19 +77,16 @@ internal class GamePlayScreen : GameScreen
             .AddSystem(_playerSpawnSystem)
 
             // Update systems            
-            .AddSystem(_playerControlSystem)
-            //.AddSystem(_playerAnimationSystem)
+            .AddSystem(_playerControlSystem)            
             .AddSystem(_spriteAnimationSystem)
             .AddSystem(_platformPhysicsSystem)
             .AddSystem(_cameraSystem)
 
             // Drawing systems (in order)
-            .AddSystem(_mapBackgroundRenderingSystem)
-            .AddSystem(_mapPlatformRenderingSystem)
-            .AddSystem(_mapForegroundRenderingSystem)
+            .AddSystem(_mapDrawingSystem)            
 
             // Sprites are drawn on top of the map
-            .AddSystem(_spriteRenderingSystem)
+            .AddSystem(_spriteDrawingSystem)
 
             // Other systems...
             .AddSystem(_debugSystem)
