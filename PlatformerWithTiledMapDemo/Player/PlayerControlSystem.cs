@@ -10,7 +10,7 @@ namespace PlatformerWithTiledMapDemo.Player;
 internal class PlayerControlSystem : EntityProcessingSystem
 {
     private ComponentMapper<CharacterComponent> _characterMapper;
-    private ComponentMapper<PhysicsComponent> _physicsMapper;    
+    private ComponentMapper<PhysicsComponent> _physicsMapper;
 
     public PlayerControlSystem() : base(Aspect.All(typeof(PlayerComponent), typeof(CharacterComponent), typeof(PhysicsComponent)))
     {
@@ -19,14 +19,14 @@ internal class PlayerControlSystem : EntityProcessingSystem
     public override void Initialize(IComponentMapperService mapperService)
     {
         _characterMapper = mapperService.GetMapper<CharacterComponent>();
-        _physicsMapper = mapperService.GetMapper<PhysicsComponent>();        
+        _physicsMapper = mapperService.GetMapper<PhysicsComponent>();
     }
 
     public override void Process(GameTime gameTime, int entityId)
     {
         // Get the components we need to work with
         var characterComponent = _characterMapper.Get(entityId);
-        var physicsComponent = _physicsMapper.Get(entityId);        
+        var physicsComponent = _physicsMapper.Get(entityId);
 
         // Get the current keyboard state
         var keyboardState = Keyboard.GetState();
@@ -76,6 +76,28 @@ internal class PlayerControlSystem : EntityProcessingSystem
                 physicsComponent.Velocity.Y -= physicsComponent.JumpStrength;
                 characterComponent.State = CharacterState.Jumping;
             }
+        }
+
+        // Here will make some small adjustments to jumping control so players can jump lower or
+        // higher. First, check if the player is jumping, but NOT holding down the jump button...
+        if (characterComponent.State == CharacterState.Jumping && !keyboardState.IsKeyDown(Keys.Up))
+        {
+            // In this case, we reduce the jump a bit quicker so they just do a small/low jump
+            physicsComponent.GravityMultiplier = 2f;
+        }
+        else if (physicsComponent.IsMovingDownwards)
+        {
+            // When falling, we could tweak the fall speed a little to make
+            // the player drop faster than normal gravity would make them...
+            physicsComponent.GravityMultiplier = 1f;
+        }
+        else
+        {
+            // If we're here then either the player is holding the jump button
+            // down (in which case, we do a normal jump) or we're not jumping. In
+            // this case, set the multiplier to '1' which will make NO change to
+            // the gravity value...
+            physicsComponent.GravityMultiplier = 1f;
         }
 
         // Clamp horizontal velocity to max horizontal speed

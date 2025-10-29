@@ -14,7 +14,6 @@ using Shared.Extensions;
 using Shared.Services;
 using System;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace PlatformerWithTiledMapDemo;
 
@@ -36,14 +35,12 @@ namespace PlatformerWithTiledMapDemo;
 /// 
 /// Todo:
 /// - Add more game mechanics (e.g., enemies, collectibles)
-/// - Improve level design
 /// - Level transitions
 /// - Implement a main menu and game over screen
 /// - Add UI elements (e.g., score, health)
 /// - Add sound and music
-/// - Polish graphics and animations
 /// - Moving objects/platforms
-/// - Gravity/jump multiplier
+/// - Map boundries
 /// </summary>
 public class GameMain : Game
 {
