@@ -21,7 +21,7 @@ public struct MapTile
 /// <summary>
 /// A basic tile map management and rendering service for use with 'Tiled' maps
 /// </summary>
-public class MapService
+public class TiledMapService
 {
     private readonly ContentManager _contentManager;
 
@@ -45,6 +45,26 @@ public class MapService
     public int ActiveTileset { get; set; } = 0;
 
     /// <summary>
+    /// Height of the map in tiles
+    /// </summary>
+    public int MapHeight => (int)_tiledMap.Height;
+
+    /// <summary>
+    /// Width of the map in tiles
+    /// </summary>
+    public int MapWidth => (int)_tiledMap.Width;
+
+    /// <summary>
+    /// Height in pixels of a single tile
+    /// </summary>
+    public int TileHeight => (int)_tiledMap.TileHeight;
+
+    /// <summary>
+    /// Width in pixels of a single tile
+    /// </summary>
+    public int TileWidth => (int)_tiledMap.TileWidth;
+
+    /// <summary>
     /// The world height (in pixels)
     /// </summary>
     public int WorldHeight => (int)_tiledMap.Height * (int)_tiledMap.TileHeight;
@@ -54,7 +74,7 @@ public class MapService
     /// </summary>
     public int WorldWidth => (int)_tiledMap.Width * (int)_tiledMap.TileWidth;
 
-    public MapService(SpriteBatch spriteBatch, ContentManager contentManager)
+    public TiledMapService(SpriteBatch spriteBatch, ContentManager contentManager)
     {
         _spriteBatch = spriteBatch;
         _contentManager = contentManager;
@@ -92,7 +112,7 @@ public class MapService
                 if (column < 0 || row < 0 || column >= layer.Width || row >= layer.Height) continue;
 
                 // Otherwise lets find out which tile in the map is at the current row/column position                
-                var tile = GetTileAtPosition(row, column);
+                var tile = TileAtPosition(row, column);
 
                 // If block is 0, i.e. air or nothing, then just continue...
                 if (tile == 0) continue;
@@ -119,9 +139,9 @@ public class MapService
     /// <param name="tileset"></param>
     /// <param name="gid"></param>
     /// <returns></returns>
-    private Rectangle GetImageSourceRectangleForTile(uint gid)
+    private Rectangle GetImageSourceRectangleForTile(int gid)
     {
-        var tileId = (int)gid - 1;
+        var tileId = gid - 1;
         var tileset = _tiledMap.Tilesets[ActiveTileset];
 
         var row = tileId / (int)tileset.Columns;
@@ -146,16 +166,16 @@ public class MapService
     /// Get a list of the surrounding tiles at the specified position for the 
     /// specified width and height
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="width"></param>
-    /// <param name="height"></param>
+    /// <param name="worldPosition">Position in the world, in pixels</param>
+    /// <param name="width">Width in pixels</param>
+    /// <param name="height">Height in pixels</param>
     /// <returns></returns>
-    public List<MapTile> GetSurroundingTiles(Vector2 position, int width, int height)
+    public List<MapTile> GetSurroundingTiles(Vector2 worldPosition, int width, int height)
     {
         var tileLayer = GetLayer(ActiveLayer);
         var bounds = new Rectangle(
-            (int)Math.Round(position.X),
-            (int)Math.Round(position.Y),
+            (int)Math.Round(worldPosition.X),
+            (int)Math.Round(worldPosition.Y),
             width,
             height);
 
@@ -180,7 +200,7 @@ public class MapService
             for (var column = leftTile; column <= rightTile; column++)
             {
                 // Get the tile id
-                var tileId = (int)GetTileAtPosition(row, column);
+                var tileId = (int)TileAtPosition(row, column);
 
                 // Skip if no tile...
                 if (tileId == 0) continue;
@@ -227,7 +247,7 @@ public class MapService
     /// <param name="mapRow"></param>
     /// <param name="mapColumn"></param>
     /// <returns></returns>
-    private uint GetTileAtPosition(int mapRow, int mapColumn)
+    public int TileAtPosition(int mapRow, int mapColumn)
     {
         // Get the active map layer
         var tileLayer = GetLayer(ActiveLayer);
@@ -239,7 +259,7 @@ public class MapService
         var index = mapRow * tileLayer.Width + mapColumn;
 
         // Otherwise return the tile
-        return tileLayer.Data.Value.GlobalTileIDs.Value[index];
+        return (int)tileLayer.Data.Value.GlobalTileIDs.Value[index];
     }
 
     /// <summary>
@@ -263,18 +283,18 @@ public class MapService
     /// <param name="position">Relevant drawing position in the world</param>
     /// <param name="viewPortWidth">Width of the viewport</param>
     /// <param name="viewPortHeight">Height of the viewport</param>
-    public void SetViewport(Vector2 position, int viewPortWidth, int viewPortHeight)
-    {
-        // Get the world position, offset to the centre of the viewport
-        var worldX = (int)Math.Floor(position.X) - viewPortWidth / 2;
-        var worldY = (int)Math.Floor(position.Y) - viewPortHeight / 2;
+    //public void SetViewport(Vector2 position, int viewPortWidth, int viewPortHeight)
+    //{
+    //    // Get the world position, offset to the centre of the viewport
+    //    var worldX = (int)Math.Floor(position.X) - viewPortWidth / 2;
+    //    var worldY = (int)Math.Floor(position.Y) - viewPortHeight / 2;
 
-        // Get the current position in the world, but in tile position not world/pixels
-        _tileColumnPositionInTheWorld = worldX / (int)_tiledMap.TileWidth;
-        _tileRowPositionInTheWorld = worldY / (int)_tiledMap.TileHeight;
+    //    // Get the current position in the world, but in tile position not world/pixels
+    //    _tileColumnPositionInTheWorld = worldX / (int)_tiledMap.TileWidth;
+    //    _tileRowPositionInTheWorld = worldY / (int)_tiledMap.TileHeight;
 
-        // Calculate how many tiles are visible        
-        _numberOfVisibleTileColumns = viewPortWidth / (int)_tiledMap.TileWidth;
-        _numberOfVisibleTileRows = viewPortHeight / (int)_tiledMap.TileHeight;
-    }
+    //    // Calculate how many tiles are visible        
+    //    _numberOfVisibleTileColumns = viewPortWidth / (int)_tiledMap.TileWidth;
+    //    _numberOfVisibleTileRows = viewPortHeight / (int)_tiledMap.TileHeight;
+    //}
 }

@@ -27,8 +27,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AetherPhysicsDebugViewTest"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TiledMapWithCamera", "TiledMapWithCamera\TiledMapWithCamera.csproj", "{B89BD187-E529-41EF-96DE-78980EFA29E7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarioPlatformerStyleTest", "MarioPlatformerStyleTest\MarioPlatformerStyleTest.csproj", "{86D707A1-3136-4304-8706-FDF8610FE077}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OutrunStyleTest", "OutrunStyleTest\OutrunStyleTest.csproj", "{9B40EA21-62DD-4BB5-BD4F-919B8AF8C196}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiledMapsAndAetherPhysics", "TiledMapsAndAetherPhysics\TiledMapsAndAetherPhysics.csproj", "{5D8D38AA-4491-4E2C-923C-10CF49CDB8AD}"
@@ -54,6 +52,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Basic3DCubeWithShaders", "Basic3DCubeWithShaders\Basic3DCubeWithShaders.csproj", "{F2DDEB94-3D25-417D-88A9-AFCE731A6B69}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{6EE853B2-CFEA-4260-B3F5-E16F769B8609}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonogameExtendedTiledMapDemo", "MonogameExtendedTiledMapDemo\MonogameExtendedTiledMapDemo.csproj", "{29678EB5-03F2-41F5-817A-FE2E57A0BAA5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlatformerWithTiledMapDemo", "PlatformerWithTiledMapDemo\PlatformerWithTiledMapDemo.csproj", "{96E52423-5C75-40BD-8A0E-9D66358A31A2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -110,10 +112,6 @@ Global
 		{B89BD187-E529-41EF-96DE-78980EFA29E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B89BD187-E529-41EF-96DE-78980EFA29E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B89BD187-E529-41EF-96DE-78980EFA29E7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{86D707A1-3136-4304-8706-FDF8610FE077}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{86D707A1-3136-4304-8706-FDF8610FE077}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{86D707A1-3136-4304-8706-FDF8610FE077}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{86D707A1-3136-4304-8706-FDF8610FE077}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9B40EA21-62DD-4BB5-BD4F-919B8AF8C196}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9B40EA21-62DD-4BB5-BD4F-919B8AF8C196}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B40EA21-62DD-4BB5-BD4F-919B8AF8C196}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -166,6 +164,14 @@ Global
 		{6EE853B2-CFEA-4260-B3F5-E16F769B8609}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EE853B2-CFEA-4260-B3F5-E16F769B8609}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EE853B2-CFEA-4260-B3F5-E16F769B8609}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29678EB5-03F2-41F5-817A-FE2E57A0BAA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29678EB5-03F2-41F5-817A-FE2E57A0BAA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29678EB5-03F2-41F5-817A-FE2E57A0BAA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29678EB5-03F2-41F5-817A-FE2E57A0BAA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96E52423-5C75-40BD-8A0E-9D66358A31A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96E52423-5C75-40BD-8A0E-9D66358A31A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96E52423-5C75-40BD-8A0E-9D66358A31A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96E52423-5C75-40BD-8A0E-9D66358A31A2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

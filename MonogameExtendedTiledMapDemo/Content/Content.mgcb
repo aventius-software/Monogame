@@ -1,0 +1,106 @@
+
+#----------------------------- Global Properties ----------------------------#
+
+/outputDir:bin/$(Platform)
+/intermediateDir:obj/$(Platform)
+/platform:DesktopGL
+/config:
+/profile:Reach
+/compress:False
+
+#-------------------------------- References --------------------------------#
+
+/reference:..\pipeline-references\MonoGame.Extended.Content.Pipeline.dll
+
+#---------------------------------- Content ---------------------------------#
+
+#begin tiled/[A]Dirt_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/[A]Dirt_pipo.tsx
+
+#begin tiled/[A]Dirt_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/[A]Dirt_pipo.tsx
+
+#begin tiled/[A]Flower_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/[A]Flower_pipo.tsx
+
+#begin tiled/[A]Flower_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/[A]Flower_pipo.tsx
+
+#begin tiled/[A]Grass_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/[A]Grass_pipo.tsx
+
+#begin tiled/[A]Grass_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/[A]Grass_pipo.tsx
+
+#begin tiled/[A]Wall-Up_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/[A]Wall-Up_pipo.tsx
+
+#begin tiled/[A]Wall-Up_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/[A]Wall-Up_pipo.tsx
+
+#begin tiled/[A]Water_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/[A]Water_pipo.tsx
+
+#begin tiled/[A]Water_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/[A]Water_pipo.tsx
+
+#begin tiled/[A]WaterFall_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/[A]WaterFall_pipo.tsx
+
+#begin tiled/[A]WaterFall_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/[A]WaterFall_pipo.tsx
+
+#begin tiled/[Base]BaseChip_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/[Base]BaseChip_pipo.tsx
+
+#begin tiled/[Base]BaseChip_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/[Base]BaseChip_pipo.tsx
+
+#begin tiled/LightShadow_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/LightShadow_pipo.tsx
+
+#begin tiled/LightShadow_pipo.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:tiled/LightShadow_pipo.tsx
+
+#begin tiled/samplemap.tmx
+/importer:TiledMapImporter
+/processor:TiledMapProcessor
+/build:tiled/samplemap.tmx
+
+#begin tiled/samplemap.tmx
+/importer:TiledMapImporter
+/processor:TiledMapProcessor
+/build:tiled/samplemap.tmx
+

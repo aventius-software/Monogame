@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Shared.Extensions;
 
-public static class ServiceCollectionExtensions
+public static class DependencyInjectionExtensions
 {
     /// <summary>
     /// Registers all implementations of a given base type or interface as themselves in the DI container.
