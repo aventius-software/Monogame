@@ -35,7 +35,7 @@ public class GameMain : Game
     // Since we're using 16 bit pixel style graphics we'll use kind
     // 16 bit style 'virtual' resolution which we'll scale later to
     // whatever screen size
-    private const int _virtualResolutionWidth = 1920, _virtualResolutionHeight = 1080;
+    private const int _virtualResolutionWidth = 1920 / 2, _virtualResolutionHeight = 1080 / 2;
 
     private readonly GraphicsDeviceManager _graphics;
     private readonly ScreenManager _screenManager;

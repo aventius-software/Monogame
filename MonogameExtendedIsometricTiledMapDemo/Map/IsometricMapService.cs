@@ -29,7 +29,7 @@ internal class IsometricMapService
     }
 
     /// <summary>
-    /// Takes a world position and returns the tile coordinates for that position
+    /// Takes a world position and returns the isometric tile coordinates for that position
     /// </summary>
     /// <param name="worldPosition"></param>
     /// <returns></returns>
