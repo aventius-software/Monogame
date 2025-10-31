@@ -1,13 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.ECS;
 using MonoGame.Extended.Screens;
 using MonogameExtendedIsometricTiledMapDemo.Camera;
 using MonogameExtendedIsometricTiledMapDemo.Map;
 using MonogameExtendedIsometricTiledMapDemo.Player;
-//using IsometricTiledMapEngine.Shared.Characters;
-//using IsometricTiledMapEngine.Shared.Debugging;
-//using IsometricTiledMapEngine.Shared.Physics;
+using MonogameExtendedIsometricTiledMapDemo.Shared.Debugging;
 using Shared.Services;
 
 namespace MonogameExtendedIsometricTiledMapDemo.Screens;
@@ -15,15 +12,12 @@ namespace MonogameExtendedIsometricTiledMapDemo.Screens;
 internal class GamePlayScreen : GameScreen
 {
     private readonly CameraSystem _cameraSystem;
-    private readonly CustomRenderTarget _customRenderTarget; 
-    //private readonly DebugSystem _debugSystem;    
-    private readonly MapDrawingSystem _mapDrawingSystem;    
-    private readonly MapInitialisationSystem _mapInitialisationSystem;    
-    //private readonly PlatformPhysicsSystem _platformPhysicsSystem;    
+    private readonly CustomRenderTarget _customRenderTarget;
+    private readonly DebugSystem _debugSystem;
+    private readonly MapDrawingSystem _mapDrawingSystem;
+    private readonly MapInitialisationSystem _mapInitialisationSystem;
     private readonly PlayerControlSystem _playerControlSystem;
     private readonly PlayerSpawnSystem _playerSpawnSystem;
-    //private readonly SpriteAnimationSystem _spriteAnimationSystem;
-    //private readonly SpriteDrawingSystem _spriteDrawingSystem;
     private readonly WorldBuilder _worldBuilder;
 
     private World _world;
@@ -31,27 +25,21 @@ internal class GamePlayScreen : GameScreen
     public GamePlayScreen(
         CameraSystem cameraSystem,
         CustomRenderTarget customRenderTarget,
-        //DebugSystem debugSystem,
-        Game game,        
-        MapDrawingSystem mapDrawingSystem,        
-        MapInitialisationSystem mapInitialisationSystem,        
-        //PlatformPhysicsSystem platformPhysicsSystem,        
+        DebugSystem debugSystem,
+        Game game,
+        MapDrawingSystem mapDrawingSystem,
+        MapInitialisationSystem mapInitialisationSystem,
         PlayerControlSystem playerControlSystem,
         PlayerSpawnSystem playerSpawnSystem,
-        //SpriteAnimationSystem spriteAnimationSystem,
-        //SpriteDrawingSystem spriteDrawingSystem,
         WorldBuilder worldBuilder) : base(game)
     {
         _cameraSystem = cameraSystem;
         _customRenderTarget = customRenderTarget;
-        //_debugSystem = debugSystem;        
-        _mapDrawingSystem = mapDrawingSystem;        
-        _mapInitialisationSystem = mapInitialisationSystem;        
-        //_platformPhysicsSystem = platformPhysicsSystem;        
+        _debugSystem = debugSystem;
+        _mapDrawingSystem = mapDrawingSystem;
+        _mapInitialisationSystem = mapInitialisationSystem;
         _playerControlSystem = playerControlSystem;
         _playerSpawnSystem = playerSpawnSystem;
-        //_spriteAnimationSystem = spriteAnimationSystem;
-        //_spriteDrawingSystem = spriteDrawingSystem;
         _worldBuilder = worldBuilder;
     }
 
@@ -77,22 +65,17 @@ internal class GamePlayScreen : GameScreen
             .AddSystem(_playerSpawnSystem)
 
             // Update systems            
-            .AddSystem(_playerControlSystem)            
-            //.AddSystem(_spriteAnimationSystem)
-            //.AddSystem(_platformPhysicsSystem)
+            .AddSystem(_playerControlSystem)
             .AddSystem(_cameraSystem)
 
             // Drawing systems (in order)
-            .AddSystem(_mapDrawingSystem)            
-
-            // Sprites are drawn on top of the map
-            //.AddSystem(_spriteDrawingSystem)
+            .AddSystem(_mapDrawingSystem)
 
             // Other systems...
-            //.AddSystem(_debugSystem)
+            .AddSystem(_debugSystem)
 
             // Build the ECS world ;-)
-            .Build();        
+            .Build();
 
         base.LoadContent();
     }

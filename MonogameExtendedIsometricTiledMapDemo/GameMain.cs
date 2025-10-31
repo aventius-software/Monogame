@@ -18,17 +18,24 @@ using System.Reflection;
 namespace MonogameExtendedIsometricTiledMapDemo;
 
 /// <summary>
-/// Example of an isometric game using Monogame Extended Tiled map functionality
+/// Example of an isometric game using Monogame Extended. Note that there are some limitations with 
+/// Monogame Extendeds Tiled map functionality:
 /// 
-/// Uses art from:
-///  - https://opengameart.org/content/isometric-64x64-outside-tileset
+/// - If you have several layers (elevation) and you want to draw characters for example, you'll
+///   need to draw the lower layers then draw you characters and then draw layers above the characters.
+///   
+/// - You can't change tiles 'on the fly' with Monogame Extendeds Tiled map functionality. Despite
+///   there being functions such as 'SetTile' and 'RemoveTile'. So, if you want to say, highlight a
+///   particular tile, then you'd need to draw a sprite or shape at the particular position.
+/// 
+/// Uses art from: https://opengameart.org/content/isometric-64x64-outside-tileset
 /// </summary>
 public class GameMain : Game
 {
     // Since we're using 16 bit pixel style graphics we'll use kind
     // 16 bit style 'virtual' resolution which we'll scale later to
     // whatever screen size
-    private const int _virtualResolutionWidth = 640, _virtualResolutionHeight = 480;
+    private const int _virtualResolutionWidth = 1920, _virtualResolutionHeight = 1080;
 
     private readonly GraphicsDeviceManager _graphics;
     private readonly ScreenManager _screenManager;
@@ -102,7 +109,7 @@ public class GameMain : Game
 
         // Add our map service to handle loading/rendering of Tiled maps, which
         // uses the TiledMapRenderer internally to do its job
-        services.AddSingleton<MapService>();
+        services.AddSingleton<IsometricMapService>();
 
         // We'll add our custom render target service so we can use our virtual resolution
         // but scale correctly to all different screen sizes easily        

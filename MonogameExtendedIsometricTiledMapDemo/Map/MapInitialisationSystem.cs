@@ -5,9 +5,9 @@ namespace MonogameExtendedIsometricTiledMapDemo.Map;
 
 internal class MapInitialisationSystem : EntitySystem
 {
-    private readonly MapService _mapService;
+    private readonly IsometricMapService _mapService;
 
-    public MapInitialisationSystem(MapService mapService) : base(Aspect.All(typeof(MapComponent)))
+    public MapInitialisationSystem(IsometricMapService mapService) : base(Aspect.All(typeof(MapComponent)))
     {
         _mapService = mapService;
     }
@@ -16,6 +16,5 @@ internal class MapInitialisationSystem : EntitySystem
     {
         // Load the Tiled map
         _mapService.LoadMap("Map/isometric map");
-        _mapService.CollisionLayerName = "Platforms";
     }    
 }
