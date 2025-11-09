@@ -6,33 +6,11 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Color = Microsoft.Xna.Framework.Color;
 
 namespace IsometricDynamicMapDemo.Map;
 
-/// <summary>
-/// A basic 2D isometric tile map service that uses Tiled maps. 
-/// 
-/// Note - For drawing at different elevations, you should set each tile layer with the Y offset which 
-/// corresponds to the height of your tile multiplied by the layer index, otherwise it will not get rendered 
-/// correctly (i.e. each layer will get rendered at the same elevation) and will also fail to calculate tile 
-/// map/world coordinate correctly.
-/// 
-/// Art:
-/// https://opengameart.org/content/isometric-64x64-outside-tileset
-/// 
-/// References:
-/// 
-/// https://erikonarheim.com/posts/handling-height-in-isometric/
-/// https://discourse.mapeditor.org/t/half-height-isometric-maps/4545/8
-/// https://clintbellanger.net/articles/isometric_math/
-/// https://stackoverflow.com/questions/21842814/mouse-position-to-isometric-tile-including-height
-/// https://github.com/OpenTTD/OpenTTD/blob/master/src/landscape.cpp
-/// https://newgrf-specs.tt-wiki.net/wiki/NML:List_of_tile_slopes
-/// https://gamedev.stackexchange.com/questions/207056/selecting-tiles-with-mouse-on-isometric-map-with-height-and-slopes
-/// https://gamedev.stackexchange.com/questions/34787/how-to-convert-mouse-coordinates-to-isometric-indexes/34791#34791
-/// https://www.gamedev.net/reference/articles/article2026.asp
-/// </summary>
 internal class IsometricMapService
 {
     private readonly ContentManager _contentManager;
@@ -42,6 +20,9 @@ internal class IsometricMapService
     private TileType _tileType;
     private DotTiled.Map _tiledMap;
     private Texture2D _tilesetTexture;
+
+    // Cache per-gid alpha masks (flattened row-major boolean arrays)
+    private readonly Dictionary<int, bool[]> _alphaMaskCache = new();
 
     public IsometricMapService(ContentManager contentManager, SpriteBatch spriteBatch)
     {
@@ -191,6 +172,9 @@ internal class IsometricMapService
         // Finally, we can build the path to the file and load it
         var contentPath = Path.Combine(mapFolder, tileAtlasFileWithoutExtension);
         _tilesetTexture = _contentManager.Load<Texture2D>(contentPath);
+
+        // Clear any previous mask cache (fresh tileset)
+        _alphaMaskCache.Clear();
     }
 
     /// <summary>
@@ -441,22 +425,25 @@ internal class IsometricMapService
         // quick bounds test
         if (localXi < 0 || localYi < 0 || localXi >= tileW || localYi >= tileH) return false;
 
-        // Try pixel-perfect alpha test if texture available
+        // Use cached per-gid alpha mask if available (build lazily)
         if (_tilesetTexture != null)
         {
             try
             {
-                var sampleRect = new Rectangle(srcRect.X + localXi, srcRect.Y + localYi, 1, 1);
-                var pixel = new Color[1];
-                _tilesetTexture.GetData(0, sampleRect, pixel, 0, 1);
+                if (! _alphaMaskCache.ContainsKey(gid))
+                    BuildAlphaMaskForGid(gid, srcRect);
 
-                // If pixel has significant alpha then this click hits the visible part of the tile
-                if (pixel[0].A > 10) return true;
-                // otherwise fall through to geometric test
+                if (_alphaMaskCache.TryGetValue(gid, out var mask) && mask != null)
+                {
+                    var idx = localYi * tileW + localXi;
+                    if (idx >= 0 && idx < mask.Length && mask[idx])
+                        return true;
+                    // If mask says transparent, fall through to geometric fallback
+                }
             }
             catch
             {
-                // If GetData fails for any reason, fall back to geometric test.
+                // If building/reading mask fails for any reason, fall through to geometric test
             }
         }
 
@@ -468,5 +455,38 @@ internal class IsometricMapService
         var dy = Math.Abs(localYf - halfH) / halfH;
 
         return dx + dy <= 1.0f;
+    }
+
+    // Build per-gid alpha mask by reading the tile rectangle from the tileset texture into a bool[].
+    // Stores a flattened row-major mask where true = opaque (alpha > threshold).
+    private void BuildAlphaMaskForGid(int gid, Rectangle srcRect)
+    {
+        // If texture missing, store a null entry to avoid retrying
+        if (_tilesetTexture == null)
+        {
+            _alphaMaskCache[gid] = null;
+            return;
+        }
+
+        var tileW = srcRect.Width;
+        var tileH = srcRect.Height;
+        var pixels = new Color[tileW * tileH];
+
+        // GetData may throw if rectangle invalid; let caller handle exceptions
+        _tilesetTexture.GetData(0, srcRect, pixels, 0, pixels.Length);
+
+        var mask = new bool[pixels.Length];
+        const byte alphaThreshold = 10;
+
+        for (int y = 0; y < tileH; y++)
+        {
+            for (int x = 0; x < tileW; x++)
+            {
+                var i = y * tileW + x;
+                mask[i] = pixels[i].A > alphaThreshold;
+            }
+        }
+
+        _alphaMaskCache[gid] = mask;
     }
 }
