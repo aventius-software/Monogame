@@ -3,6 +3,7 @@ using DotTiled.Serialization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended;
 using System;
 using System.IO;
 using Color = Microsoft.Xna.Framework.Color;
@@ -84,6 +85,12 @@ internal class IsometricMapService
                         position: MapToWorldCoordinates(new Point(x, y), elevation),
                         sourceRectangle: sourceRectangle,
                         color: colour);
+
+                    if ((int)_selectedTile.X == x && (int)_selectedTile.Y == y && _selectedTile.Z == elevation)
+                    {
+                        var pos = MapToWorldCoordinates(new Point(x, y), elevation);
+                        _spriteBatch.DrawRectangle(new RectangleF(pos.X, pos.Y, 64, 48), Color.White);
+                    }                    
                 }
             }
         }
@@ -133,11 +140,13 @@ internal class IsometricMapService
         // Calculate the index of the request tile in the map data
         var index = (y * tileLayer.Width) + x;
 
+        var data = tileLayer.Data.Value.GlobalTileIDs.Value;
+
         // If the index is out of bounds then just return 'no tile' (i.e. 0)
-        if (index >= tileLayer.Data.Value.GlobalTileIDs.Value.Length - 1 || index < 0) return 0;
+        if (index < 0 || index >= data.Length) return 0;
 
         // Otherwise return the tile
-        return (int)tileLayer.Data.Value.GlobalTileIDs.Value[index];
+        return (int)data[index];
     }
 
     /// <summary>
@@ -229,8 +238,9 @@ internal class IsometricMapService
         var halfTileWidth = _tiledMap.TileWidth / 2f;
         var halfTileHeight = _tiledMap.TileHeight / 2f;
 
-        var tileX = (int)((worldCoordinates.X / halfTileWidth + worldCoordinates.Y / halfTileHeight) / 2);
-        var tileY = (int)((worldCoordinates.Y / halfTileHeight - worldCoordinates.X / halfTileWidth) / 2);
+        // preserve fractional coordinates for precision; floor only when selecting final tile
+        var tileX = (worldCoordinates.X / halfTileWidth + worldCoordinates.Y / halfTileHeight) / 2f;
+        var tileY = (worldCoordinates.Y / halfTileHeight - worldCoordinates.X / halfTileWidth) / 2f;
 
         return new Vector2(tileX, tileY);
     }
