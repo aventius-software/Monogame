@@ -25,10 +25,9 @@ namespace IsometricDynamicMapDemo.Map;
 /// https://erikonarheim.com/posts/handling-height-in-isometric/
 /// https://discourse.mapeditor.org/t/half-height-isometric-maps/4545/8
 /// https://clintbellanger.net/articles/isometric_math/
-/// 
+/// https://stackoverflow.com/questions/21842814/mouse-position-to-isometric-tile-including-height
 /// https://github.com/OpenTTD/OpenTTD/blob/master/src/landscape.cpp
 /// https://newgrf-specs.tt-wiki.net/wiki/NML:List_of_tile_slopes
-/// 
 /// https://gamedev.stackexchange.com/questions/207056/selecting-tiles-with-mouse-on-isometric-map-with-height-and-slopes
 /// https://gamedev.stackexchange.com/questions/34787/how-to-convert-mouse-coordinates-to-isometric-indexes/34791#34791
 /// https://www.gamedev.net/reference/articles/article2026.asp
@@ -158,7 +157,7 @@ internal class IsometricMapService
     /// the related tileset texture/image though, this SHOULD be added to the content pipeline!
     /// </summary>
     /// <param name="tiledMapPath">Path inside the 'Content' folder for the tile TMX map file</param>
-    /// <param name="tileHeightDivisor">For flat tiles use 2, if using cube blocks should use 4</param>
+    /// <param name="tileType">For flat or cube tile types</param>
     public void LoadTiledMap(string tiledMapPath, TileType tileType)
     {
         // Load the map using DotTiled (as we're not using the content pipeline)
@@ -245,7 +244,7 @@ internal class IsometricMapService
     public Vector3 WorldToMapCoordinates(Vector2 worldCoordinates)
     {
         if (_tileType == TileType.Cube) return WorldToCubeTileMapCoordinates(worldCoordinates);
-        else return WorldToCubeTileMapCoordinates(worldCoordinates);
+        else return WorldToFlatTileMapCoordinates(worldCoordinates);
     }
 
     /// <summary>
@@ -300,5 +299,141 @@ internal class IsometricMapService
 
         // If we reached here, the best match was the original tile at zero elevation
         return new Vector3(flatMapCoordinates, 0);
+    }
+
+    /// <summary>
+    /// Translates world coordinates to map coordinates when using
+    /// diamond/flat (half-height) tiles, taking tile elevation into account.
+    /// 
+    /// Improved precision: this method now performs per-layer inversion as before but
+    /// additionally performs per-tile hit-tests using the tileset image alpha (pixel-perfect)
+    /// when available, and also falls back to geometric diamond tests. It also checks a small
+    /// neighbourhood of candidate tile coordinates to handle border cases.
+    /// </summary>
+    /// <param name="worldCoordinates"></param>
+    /// <returns></returns>
+    private Vector3 WorldToFlatTileMapCoordinates(Vector2 worldCoordinates)
+    {
+        if (_tiledMap == null || _tiledMap.Layers.Count == 0) return Vector3.Zero;
+
+        // neighbour offsets to test around candidate (covers border clicks)
+        var neighbourOffsets = new Point[]
+        {
+            new Point(0,0),
+            new Point(-1,0),
+            new Point(1,0),
+            new Point(0,-1),
+            new Point(0,1),
+            new Point(-1,-1),
+            new Point(1,1),
+            new Point(-1,1),
+            new Point(1,-1),
+        };
+
+        // Iterate from topmost layer down so we find the tile visually closest to the camera first
+        for (var elevation = _tiledMap.Layers.Count - 1; elevation >= 0; elevation--)
+        {
+            // Undo MapToWorldCoordinates adjustments for this elevation:
+            // - MapToWorldCoordinates subtracted tileWidth/2 from X, so add it back.
+            // - MapToWorldCoordinates added layer.OffsetY to Y, so subtract it here.
+            var adjusted = new Vector2(
+                worldCoordinates.X + _tiledMap.TileWidth / 2f,
+                worldCoordinates.Y - _tiledMap.Layers[elevation].OffsetY
+            );
+
+            // Convert the adjusted world coordinates back to flat map coordinates
+            var candidate = WorldToFlatMapCoordinates(adjusted);
+
+            // Correct negative rounding (same logic as for cube tiles)
+            if (candidate.X < 0) candidate.X = (int)Math.Floor(candidate.X);
+            if (candidate.Y < 0) candidate.Y = (int)Math.Floor(candidate.Y);
+
+            var baseX = (int)candidate.X;
+            var baseY = (int)candidate.Y;
+
+            // Test the candidate tile and neighbours for a hit.
+            foreach (var off in neighbourOffsets)
+            {
+                var tx = baseX + off.X;
+                var ty = baseY + off.Y;
+
+                // Bounds check
+                if (tx < 0 || ty < 0 || tx >= _tiledMap.Width || ty >= _tiledMap.Height) continue;
+
+                if (DoesScreenPointHitTile(new Point(tx, ty), elevation, worldCoordinates))
+                {
+                    return new Vector3(tx, ty, elevation);
+                }
+            }
+        }
+
+        // If nothing was found, return best-effort base tile (elevation zero) by inverting elevation 0 adjustments
+        var baseAdjusted = new Vector2(
+            worldCoordinates.X + _tiledMap.TileWidth / 2f,
+            worldCoordinates.Y - _tiledMap.Layers[0].OffsetY
+        );
+
+        var baseCoords = WorldToFlatMapCoordinates(baseAdjusted);
+        if (baseCoords.X < 0) baseCoords.X = (int)Math.Floor(baseCoords.X);
+        if (baseCoords.Y < 0) baseCoords.Y = (int)Math.Floor(baseCoords.Y);
+
+        return new Vector3((int)baseCoords.X, (int)baseCoords.Y, 0);
+    }
+
+    /// <summary>
+    /// Checks whether a screen world point hits a tile at map coordinate (mapCoords, elevation).
+    /// Uses pixel-perfect alpha test against the tileset image when possible; otherwise falls back
+    /// to a diamond geometric test.
+    /// </summary>
+    private bool DoesScreenPointHitTile(Point mapCoords, int elevation, Vector2 screenWorldPoint)
+    {
+        var gid = GetTileAtPosition(mapCoords.X, mapCoords.Y, elevation);
+        if (gid == 0) return false;
+
+        // Tile sprite top-left in world coordinates
+        var tileWorldPos = MapToWorldCoordinates(mapCoords, elevation);
+
+        // local coordinates within tile sprite
+        var localXf = screenWorldPoint.X - tileWorldPos.X;
+        var localYf = screenWorldPoint.Y - tileWorldPos.Y;
+
+        // Get source rectangle for tile within tileset
+        var srcRect = GetImageSourceRectangleForTile(gid);
+        var tileW = srcRect.Width;
+        var tileH = srcRect.Height;
+
+        var localXi = (int)Math.Floor(localXf);
+        var localYi = (int)Math.Floor(localYf);
+
+        // quick bounds test
+        if (localXi < 0 || localYi < 0 || localXi >= tileW || localYi >= tileH) return false;
+
+        // Try pixel-perfect alpha test if texture available
+        if (_tilesetTexture != null)
+        {
+            try
+            {
+                var sampleRect = new Rectangle(srcRect.X + localXi, srcRect.Y + localYi, 1, 1);
+                var pixel = new Color[1];
+                _tilesetTexture.GetData(0, sampleRect, pixel, 0, 1);
+
+                // If pixel has significant alpha then this click hits the visible part of the tile
+                if (pixel[0].A > 10) return true;
+                // otherwise fall through to geometric test
+            }
+            catch
+            {
+                // If GetData fails for any reason, fall back to geometric test.
+            }
+        }
+
+        // Geometric diamond test fallback.
+        // Diamond center is at (tileW/2, tileH/2).
+        var halfW = tileW / 2f;
+        var halfH = tileH / 2f;
+        var dx = Math.Abs(localXf - halfW) / halfW;
+        var dy = Math.Abs(localYf - halfH) / halfH;
+
+        return dx + dy <= 1.0f;
     }
 }
