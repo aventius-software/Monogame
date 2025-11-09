@@ -89,7 +89,11 @@ internal class IsometricMapService
                     if ((int)_selectedTile.X == x && (int)_selectedTile.Y == y && _selectedTile.Z == elevation)
                     {
                         var pos = MapToWorldCoordinates(new Point(x, y), elevation);
-                        _spriteBatch.DrawRectangle(new RectangleF(pos.X, pos.Y, 64, 48), Color.White);
+
+                        // Use the actual tileset tile size for the debug rect to avoid mismatches.
+                        var debugW = _tiledMap.TileWidth;
+                        var debugH = _tiledMap.TileHeight;
+                        _spriteBatch.DrawRectangle(new RectangleF(pos.X, pos.Y, debugW, debugH), Color.White);
                     }                    
                 }
             }
@@ -206,25 +210,30 @@ internal class IsometricMapService
     }
 
     /// <summary>
-    /// Translates map coordinates to world coordinates
+    /// Translates map coordinates to world coordinates (returns the top-left position where the tile sprite should be drawn).
+    /// NOTE: previous implementation only moved X by half the tile width which produced a vertical origin mismatch.
+    /// We now subtract half the tile height as well so returned position is the sprite top-left.
     /// </summary>
     /// <param name="mapCoordinates"></param>
     /// <param name="elevation"></param>
     /// <returns></returns>
     public Vector2 MapToWorldCoordinates(Point mapCoordinates, int elevation)
     {
-        // First get the world coordinates as if it were on a flat map
-        var worldCoordinates = FlatMapToWorldCoordinates(mapCoordinates);
+        // First get the world coordinates as if it were on a flat map (this is the tile center)
+        var worldCenter = FlatMapToWorldCoordinates(mapCoordinates);
 
-        // In isometric maps the origin point is at the middle of a tile, so to correct this
-        // we offset the x coordinate by half a tile width
-        worldCoordinates.X -= _tiledMap.TileWidth / 2;
+        // Convert center -> top-left sprite position:
+        // - In X we move left by half tile width
+        // - In Y we move up by half tile height
+        var worldTopLeft = new Vector2(
+            worldCenter.X - _tiledMap.TileWidth / 2f,
+            worldCenter.Y - _tiledMap.TileHeight / 2f
+        );
 
-        // Adjust the Y coordinate for the elevation
-        worldCoordinates.Y += _tiledMap.Layers[elevation].OffsetY;
+        // Adjust the Y coordinate for the elevation (layer offset applied after top-left calc)
+        worldTopLeft.Y += _tiledMap.Layers[elevation].OffsetY;
 
-        // Finally
-        return worldCoordinates;
+        return worldTopLeft;
     }
 
     /// <summary>
@@ -265,8 +274,15 @@ internal class IsometricMapService
     /// <returns></returns>
     private Vector3 WorldToCubeTileMapCoordinates(Vector2 worldCoordinates)
     {
+        // Convert the incoming top-left world coordinate -> the tile center world coordinate
+        var centerWorld = new Vector2(
+            worldCoordinates.X + _tiledMap.TileWidth / 2f,
+            // assume base-layer (0) offset for initial inversion anchor, then we search upwards
+            worldCoordinates.Y - _tiledMap.Layers[0].OffsetY + _tiledMap.TileHeight / 2f
+        );
+
         // Translate to X,Y map position as if it were a flat map with no elevation        
-        var flatMapCoordinates = WorldToFlatMapCoordinates(worldCoordinates);
+        var flatMapCoordinates = WorldToFlatMapCoordinates(centerWorld);
 
         // When at a negative position in the map, the tile at say map coordinates (-1, 0) will be ranges
         // 0 to -1 from the screen coordinate translation. The problem with this is that when the calculation
@@ -308,7 +324,7 @@ internal class IsometricMapService
         }
 
         // If we reached here, the best match was the original tile at zero elevation
-        return new Vector3(flatMapCoordinates, 0);
+        return new Vector3((int)flatMapCoordinates.X, (int)flatMapCoordinates.Y, 0);
     }
 
     /// <summary>
@@ -319,6 +335,8 @@ internal class IsometricMapService
     /// additionally performs per-tile hit-tests using the tileset image alpha (pixel-perfect)
     /// when available, and also falls back to geometric diamond tests. It also checks a small
     /// neighbourhood of candidate tile coordinates to handle border cases.
+    /// 
+    /// NOTE: updated to invert the top-left -> center transform by adding back tileWidth/2 and tileHeight/2.
     /// </summary>
     /// <param name="worldCoordinates"></param>
     /// <returns></returns>
@@ -340,19 +358,24 @@ internal class IsometricMapService
             new Point(1,-1),
         };
 
+        var tileW = _tiledMap.TileWidth;
+        var tileH = _tiledMap.TileHeight;
+
         // Iterate from topmost layer down so we find the tile visually closest to the camera first
         for (var elevation = _tiledMap.Layers.Count - 1; elevation >= 0; elevation--)
         {
             // Undo MapToWorldCoordinates adjustments for this elevation:
-            // - MapToWorldCoordinates subtracted tileWidth/2 from X, so add it back.
-            // - MapToWorldCoordinates added layer.OffsetY to Y, so subtract it here.
-            var adjusted = new Vector2(
-                worldCoordinates.X + _tiledMap.TileWidth / 2f,
-                worldCoordinates.Y - _tiledMap.Layers[elevation].OffsetY
+            // MapToWorldCoordinates did:
+            //   worldTopLeft.X = centerX - tileW/2
+            //   worldTopLeft.Y = centerY - tileH/2 + Layer.OffsetY
+            // So to get center back we add tileW/2 and add tileH/2 then subtract layer offset.
+            var adjustedCenter = new Vector2(
+                worldCoordinates.X + tileW / 2f,
+                worldCoordinates.Y - _tiledMap.Layers[elevation].OffsetY + tileH / 2f
             );
 
-            // Convert the adjusted world coordinates back to flat map coordinates
-            var candidate = WorldToFlatMapCoordinates(adjusted);
+            // Convert the adjusted world center coordinates back to flat map coordinates
+            var candidate = WorldToFlatMapCoordinates(adjustedCenter);
 
             // Correct negative rounding (same logic as for cube tiles)
             if (candidate.X < 0) candidate.X = (int)Math.Floor(candidate.X);
@@ -379,8 +402,8 @@ internal class IsometricMapService
 
         // If nothing was found, return best-effort base tile (elevation zero) by inverting elevation 0 adjustments
         var baseAdjusted = new Vector2(
-            worldCoordinates.X + _tiledMap.TileWidth / 2f,
-            worldCoordinates.Y - _tiledMap.Layers[0].OffsetY
+            worldCoordinates.X + tileW / 2f,
+            worldCoordinates.Y - _tiledMap.Layers[0].OffsetY + tileH / 2f
         );
 
         var baseCoords = WorldToFlatMapCoordinates(baseAdjusted);
@@ -403,7 +426,7 @@ internal class IsometricMapService
         // Tile sprite top-left in world coordinates
         var tileWorldPos = MapToWorldCoordinates(mapCoords, elevation);
 
-        // local coordinates within tile sprite
+        // local coordinates within tile sprite (top-left origin)
         var localXf = screenWorldPoint.X - tileWorldPos.X;
         var localYf = screenWorldPoint.Y - tileWorldPos.Y;
 
