@@ -123,7 +123,8 @@ public class GameMain : Game
         });
 
         // Add our map service to handle loading/rendering of Tiled maps
-        services.AddSingleton<IsometricMapService>();
+        //services.AddSingleton<IsometricMapService>();
+        services.AddSingleton<DiamondTileMapRenderer>();
 
         // We'll add our custom render target service so we can use our virtual resolution
         // but scale correctly to all different screen sizes easily        

@@ -14,20 +14,23 @@ internal class DebugSystem : EntityDrawSystem
 {
     private readonly OrthographicCamera _camera;
     private readonly ContentManager _contentManager;
+    private readonly DiamondTileMapRenderer _diamondTileMapRenderer;
     private readonly GraphicsDevice _graphicsDevice;
-    private readonly IsometricMapService _mapService;
+    //private readonly IsometricMapService _mapService;
     private readonly SpriteBatch _spriteBatch;
 
     private SpriteFont _font;
 
-    public DebugSystem(ContentManager contentManager, SpriteBatch spriteBatch, IsometricMapService mapService, OrthographicCamera camera, GraphicsDevice graphicsDevice)
+    public DebugSystem(ContentManager contentManager, SpriteBatch spriteBatch, OrthographicCamera camera, 
+        GraphicsDevice graphicsDevice, DiamondTileMapRenderer diamondTileMapRenderer)
         : base(Aspect.All(typeof(PlayerComponent)))
     {
         _contentManager = contentManager;
         _spriteBatch = spriteBatch;
-        _mapService = mapService;
+        //_mapService = mapService;
         _camera = camera;
         _graphicsDevice = graphicsDevice;
+        _diamondTileMapRenderer = diamondTileMapRenderer;
     }
 
     public override void Draw(GameTime gameTime)
@@ -46,12 +49,13 @@ internal class DebugSystem : EntityDrawSystem
         var worldPosition = _camera.ScreenToWorld(normalizedMousePosition);
         
         // Highlight the tile
-        _mapService.HighlightTile(worldPosition);
+        //_mapService.HighlightTile(worldPosition);
 
         // Finally, translate the world position to 'tile' coordinates in the map
         // and we can see which tile X,Y position the mouse is hovering over
-        var mapPosition = _mapService.WorldToMapCoordinates(worldPosition);        
-        mapPosition.Floor();        
+        //var mapPosition = _mapService.WorldToMapCoordinates(worldPosition);        
+        //mapPosition.Floor();        
+        var (tile, local) = _diamondTileMapRenderer.WorldToTile(worldPosition);
 
         // Draw some debugging information
         _spriteBatch.Begin();
@@ -69,7 +73,7 @@ internal class DebugSystem : EntityDrawSystem
 
         _spriteBatch.DrawString(
             spriteFont: _font,
-            text: $"Mouse position in map: {mapPosition}",
+            text: $"Mouse position in map: {tile}",
             position: new Vector2(10, 30),
             color: Color.White,
             rotation: 0f,

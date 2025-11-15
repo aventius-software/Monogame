@@ -11,6 +11,29 @@ using Color = Microsoft.Xna.Framework.Color;
 
 namespace IsometricDynamicMapDemo.Map;
 
+/// <summary>
+/// A basic 2D isometric tile map service that uses Tiled maps. 
+/// 
+/// Note - For drawing at different elevations, you should set each tile layer with the Y offset which 
+/// corresponds to the height of your tile multiplied by the layer index, otherwise it will not get rendered 
+/// correctly (i.e. each layer will get rendered at the same elevation) and will also fail to calculate tile 
+/// map/world coordinate correctly.
+/// 
+/// Art:
+/// https://opengameart.org/content/isometric-64x64-outside-tileset
+/// 
+/// References:
+/// 
+/// https://erikonarheim.com/posts/handling-height-in-isometric/
+/// https://discourse.mapeditor.org/t/half-height-isometric-maps/4545/8
+/// https://clintbellanger.net/articles/isometric_math/
+/// https://stackoverflow.com/questions/21842814/mouse-position-to-isometric-tile-including-height
+/// https://github.com/OpenTTD/OpenTTD/blob/master/src/landscape.cpp
+/// https://newgrf-specs.tt-wiki.net/wiki/NML:List_of_tile_slopes
+/// https://gamedev.stackexchange.com/questions/207056/selecting-tiles-with-mouse-on-isometric-map-with-height-and-slopes
+/// https://gamedev.stackexchange.com/questions/34787/how-to-convert-mouse-coordinates-to-isometric-indexes/34791#34791
+/// https://www.gamedev.net/reference/articles/article2026.asp
+/// </summary>
 internal class IsometricMapService
 {
     private readonly ContentManager _contentManager;

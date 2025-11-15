@@ -5,17 +5,21 @@ namespace IsometricDynamicMapDemo.Map;
 
 internal class MapInitialisationSystem : EntitySystem
 {
-    private readonly IsometricMapService _mapService;
+    private readonly DiamondTileMapRenderer _diamondTileMapRenderer;
+    //private readonly IsometricMapService _mapService;
 
-    public MapInitialisationSystem(IsometricMapService mapService) : base(Aspect.All(typeof(MapComponent)))
+    public MapInitialisationSystem(DiamondTileMapRenderer diamondTileMapRenderer) : base(Aspect.All(typeof(MapComponent)))
     {
-        _mapService = mapService;
+        _diamondTileMapRenderer = diamondTileMapRenderer;
+        //_mapService = mapService;
     }
 
     public override void Initialize(IComponentMapperService mapperService)
     {
         // Load the Tiled map
         //_mapService.LoadTiledMap("Map/tiles_cubes.tmx", TileType.Cube);
-        _mapService.LoadTiledMap("Map/tiles_grass.tmx", TileType.Flat);
+        //_mapService.LoadTiledMap("Map/tiles_grass.tmx", TileType.Flat);
+        _diamondTileMapRenderer.LoadMap("C:\\Users\\Ben\\source\\repos\\aventius-software\\Monogame\\IsometricDynamicMapDemo\\Content\\Map\\tiles_grass.tmx");
+
     }    
 }
