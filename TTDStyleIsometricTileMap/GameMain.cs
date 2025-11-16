@@ -1,52 +1,66 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using TTDStyleIsometricTileMap.Services;
 
-namespace TTDStyleIsometricTileMap
+namespace TTDStyleIsometricTileMap;
+
+public class GameMain : Game
 {
-    public class GameMain : Game
+    private GraphicsDeviceManager _graphics;
+    private IsometricDiamondTileMapService _isometricDiamondTileMapService;
+    private SpriteBatch _spriteBatch;
+
+    public GameMain()
     {
-        private GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
+        _graphics = new GraphicsDeviceManager(this);
+        _graphics.PreferredBackBufferWidth = 1920;
+        _graphics.PreferredBackBufferHeight = 1080;
+        _graphics.ApplyChanges();
 
-        public GameMain()
-        {
-            _graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
-            IsMouseVisible = true;
-        }
+        Content.RootDirectory = "Content";
+        IsMouseVisible = true;
+    }
 
-        protected override void Initialize()
-        {
-            // TODO: Add your initialization logic here
+    protected override void Initialize()
+    {
+        // TODO: Add your initialization logic here
+        _isometricDiamondTileMapService = new IsometricDiamondTileMapService(Content);
 
-            base.Initialize();
-        }
+        base.Initialize();
+    }
 
-        protected override void LoadContent()
-        {
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
+    protected override void LoadContent()
+    {
+        _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
-        }
+        // TODO: use this.Content to load your game content here
+        _isometricDiamondTileMapService.LoadTileAtlas("Map/tiles_grass");        
+    }
 
-        protected override void Update(GameTime gameTime)
-        {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+    protected override void Update(GameTime gameTime)
+    {
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            Exit();
 
-            // TODO: Add your update logic here
+        // TODO: Add your update logic here
 
-            base.Update(gameTime);
-        }
+        base.Update(gameTime);
+    }
 
-        protected override void Draw(GameTime gameTime)
-        {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+    protected override void Draw(GameTime gameTime)
+    {
+        GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+        // Start drawing...
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-            base.Draw(gameTime);
-        }
+        // Draw map
+        _isometricDiamondTileMapService.Draw(_spriteBatch);
+
+        // Done
+        _spriteBatch.End();
+
+        base.Draw(gameTime);
     }
 }
