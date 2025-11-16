@@ -59,6 +59,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlatformerWithTiledMapDemo"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonogameExtendedIsometricTiledMapDemo", "MonogameExtendedIsometricTiledMapDemo\MonogameExtendedIsometricTiledMapDemo.csproj", "{F4BC72FB-D505-4581-BFAC-69DBADDF6759}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TTDStyleIsometricTileMap", "TTDStyleIsometricTileMap\TTDStyleIsometricTileMap.csproj", "{52E5A88B-5982-48CB-8DF3-285F49469EFC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -178,6 +180,10 @@ Global
 		{F4BC72FB-D505-4581-BFAC-69DBADDF6759}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4BC72FB-D505-4581-BFAC-69DBADDF6759}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4BC72FB-D505-4581-BFAC-69DBADDF6759}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52E5A88B-5982-48CB-8DF3-285F49469EFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52E5A88B-5982-48CB-8DF3-285F49469EFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52E5A88B-5982-48CB-8DF3-285F49469EFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52E5A88B-5982-48CB-8DF3-285F49469EFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
