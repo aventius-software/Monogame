@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<RollForward>Major</RollForward>
 		<PublishReadyToRun>false</PublishReadyToRun>
 		<TieredCompilation>false</TieredCompilation>
@@ -9,10 +9,7 @@
 	<PropertyGroup>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<ApplicationIcon>Icon.ico</ApplicationIcon>
-	</PropertyGroup>
-	<PropertyGroup>
-		<MonoGameExtendedPipelineReferencePath>$(MSBuildThisFileDirectory)pipeline-references</MonoGameExtendedPipelineReferencePath>
-	</PropertyGroup>
+	</PropertyGroup>	
 	<ItemGroup>
 		<None Remove="Icon.ico" />
 		<None Remove="Icon.bmp" />
@@ -26,15 +23,19 @@
 		</EmbeddedResource>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
-		<PackageReference Include="MonoGame.Extended" Version="5.2.0" />
-		<PackageReference Include="MonoGame.Extended.Content.Pipeline" Version="5.2.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
+		<PackageReference Include="MonoGame.Extended" Version="5.4.0" />
+		<PackageReference Include="MonoGame.Extended.Content.Pipeline" Version="5.4.0" />
 		<PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
 		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Shared\Shared.csproj" />
+	  <ProjectReference Include="..\Shared\Shared.csproj" />
 	</ItemGroup>
+	<!-- See https://www.monogameextended.net/docs/getting-started/installation-monogame/#optional-set-up-mgcb-editor -->
+	<PropertyGroup>
+		<MonoGameExtendedPipelineReferencePath>$(MSBuildThisFileDirectory)pipeline-references</MonoGameExtendedPipelineReferencePath>
+	</PropertyGroup>
 	<Target Name="RestoreDotnetTools" BeforeTargets="CollectPackageReferences">
 		<Message Text="Restoring dotnet tools (this might take a while depending on your internet speed and should only happen upon building your project for the first time, or after upgrading MonoGame, or clearing your nuget cache)" Importance="High" />
 		<Exec Command="dotnet tool restore" />

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>		
-		<TargetFramework>net9.0-android35.0</TargetFramework>
+		<TargetFramework>net10.0-android36.0</TargetFramework>
 		<OutputType>Exe</OutputType>
 		<ApplicationId>com.companyname.AndroidAdMobExample</ApplicationId>
 		<ApplicationVersion>1</ApplicationVersion>
@@ -25,8 +25,8 @@
 	<ItemGroup>
 		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4.1" />
 		<PackageReference Include="MonoGame.Framework.Android" Version="3.8.4.1" />
-		<PackageReference Include="MonoGame.Library.OpenAL" Version="1.24.3.2" />
-		<PackageReference Include="Xamarin.GooglePlayServices.Ads.Lite" Version="124.0.0.3" />		
+		<PackageReference Include="MonoGame.Library.OpenAL" Version="1.24.3.4" />
+		<PackageReference Include="Xamarin.GooglePlayServices.Ads.Lite" Version="124.0.0.5" />		
 	</ItemGroup>
 	<Target Name="RestoreDotnetTools" BeforeTargets="Restore">
 		<Message Text="Restoring dotnet tools" Importance="High" />

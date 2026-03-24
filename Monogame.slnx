@@ -1,0 +1,32 @@
+<Solution>
+  <Project Path="AetherPhysicsDebugViewTest/AetherPhysicsDebugViewTest.csproj" />
+  <Project Path="AetherPhysicsTest/AetherPhysicsTest.csproj" />
+  <Project Path="AndroidAdMobExample/AndroidAdMobExample.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+  <Project Path="AStarPathFindUsingRoyT/AStarPathFindUsingRoyT.csproj" />
+  <Project Path="Basic3DCubeTest/Basic3DCubeTest.csproj" />
+  <Project Path="Basic3DCubeWithShaders/Basic3DCubeWithShaders.csproj" />
+  <Project Path="DependencyInjectionSample/DependencyInjectionSample.csproj" />
+  <Project Path="DotTiledTest/DotTiledTest.csproj" />
+  <Project Path="DrawingPrimitiveShapes/DrawingPrimitiveShapes.csproj" />
+  <Project Path="DungeonMasterStyleDemo/DungeonMasterStyleDemo.csproj" />
+  <Project Path="IsometricLightingDemo/IsometricLightingDemo.csproj" />
+  <Project Path="IsometricTiledMapDemo/IsometricTiledMapDemo.csproj" />
+  <Project Path="MonogameExtendedIsometricTiledMapDemo/MonogameExtendedIsometricTiledMapDemo.csproj" />
+  <Project Path="MonogameExtendedTiledMapDemo/MonogameExtendedTiledMapDemo.csproj" />
+  <Project Path="MorpehECSTest/MorpehECSTest.csproj" />
+  <Project Path="OutrunStyleTest/OutrunStyleTest.csproj" />
+  <Project Path="PlatformerWithTiledMapDemo/PlatformerWithTiledMapDemo.csproj" />
+  <Project Path="RenderTargetExample/RenderTargetExample.csproj" />
+  <Project Path="Shared/Shared.csproj" />
+  <Project Path="Simple2DLightingWithNormalMaps/Simple2DLightingWithNormalMaps.csproj" />
+  <Project Path="Simple2DLightingWithShaders/Simple2DLightingWithShaders.csproj" />
+  <Project Path="SimpleShaders/SimpleShaders.csproj" />
+  <Project Path="SmoothMovementTest/SmoothMovementTest.csproj" />
+  <Project Path="TiledCSTest/TiledCSTest.csproj" />
+  <Project Path="TiledMapsAndAetherPhysics/TiledMapsAndAetherPhysics.csproj" />
+  <Project Path="TiledMapWithCamera/TiledMapWithCamera.csproj" />
+  <Project Path="TinyWingsStyleDemo/TinyWingsStyleDemo.csproj" />
+  <Project Path="TopDownCarPhysics/TopDownCarPhysics.csproj" />
+</Solution>

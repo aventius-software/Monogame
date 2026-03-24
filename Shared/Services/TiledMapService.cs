@@ -25,13 +25,13 @@ public class TiledMapService
 {
     private readonly ContentManager _contentManager;
 
-    private int _numberOfVisibleTileColumns;
-    private int _numberOfVisibleTileRows;
+    private int _numberOfVisibleTileColumns = 0;
+    private int _numberOfVisibleTileRows = 0;
     private readonly SpriteBatch _spriteBatch;
     private Map _tiledMap;
     private Texture2D _tilesetTexture;
-    private int _tileColumnPositionInTheWorld;
-    private int _tileRowPositionInTheWorld;
+    private int _tileColumnPositionInTheWorld = 0;
+    private int _tileRowPositionInTheWorld = 0;
     //private List<Point> _highlightedTiles = [];
 
     /// <summary>
