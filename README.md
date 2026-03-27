@@ -1,6 +1,6 @@
 # Monogame examples
 
-A Visual Studio 2022 solution with various example projects for Monogame related stuff, such as:-
+A Visual Studio 2026 (and .NET 10) solution with various example projects for Monogame related stuff, such as:-
 
 - A-star (or A*) path finding on a Tiled map example using the RoyT library
 - A couple of Aether Physics 2D simple example projects
