@@ -19,6 +19,7 @@
   <Project Path="OutrunStyleTest/OutrunStyleTest.csproj" />
   <Project Path="PlatformerWithTiledMapDemo/PlatformerWithTiledMapDemo.csproj" />
   <Project Path="RenderTargetExample/RenderTargetExample.csproj" />
+  <Project Path="ShadersWithMonogameExtendedCamera/ShadersWithMonogameExtendedCamera.csproj" Id="353f3210-d96e-40ba-95a6-12ef5c472d8e" />
   <Project Path="Shared/Shared.csproj" />
   <Project Path="Simple2DLightingWithNormalMaps/Simple2DLightingWithNormalMaps.csproj" />
   <Project Path="Simple2DLightingWithShaders/Simple2DLightingWithShaders.csproj" />
