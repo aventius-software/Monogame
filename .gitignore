@@ -364,3 +364,5 @@ FodyWeavers.xsd
 /MonogameExtendedTiledMapDemo/pipeline-references
 /PlatformerWithTiledMapDemo/pipeline-references
 /MonogameExtendedIsometricTiledMapDemo/pipeline-references
+/OpenTTDStyleIsometricMap/pipeline-references/MonoGame.Extended.Content.Pipeline.dll
+/OpenTTDStyleIsometricMap/pipeline-references/MonoGame.Extended.dll

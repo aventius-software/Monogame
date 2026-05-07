@@ -16,6 +16,7 @@
   <Project Path="MonogameExtendedIsometricTiledMapDemo/MonogameExtendedIsometricTiledMapDemo.csproj" />
   <Project Path="MonogameExtendedTiledMapDemo/MonogameExtendedTiledMapDemo.csproj" />
   <Project Path="MorpehECSTest/MorpehECSTest.csproj" />
+  <Project Path="OpenTTDStyleIsometricMap/OpenTTDStyleIsometricMap.csproj" Id="5e479408-a53c-4dc8-88a9-7bbff9687e0d" />
   <Project Path="OutrunStyleTest/OutrunStyleTest.csproj" />
   <Project Path="PlatformerWithTiledMapDemo/PlatformerWithTiledMapDemo.csproj" />
   <Project Path="RenderTargetExample/RenderTargetExample.csproj" />
